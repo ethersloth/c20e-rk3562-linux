@@ -410,7 +410,6 @@ enable_if_installable() {
 }
 
 systemctl enable NetworkManager
-enable_if_installable bluetooth.service
 enable_if_installable upower.service
 # This tablet has no cellular modem; keep WWAN stack disabled so Phosh does
 # not show a cellular status path on the top bar.
@@ -1042,6 +1041,17 @@ install -m 0644 "${ROOT_DIR}/splash.png" "${THEME_DIR}/splash.png"
 mkdir -p "${ROOTFS_MNT}/usr/share/backgrounds/rkdebian"
 install -m 0644 "${ROOT_DIR}/splash.png" \
     "${ROOTFS_MNT}/usr/share/backgrounds/rkdebian/splash.png"
+mkdir -p "${ROOTFS_MNT}/usr/share/glib-2.0/schemas"
+cat > "${ROOTFS_MNT}/usr/share/glib-2.0/schemas/90-rkdebian-background.gschema.override" << 'RKDEBIAN_BACKGROUND'
+[org.gnome.desktop.background]
+picture-uri='file:///usr/share/backgrounds/rkdebian/splash.png'
+picture-uri-dark='file:///usr/share/backgrounds/rkdebian/splash.png'
+picture-options='zoom'
+
+[org.gnome.desktop.screensaver]
+picture-uri='file:///usr/share/backgrounds/rkdebian/splash.png'
+RKDEBIAN_BACKGROUND
+chroot "${ROOTFS_MNT}" glib-compile-schemas /usr/share/glib-2.0/schemas
 
 # Static framebuffer logo shown while booting. This bypasses Plymouth, which
 # currently crashes on this Trixie + RK3562 stack.
@@ -4345,8 +4355,8 @@ chmod +x "${ROOTFS_MNT}/usr/local/sbin/rk-power-profile-sync.sh"
 cat > "${ROOTFS_MNT}/etc/systemd/system/rk-power-profile-sync.service" << 'RK_POWER_PROFILE_SYNC_UNIT'
 [Unit]
 Description=Sync CPU governor/frequency caps with Power Profiles mode
-After=power-profiles-daemon.service rk-power-tune.service
-Wants=power-profiles-daemon.service rk-power-tune.service
+After=rk-power-tune.service
+Wants=rk-power-tune.service
 
 [Service]
 Type=simple
