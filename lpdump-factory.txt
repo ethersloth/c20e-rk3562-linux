@@ -1,0 +1,315 @@
+=== LPDUMP DEFAULT ===
+Slot 0:
+Metadata version: 10.2
+Metadata size: 1488 bytes
+Metadata max size: 65536 bytes
+Metadata slot count: 3
+Header flags: virtual_ab_device
+Partition table:
+------------------------
+  Name: odm_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 1711 linear super 2048
+------------------------
+  Name: odm_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: odm_dlkm_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 679 linear super 4096
+------------------------
+  Name: odm_dlkm_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: product_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 5541927 linear super 6144
+------------------------
+  Name: product_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: system_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 1840039 linear super 5550080
+------------------------
+  Name: system_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: system_dlkm_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 30799 linear super 7391232
+------------------------
+  Name: system_dlkm_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: system_ext_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 786391 linear super 7424000
+------------------------
+  Name: system_ext_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: vendor_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 460687 linear super 8210432
+------------------------
+  Name: vendor_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: vendor_dlkm_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 23215 linear super 8671232
+------------------------
+  Name: vendor_dlkm_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+Super partition layout:
+------------------------
+super: 2048 .. 3760: odm_a (1712 sectors)
+super: 4096 .. 4776: odm_dlkm_a (680 sectors)
+super: 6144 .. 5548072: product_a (5541928 sectors)
+super: 5550080 .. 7390120: system_a (1840040 sectors)
+super: 7391232 .. 7422032: system_dlkm_a (30800 sectors)
+super: 7424000 .. 8210392: system_ext_a (786392 sectors)
+super: 8210432 .. 8671120: vendor_a (460688 sectors)
+super: 8671232 .. 8694448: vendor_dlkm_a (23216 sectors)
+------------------------
+Block device table:
+------------------------
+  Partition name: super
+  First sector: 2048
+  Size: 4831838208 bytes
+  Flags: none
+------------------------
+Group table:
+------------------------
+  Name: default
+  Maximum size: 0 bytes
+  Flags: none
+------------------------
+  Name: rockchip_dynamic_partitions_a
+  Maximum size: 4827643904 bytes
+  Flags: none
+------------------------
+  Name: rockchip_dynamic_partitions_b
+  Maximum size: 4827643904 bytes
+  Flags: none
+------------------------
+---------------
+Snapshot state:
+---------------
+Update state: none
+Using snapuserd: 0
+Using userspace snapshots: 0
+Using io_uring: 0
+Using o_direct: 0
+Using XOR compression: 1
+Current slot: _a
+Boot indicator: booting from unknown slot
+Rollback indicator: No such file or directory
+Forward merge indicator: No such file or directory
+Source build fingerprint: 
+
+=== LPDUMP SLOT 0 ===
+Slot 0:
+Metadata version: 10.2
+Metadata size: 1488 bytes
+Metadata max size: 65536 bytes
+Metadata slot count: 3
+Header flags: virtual_ab_device
+Partition table:
+------------------------
+  Name: odm_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 1711 linear super 2048
+------------------------
+  Name: odm_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: odm_dlkm_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 679 linear super 4096
+------------------------
+  Name: odm_dlkm_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: product_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 5541927 linear super 6144
+------------------------
+  Name: product_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: system_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 1840039 linear super 5550080
+------------------------
+  Name: system_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: system_dlkm_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 30799 linear super 7391232
+------------------------
+  Name: system_dlkm_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: system_ext_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 786391 linear super 7424000
+------------------------
+  Name: system_ext_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: vendor_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 460687 linear super 8210432
+------------------------
+  Name: vendor_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+  Name: vendor_dlkm_a
+  Group: rockchip_dynamic_partitions_a
+  Attributes: readonly
+  Extents:
+    0 .. 23215 linear super 8671232
+------------------------
+  Name: vendor_dlkm_b
+  Group: rockchip_dynamic_partitions_b
+  Attributes: readonly
+  Extents:
+------------------------
+Super partition layout:
+------------------------
+super: 2048 .. 3760: odm_a (1712 sectors)
+super: 4096 .. 4776: odm_dlkm_a (680 sectors)
+super: 6144 .. 5548072: product_a (5541928 sectors)
+super: 5550080 .. 7390120: system_a (1840040 sectors)
+super: 7391232 .. 7422032: system_dlkm_a (30800 sectors)
+super: 7424000 .. 8210392: system_ext_a (786392 sectors)
+super: 8210432 .. 8671120: vendor_a (460688 sectors)
+super: 8671232 .. 8694448: vendor_dlkm_a (23216 sectors)
+------------------------
+Block device table:
+------------------------
+  Partition name: super
+  First sector: 2048
+  Size: 4831838208 bytes
+  Flags: none
+------------------------
+Group table:
+------------------------
+  Name: default
+  Maximum size: 0 bytes
+  Flags: none
+------------------------
+  Name: rockchip_dynamic_partitions_a
+  Maximum size: 4827643904 bytes
+  Flags: none
+------------------------
+  Name: rockchip_dynamic_partitions_b
+  Maximum size: 4827643904 bytes
+  Flags: none
+------------------------
+---------------
+Snapshot state:
+---------------
+Update state: none
+Using snapuserd: 0
+Using userspace snapshots: 0
+Using io_uring: 0
+Using o_direct: 0
+Using XOR compression: 1
+Current slot: _a
+Boot indicator: booting from unknown slot
+Rollback indicator: No such file or directory
+Forward merge indicator: No such file or directory
+Source build fingerprint: 
+
+=== LPDUMP HELP ===
+lpdump - command-line tool for dumping Android Logical Partition images.
+
+Usage:
+  lpdump [-s <SLOT#>|--slot=<SLOT#>] [-j|--json] [FILE|DEVICE]
+
+Options:
+  -s, --slot=N     Slot number or suffix.
+  -j, --json       Print in JSON format.
+  -d, --dump-metadata-size
+                   Print the space reserved for metadata to stdout
+                   in bytes.
+  -a, --all        Dump all slots (not available in JSON mode).
+---------------
+Snapshot state:
+---------------
+Update state: none
+Using snapuserd: 0
+Using userspace snapshots: 0
+Using io_uring: 0
+Using o_direct: 0
+Using XOR compression: 1
+Current slot: _a
+Boot indicator: booting from unknown slot
+Rollback indicator: No such file or directory
+Forward merge indicator: No such file or directory
+Source build fingerprint: 

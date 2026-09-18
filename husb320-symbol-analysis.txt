@@ -1,0 +1,69 @@
+=== MODULES ===
+tcpc_husb320 45056 0 - Live 0x0000000000000000 (E)
+tcpci_husb311 20480 0 - Live 0x0000000000000000 (E)
+phy_rockchip_inno_usb2 73728 2 tcpc_husb320, Live 0x0000000000000000 (E)
+
+=== HUSB320 SYSFS ===
+/sys/module/tcpc_husb320/coresize
+/sys/module/tcpc_husb320/drivers/i2c:husb320
+/sys/module/tcpc_husb320/drivers/platform:husb320_incar
+/sys/module/tcpc_husb320/initsize
+/sys/module/tcpc_husb320/initstate
+/sys/module/tcpc_husb320/notes/.note.Linux
+/sys/module/tcpc_husb320/notes/.note.gnu.build-id
+/sys/module/tcpc_husb320/notes/.note.gnu.property
+/sys/module/tcpc_husb320/refcnt
+/sys/module/tcpc_husb320/sections/.bss
+/sys/module/tcpc_husb320/sections/.data
+/sys/module/tcpc_husb320/sections/.exit.data
+/sys/module/tcpc_husb320/sections/.exit.text
+/sys/module/tcpc_husb320/sections/.gnu.linkonce.this_module
+/sys/module/tcpc_husb320/sections/.init.data
+/sys/module/tcpc_husb320/sections/.init.eh_frame
+/sys/module/tcpc_husb320/sections/.init.plt
+/sys/module/tcpc_husb320/sections/.init.text
+/sys/module/tcpc_husb320/sections/.note.Linux
+/sys/module/tcpc_husb320/sections/.note.gnu.build-id
+/sys/module/tcpc_husb320/sections/.note.gnu.property
+/sys/module/tcpc_husb320/sections/.plt
+/sys/module/tcpc_husb320/sections/.rodata
+/sys/module/tcpc_husb320/sections/.rodata.str1.1
+/sys/module/tcpc_husb320/sections/.strtab
+/sys/module/tcpc_husb320/sections/.symtab
+/sys/module/tcpc_husb320/sections/.text
+/sys/module/tcpc_husb320/sections/.text.ftrace_trampoline
+/sys/module/tcpc_husb320/taint
+/sys/module/tcpc_husb320/uevent
+
+=== HUSB320 SECTIONS ===
+*                                             cat: /sys/module/tcpc_husb320/sections/*: No such file or directory
+
+=== KALLSYMS HUSB320 ===
+grep: /proc/kallsyms: Permission denied
+
+=== PLATFORM DRIVER ===
+total 0
+drwxr-xr-x   2 root root    0 2026-09-16 15:55 .
+drwxr-xr-x 243 root root    0 2026-09-16 15:55 ..
+--w-------   1 root root 4096 2026-09-16 15:55 bind
+lrwxrwxrwx   1 root root    0 2026-09-16 15:55 husb320_incar -> ../../../../devices/platform/husb320_incar
+lrwxrwxrwx   1 root root    0 2026-09-16 15:55 module -> ../../../../module/tcpc_husb320
+--w-------   1 root root 4096 2026-09-16 15:55 uevent
+--w-------   1 root root 4096 2026-09-16 15:55 unbind
+/sys/bus/platform/drivers/husb320_incar/bind
+/sys/bus/platform/drivers/husb320_incar/husb320_incar
+/sys/bus/platform/drivers/husb320_incar/module
+/sys/bus/platform/drivers/husb320_incar/uevent
+/sys/bus/platform/drivers/husb320_incar/unbind
+
+=== I2C DRIVER ===
+total 0
+drwxr-xr-x  2 root root    0 2026-09-16 15:55 .
+drwxr-xr-x 45 root root    0 2026-09-16 15:55 ..
+lrwxrwxrwx  1 root root    0 2026-09-16 15:55 0-0021 -> ../../../../devices/platform/ff200000.i2c/i2c-0/0-0021
+--w-------  1 root root 4096 2026-09-16 15:55 bind
+lrwxrwxrwx  1 root root    0 2026-09-16 15:55 module -> ../../../../module/tcpc_husb320
+--w-------  1 root root 4096 2026-09-16 15:55 uevent
+--w-------  1 root root 4096 2026-09-16 15:55 unbind
+
+=== MODULE NOTES ===

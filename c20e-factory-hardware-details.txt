@@ -1,0 +1,1665 @@
+
+====================================================================================================
+HUSB320
+====================================================================================================
+husb320: husb320@21 {
+			status = "okay";
+			compatible = "hynetek,husb320";
+			reg = <0x21>;
+			interrupt-parent = <0x4a>;
+			interrupts = <0x07 0x08>;
+			husb320,int-gpio = <0x4a 0x07 0x00>;
+			husb320,int-gpio_num = <0x07>;
+			pinctrl-names = "default";
+			pinctrl-0 = <0x56>;
+			gpio-controller;
+			husb320,init-mode = <0x14>;
+			husb320,host-current = <0x02>;
+			husb320,drp-toggle-time = <0x01>;
+			husb320,drp-duty-time = <0x00>;
+			husb320,autosink-threshold = <0x01>;
+			husb320,cc-debounce-time = <0x03>;
+			phandle = <0x178>;
+		};
+
+====================================================================================================
+HUSB320 PINCTRL
+====================================================================================================
+husb320_gpio: husb320-gpio {
+				rockchip,pins = <0x00 0x07 0x00 0xf1>;
+				phandle = <0x56>;
+			};
+
+====================================================================================================
+I2C0
+====================================================================================================
+i2c0: i2c@ff200000 {
+		compatible = "rockchip,rk3562-i2c", "rockchip,rk3399-i2c";
+		reg = <0x00 0xff200000 0x00 0x1000>;
+		clocks = <0x02 0x126 0x02 0x125>;
+		clock-names = "i2c", "pclk";
+		interrupts = <0x00 0x0c 0x04>;
+		pinctrl-names = "default";
+		pinctrl-0 = <0x49>;
+		#address-cells = <0x01>;
+		#size-cells = <0x00>;
+		status = "okay";
+		phandle = <0x16e>;
+
+		rk817: pmic@20 {
+			compatible = "rockchip,rk817";
+			reg = <0x20>;
+			interrupt-parent = <0x4a>;
+			interrupts = <0x03 0x08>;
+			pinctrl-names = "default", "pmic-sleep", "pmic-power-off", "pmic-reset";
+			pinctrl-0 = <0x4b>;
+			pinctrl-1 = <0x4c 0x4d>;
+			pinctrl-2 = <0x4e 0x4f>;
+			pinctrl-3 = <0x4e 0x50>;
+			rockchip,system-power-controller;
+			wakeup-source;
+			#clock-cells = <0x01>;
+			clock-output-names = "rk808-clkout1", "rk808-clkout2";
+			pmic-reset-func = <0x00>;
+			vcc1-supply = <0x51>;
+			vcc2-supply = <0x51>;
+			vcc3-supply = <0x51>;
+			vcc4-supply = <0x51>;
+			vcc5-supply = <0x51>;
+			vcc6-supply = <0x51>;
+			vcc7-supply = <0x51>;
+			vcc8-supply = <0x51>;
+			vcc9-supply = <0x52>;
+			phandle = <0x101>;
+
+			pwrkey {
+				status = "okay";
+			};
+
+			pinctrl_rk8xx: pinctrl_rk8xx {
+				gpio-controller;
+				#gpio-cells = <0x02>;
+				phandle = <0x16f>;
+
+				rk817_slppin_null: rk817_slppin_null {
+					pins = "gpio_slp";
+					function = "pin_fun0";
+					phandle = <0x170>;
+				};
+
+				rk817_slppin_slp: rk817_slppin_slp {
+					pins = "gpio_slp";
+					function = "pin_fun1";
+					phandle = <0x4d>;
+				};
+
+				rk817_slppin_pwrdn: rk817_slppin_pwrdn {
+					pins = "gpio_slp";
+					function = "pin_fun2";
+					phandle = <0x4f>;
+				};
+
+				rk817_slppin_rst: rk817_slppin_rst {
+					pins = "gpio_slp";
+					function = "pin_fun3";
+					phandle = <0x50>;
+				};
+			};
+
+			regulators {
+
+				vdd_logic: DCDC_REG1 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x7a120>;
+					regulator-max-microvolt = <0x149970>;
+					regulator-init-microvolt = <0xe7ef0>;
+					regulator-ramp-delay = <0x1771>;
+					regulator-initial-mode = <0x02>;
+					regulator-name = "vdd_logic";
+					phandle = <0x25>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+						regulator-suspend-microvolt = <0xdbba0>;
+					};
+				};
+
+				vdd_cpu: DCDC_REG2 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x7a120>;
+					regulator-max-microvolt = <0x149970>;
+					regulator-init-microvolt = <0x100590>;
+					regulator-ramp-delay = <0x1771>;
+					regulator-initial-mode = <0x02>;
+					regulator-name = "vdd_cpu";
+					phandle = <0x08>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+
+				vcc_ddr: DCDC_REG3 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-initial-mode = <0x02>;
+					regulator-name = "vcc_ddr";
+					phandle = <0x171>;
+
+					regulator-state-mem {
+						regulator-on-in-suspend;
+					};
+				};
+
+				vcc_3v3: DCDC_REG4 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x325aa0>;
+					regulator-max-microvolt = <0x325aa0>;
+					regulator-initial-mode = <0x02>;
+					regulator-name = "vcc_3v3";
+					phandle = <0x172>;
+
+					regulator-state-mem {
+						regulator-on-in-suspend;
+						regulator-suspend-microvolt = <0x325aa0>;
+					};
+				};
+
+				vcca1v8_pmu: LDO_REG1 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x1b7740>;
+					regulator-max-microvolt = <0x1b7740>;
+					regulator-name = "vcca1v8_pmu";
+					phandle = <0x173>;
+
+					regulator-state-mem {
+						regulator-on-in-suspend;
+						regulator-suspend-microvolt = <0x1b7740>;
+					};
+				};
+
+				vdda_0v9: LDO_REG2 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0xdbba0>;
+					regulator-max-microvolt = <0xdbba0>;
+					regulator-name = "vdda_0v9";
+					phandle = <0x174>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+
+				vdda0v9_pmu: LDO_REG3 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0xdbba0>;
+					regulator-max-microvolt = <0xdbba0>;
+					regulator-name = "vdda0v9_pmu";
+					phandle = <0x175>;
+
+					regulator-state-mem {
+						regulator-on-in-suspend;
+						regulator-suspend-microvolt = <0xdbba0>;
+					};
+				};
+
+				vccio_acodec: LDO_REG4 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x2dc6c0>;
+					regulator-max-microvolt = <0x2dc6c0>;
+					regulator-name = "vccio_acodec";
+					phandle = <0x176>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+
+				vccio_sd: LDO_REG5 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x1b7740>;
+					regulator-max-microvolt = <0x325aa0>;
+					regulator-name = "vccio_sd";
+					phandle = <0xc5>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+
+				vcc3v3_pmu: LDO_REG6 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x325aa0>;
+					regulator-max-microvolt = <0x325aa0>;
+					regulator-name = "vcc3v3_pmu";
+					phandle = <0x177>;
+
+					regulator-state-mem {
+						regulator-on-in-suspend;
+						regulator-suspend-microvolt = <0x2dc6c0>;
+					};
+				};
+
+				vcc_1v8: LDO_REG7 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x1b7740>;
+					regulator-max-microvolt = <0x1b7740>;
+					regulator-name = "vcc_1v8";
+					phandle = <0xa5>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+
+				vcc1v8_dvp: LDO_REG8 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x1b7740>;
+					regulator-max-microvolt = <0x1b7740>;
+					regulator-name = "vcc1v8_dvp";
+					phandle = <0xd7>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+
+				vcc1v2_dvp: LDO_REG9 {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x124f80>;
+					regulator-max-microvolt = <0x124f80>;
+					regulator-name = "vcc1v2_dvp";
+					phandle = <0xd8>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+
+				dcdc_boost: BOOST {
+					regulator-always-on;
+					regulator-boot-on;
+					regulator-min-microvolt = <0x4c4b40>;
+					regulator-max-microvolt = <0x5265c0>;
+					regulator-name = "boost";
+					phandle = <0x52>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+
+				otg_switch: OTG_SWITCH {
+					regulator-name = "otg_switch";
+					phandle = <0xa7>;
+
+					regulator-state-mem {
+						regulator-off-in-suspend;
+					};
+				};
+			};
+
+			battery {
+				compatible = "rk817,battery";
+				ocv_table = <0xd48 0xe5c 0xe6c 0xe85 0xe9c 0xeab 0xeb9 0xec7 0xed5 0xee6 0xefa 0xf13 0xf37 0xf63 0xf83 0xfb3 0xfeb 0x1017 0x1049 0x107e 0x10b7>;
+				design_capacity = <0x1520>;
+				design_qmax = <0x173c>;
+				bat_res = <0x9f>;
+				sleep_enter_current = <0x96>;
+				sleep_exit_current = <0xb4>;
+				sleep_filter_current = <0x64>;
+				power_off_thresd = <0xd48>;
+				zero_algorithm_vol = <0xf6e>;
+				max_soc_offset = <0x3c>;
+				monitor_sec = <0x05>;
+				sample_res = <0x0a>;
+				virtual_power = <0x00>;
+			};
+
+			charger {
+				compatible = "rk817,charger";
+				min_input_voltage = <0x1194>;
+				max_input_current = <0x6d6>;
+				max_chrg_current = <0x7d0>;
+				max_chrg_voltage = <0x10cc>;
+				chrg_term_mode = <0x00>;
+				chrg_finish_cur = <0x12c>;
+				virtual_power = <0x00>;
+				dc_det_adc = <0x00>;
+				extcon = <0x45>;
+				gate_function_disable = <0x01>;
+			};
+
+			rk817_codec: codec {
+				#sound-dai-cells = <0x00>;
+				compatible = "rockchip,rk817-codec";
+				clocks = <0x53>;
+				clock-names = "mclk";
+				assigned-clocks = <0x53>;
+				assigned-clock-rates = <0xbb8000>;
+				pinctrl-names = "default";
+				pinctrl-0 = <0x54>;
+				hp-volume = <0x14>;
+				spk-volume = <0x22>;
+				use-ext-amplifier;
+				spk-ctl-gpios = <0x55 0x0f 0x00>;
+				status = "okay";
+				phandle = <0xff>;
+			};
+		};
+
+		husb320: husb320@21 {
+			status = "okay";
+			compatible = "hynetek,husb320";
+			reg = <0x21>;
+			interrupt-parent = <0x4a>;
+			interrupts = <0x07 0x08>;
+			husb320,int-gpio = <0x4a 0x07 0x00>;
+			husb320,int-gpio_num = <0x07>;
+			pinctrl-names = "default";
+			pinctrl-0 = <0x56>;
+			gpio-controller;
+			husb320,init-mode = <0x14>;
+			husb320,host-current = <0x02>;
+			husb320,drp-toggle-time = <0x01>;
+			husb320,drp-duty-time = <0x00>;
+			husb320,autosink-threshold = <0x01>;
+			husb320,cc-debounce-time = <0x03>;
+			phandle = <0x178>;
+		};
+	};
+
+====================================================================================================
+OV5648
+====================================================================================================
+ov5648: ov5648@36 {
+			status = "okay";
+			compatible = "ovti,ov5648";
+			reg = <0x36>;
+			clocks = <0x02 0x13>;
+			clock-names = "xvclk";
+			reset-gpios = <0xd5 0x0d 0x01>;
+			pwdn-gpios = <0xd5 0x0c 0x00>;
+			avdd-supply = <0xd6>;
+			dovdd-supply = <0xd7>;
+			dvdd-supply = <0xd8>;
+			rockchip,camera-module-index = <0x00>;
+			rockchip,camera-module-facing = "back";
+			rockchip,camera-module-name = "HS5885-BNSM1018-V01";
+			rockchip,camera-module-lens-name = "default";
+			flash-leds = <0xd9>;
+			lens-focus = <0xda>;
+			phandle = <0x1ae>;
+
+			port {
+
+				ov5648_out: endpoint {
+					remote-endpoint = <0xdb>;
+					data-lanes = <0x01 0x02>;
+					phandle = <0x17>;
+				};
+			};
+		};
+
+====================================================================================================
+GC02M1
+====================================================================================================
+gc02m1: gc02m1@37 {
+			compatible = "galaxycore,gc02m1";
+			status = "okay";
+			reg = <0x37>;
+			clocks = <0x02 0x13>;
+			clock-names = "xvclk";
+			pwdn-gpios = <0xd5 0x10 0x01>;
+			avdd-supply = <0xd6>;
+			dovdd-supply = <0xd7>;
+			dvdd-supply = <0xd8>;
+			rockchip,camera-module-index = <0x01>;
+			rockchip,camera-module-facing = "front";
+			rockchip,camera-module-name = "KYT-8789-V10";
+			rockchip,camera-module-lens-name = "default";
+			phandle = <0x1af>;
+
+			port {
+
+				gc02m1_out: endpoint {
+					remote-endpoint = <0xdc>;
+					data-lanes = <0x01>;
+					phandle = <0x1b>;
+				};
+			};
+		};
+
+====================================================================================================
+DW9714
+====================================================================================================
+dw9714: dw9714@c {
+			compatible = "dongwoon,dw9714";
+			status = "okay";
+			reg = <0x0c>;
+			rockchip,camera-module-index = <0x00>;
+			rockchip,vcm-start-current = <0x05>;
+			rockchip,vcm-rated-current = <0x5a>;
+			rockchip,vcm-step-mode = <0x05>;
+			rockchip,camera-module-facing = "back";
+			xsd-gpios = <0xd5 0x11 0x00>;
+			phandle = <0xda>;
+		};
+
+====================================================================================================
+CSI2 DPHY0
+====================================================================================================
+csi2_dphy0: csi2-dphy0 {
+		compatible = "rockchip,rk3562-csi2-dphy";
+		rockchip,hw = <0x15 0x16>;
+		status = "okay";
+		phandle = <0x118>;
+
+		ports {
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+
+			port@0 {
+				reg = <0x00>;
+				#address-cells = <0x01>;
+				#size-cells = <0x00>;
+
+				mipi_in_ov5648: endpoint@1 {
+					reg = <0x01>;
+					remote-endpoint = <0x17>;
+					data-lanes = <0x01 0x02>;
+					phandle = <0xdb>;
+				};
+
+				mipi_in_ov5695: endpoint@2 {
+					reg = <0x02>;
+					remote-endpoint = <0x18>;
+					data-lanes = <0x01 0x02>;
+					phandle = <0xdd>;
+				};
+
+				mipi_in_gc5035: endpoint@3 {
+					reg = <0x03>;
+					remote-endpoint = <0x19>;
+					data-lanes = <0x01 0x02>;
+					phandle = <0xde>;
+				};
+			};
+
+			port@1 {
+				reg = <0x01>;
+				#address-cells = <0x01>;
+				#size-cells = <0x00>;
+
+				csidphy0_out: endpoint@0 {
+					reg = <0x00>;
+					remote-endpoint = <0x1a>;
+					data-lanes = <0x01 0x02>;
+					phandle = <0x2e>;
+				};
+			};
+		};
+	};
+
+====================================================================================================
+CSI2 DPHY4
+====================================================================================================
+csi2_dphy4: csi2-dphy4 {
+		compatible = "rockchip,rk3562-csi2-dphy";
+		rockchip,hw = <0x15 0x16>;
+		status = "okay";
+		phandle = <0x11c>;
+
+		ports {
+			#address-cells = <0x01>;
+			#size-cells = <0x00>;
+
+			port@0 {
+				reg = <0x00>;
+				#address-cells = <0x01>;
+				#size-cells = <0x00>;
+
+				mipi_in_gc02m1: endpoint@2 {
+					reg = <0x01>;
+					remote-endpoint = <0x1b>;
+					data-lanes = <0x01>;
+					phandle = <0xdc>;
+				};
+			};
+
+			port@1 {
+				reg = <0x01>;
+				#address-cells = <0x01>;
+				#size-cells = <0x00>;
+
+				csidphy4_out: endpoint@0 {
+					reg = <0x00>;
+					remote-endpoint = <0x1c>;
+					data-lanes = <0x01>;
+					phandle = <0x30>;
+				};
+			};
+		};
+	};
+
+====================================================================================================
+VCC_SD
+====================================================================================================
+vcc_sd: vcc-sd {
+		compatible = "regulator-gpio";
+		enable-active-low;
+		enable-gpio = <0x4a 0x05 0x01>;
+		regulator-min-microvolt = <0x325aa0>;
+		regulator-max-microvolt = <0x325aa0>;
+		pinctrl-names = "default";
+		pinctrl-0 = <0x104>;
+		regulator-name = "vcc_sd";
+		states = <0x325aa0 0x00 0x325aa0 0x01>;
+		phandle = <0xc4>;
+	};
+
+====================================================================================================
+SEEKWAVE
+====================================================================================================
+seekwcn_boot: seekwcn_boot {
+		compatible = "seekwave,sv6160";
+		sv6160_path = "/vendor/bin/sv6160.bin";
+		sv6160_dram_path = "/vendor/etc/firmware/RAM_RW_KERNEL_DRAM";
+		sv6160_iram_path = "/vendor/etc/firmware/ROM_EXEC_KERNEL_IRAM";
+		dma_type = <0x01>;
+		status = "okay";
+		gpio_host_wake = <0x4a 0x15 0x01>;
+		gpio_chip_wake = <0x4a 0x0c 0x00>;
+		gpio_chip_en = <0x4a 0x0b 0x00>;
+		phandle = <0x2b3>;
+	};
+
+====================================================================================================
+WLAN
+====================================================================================================
+wireless-wlan {
+
+			wifi_host_wake_irq: wifi-host-wake-irq {
+				rockchip,pins = <0x00 0x0c 0x00 0xf1>;
+				phandle = <0x107>;
+			};
+		};
+
+====================================================================================================
+PHANDLE MAP
+====================================================================================================
+0x1	interrupt-controller@fe901000	line 1089
+0x2	clock-controller@ff100000	line 1576
+0x3	aclk_vi_isp@ff10032c	line 95
+0x4	aclk_vo@ff100334	line 105
+0x5	protocol@14	line 599
+0x6	cpu-sleep	line 250
+0x7	cpu0-opp-table	line 262
+0x8	DCDC_REG2	line 1679
+0x9	cpu-leakage@1a	line 3313
+0xa	cpu-opp-info@2e	line 3354
+0xb	mbist-vmin@9	line 3296
+0xc	cpu-pvtpll@46	line 3374
+0xd	syscon@ff030000	line 1494
+0xe	cpu@0	line 194
+0xf	cpu@1	line 208
+0x10	cpu@2	line 221
+0x11	cpu@3	line 234
+0x12	id@a	line 3308
+0x13	cpu-version@8	line 3290
+0x14	cpu-code@2	line 3285
+0x15	csi2-dphy0-hw@ff3c0000	line 2430
+0x16	csi2-dphy1-hw@ff3d0000	line 2442
+0x17	endpoint	line 3555
+0x18	endpoint	line 3610
+0x19	endpoint	line 3639
+0x1a	endpoint@1	line 636
+0x1b	endpoint	line 3581
+0x1c	endpoint@1	line 681
+0x1d	ports	line 2533
+0x1e	drm-logo@00000000	line 722
+0x1f	drm-cubic-lut@00000000	line 734
+0x20	endpoint@1	line 2550
+0x21	endpoint@2	line 2556
+0x22	endpoint@0	line 2544
+0x23	dfi@ff4c0000	line 2637
+0x24	dmc-opp-table	line 569
+0x25	DCDC_REG1	line 1662
+0x26	log-leakage@1b	line 3318
+0x27	dmc-opp-info@40	line 3369
+0x28	log-mbist-vmin@9	line 3302
+0x29	scmi-shmem@10f000	line 1043
+0x2a	mipi0-csi2-hw@ff380000	line 2374
+0x2b	mipi1-csi2-hw@ff390000	line 2388
+0x2c	mipi2-csi2-hw@ff3a0000	line 2402
+0x2d	mipi3-csi2-hw@ff3b0000	line 2416
+0x2e	endpoint@0	line 432
+0x2f	endpoint	line 762
+0x30	endpoint@0	line 491
+0x31	endpoint	line 850
+0x32	rkcif@ff3e0000	line 2454
+0x33	iommu@ff3e0800	line 2473
+0x34	endpoint@0	line 649
+0x35	rkcif-mipi-lvds	line 753
+0x36	endpoint@0	line 939
+0x37	rkcif-mipi-lvds1	line 805
+0x38	endpoint@0	line 694
+0x39	rkcif-mipi-lvds2	line 841
+0x3a	endpoint@1	line 945
+0x3b	rkcif-mipi-lvds3	line 893
+0x3c	isp@ff3f0000	line 2487
+0x3d	endpoint	line 777
+0x3e	endpoint	line 865
+0x3f	tsadc@ffa70000	line 3681
+0x40	trip-point-1	line 999
+0x41	gpu@ff320000	line 2213
+0x42	vendor-storage-rm@00000000	line 728
+0x43	otg-port	line 3018
+0x44	power-controller	line 2022
+0x45	usb2-phy@ff740000	line 3007
+0x46	host-port	line 3028
+0x47	phy@ffb20000	line 3879
+0x48	vo-pins	line 5859
+0x49	i2c0-xfer	line 4585
+0x4a	gpio@ff260000	line 3923
+0x4b	pmic-int	line 5047
+0x4c	soc-slppin-slp	line 5057
+0x4d	rk817_slppin_slp	line 1641
+0x4e	soc-slppin-gpio	line 5052
+0x4f	rk817_slppin_pwrdn	line 1647
+0x50	rk817_slppin_rst	line 1653
+0x51	vcc-sys	line 6153
+0x52	BOOST	line 1842
+0x53	mclkout-sai0@ff040070	line 159
+0x54	i2s0m0-mclk	line 4663
+0x55	gpio@ffad0000	line 3975
+0x56	husb320-gpio	line 5905
+0x57	dma-controller@ff990000	line 3390
+0x58	spi0m0-csn0	line 5457
+0x59	spi0m0-csn1	line 5462
+0x5a	spi0m0-pins	line 5452
+0x5b	pwm0m0-pins	line 5073
+0x5c	pwm1m0-pins	line 5086
+0x5d	pwm2m0-pins	line 5099
+0x5e	pwm3m0-pins	line 5112
+0x5f	qos@fee30000	line 1219
+0x60	shaping@fee30088	line 1226
+0x61	qos@fee40000	line 1232
+0x62	shaping@fee40088	line 1238
+0x63	qos@fee50000	line 1244
+0x64	shaping@fee50088	line 1250
+0x65	qos@fee70000	line 1268
+0x66	qos@fee70100	line 1280
+0x67	shaping@fee70088	line 1274
+0x68	shaping@fee70188	line 1286
+0x69	qos@fee60000	line 1256
+0x6a	shaping@fee60088	line 1262
+0x6b	qos@fee80000	line 1292
+0x6c	shaping@fee80088	line 1298
+0x6d	qos@fee90100	line 1316
+0x6e	qos@fee90200	line 1328
+0x6f	qos@fee90000	line 1304
+0x70	shaping@fee90188	line 1322
+0x71	shaping@fee90288	line 1334
+0x72	shaping@fee90088	line 1310
+0x73	qos@feea0000	line 1340
+0x74	qos@feea0100	line 1353
+0x75	shaping@feea0088	line 1346
+0x76	shaping@feea0188	line 1359
+0x77	npu-opp-table	line 2113
+0x78	iommu@ff30a000	line 2200
+0x79	vdd-npu	line 6178
+0x7a	npu-leakage@1c	line 3323
+0x7b	npu-opp-info@3a	line 3364
+0x7c	npu-pvtpll@4a	line 3384
+0x7d	gpu-opp-table	line 2231
+0x7e	vdd-gpu	line 6163
+0x7f	gpu-leakage@1d	line 3328
+0x80	gpu-opp-info@34	line 3359
+0x81	gpu-pvtpll@48	line 3379
+0x82	iommu@ff340800	line 2325
+0x83	mpp-srv	line 613
+0x84	iommu@ff36f000	line 2360
+0x85	camm0-clk0-out	line 4399
+0x86	iommu@ff3f7f00	line 2500
+0x87	iommu@ff407e00	line 2565
+0x88	syscon@ff060000	line 1532
+0x89	endpoint@0	line 1553
+0x8a	endpoint@0	line 3802
+0x8b	endpoint@0	line 1515
+0x8c	iommu@ff440f00	line 2592
+0x8d	iommu@ff450480	line 2623
+0x8e	syscon@ff010000	line 1473
+0x8f	legacy-interrupt-controller	line 2675
+0x90	phy@ff750000	line 3037
+0x91	spi1m0-csn0	line 5490
+0x92	spi1m0-csn1	line 5495
+0x93	spi1m0-pins	line 5485
+0x94	spi2m0-csn0	line 5523
+0x95	spi2m0-csn1	line 5528
+0x96	spi2m0-pins	line 5518
+0x97	uart1m0-xfer	line 5582
+0x98	uart1m0-ctsn	line 5587
+0x99	pwm4m0-pins	line 5125
+0x9a	pwm5m0-pins	line 5138
+0x9b	pwm6m0-pins	line 5151
+0x9c	pwm7m0-pins	line 5164
+0x9d	pwm8m0-pins	line 5177
+0x9e	pwm9m0-pins	line 5190
+0x9f	pwm10m0-pins	line 5203
+0xa0	pwm11m0-pins	line 5216
+0xa1	pwm12m0-pins	line 5229
+0xa2	pwm13m0-pins	line 5242
+0xa3	pwm14m0-pins	line 5255
+0xa4	pwm15m0-pins	line 5268
+0xa5	LDO_REG7	line 1803
+0xa6	syscon@ff090000	line 1564
+0xa7	OTG_SWITCH	line 1855
+0xa8	syscon@ff040000	line 1526
+0xa9	syscon@ff098000	line 1570
+0xaa	i2s0m0-lrck	line 4658
+0xab	i2s0m0-sclk	line 4668
+0xac	i2s0m0-sdi0	line 4673
+0xad	i2s0m0-sdo0	line 4693
+0xae	i2s1m0-lrck	line 4771
+0xaf	i2s1m0-sclk	line 4781
+0xb0	i2s1m0-sdi0	line 4786
+0xb1	i2s1m0-sdi1	line 4791
+0xb2	i2s1m0-sdi2	line 4796
+0xb3	i2s1m0-sdi3	line 4801
+0xb4	i2s1m0-sdo0	line 4806
+0xb5	i2s1m0-sdo1	line 4811
+0xb6	i2s1m0-sdo2	line 4816
+0xb7	i2s1m0-sdo3	line 4821
+0xb8	i2s2m0-lrck	line 4884
+0xb9	i2s2m0-sclk	line 4894
+0xba	i2s2m0-sdi	line 4899
+0xbb	i2s2m0-sdo	line 4904
+0xbc	pdmm0-clk0	line 4984
+0xbd	pdmm0-clk1	line 4989
+0xbe	pdmm0-sdi0	line 4994
+0xbf	pdmm0-sdi1	line 4999
+0xc0	pdmm0-sdi2	line 5004
+0xc1	pdmm0-sdi3	line 5009
+0xc2	spdifm0-pins	line 5434
+0xc3	dsm-pins	line 4515
+0xc4	vcc-sd	line 6140
+0xc5	LDO_REG5	line 1776
+0xc6	sdmmc0-bus4	line 5378
+0xc7	sdmmc0-clk	line 5383
+0xc8	sdmmc0-cmd	line 5388
+0xc9	sdmmc0-det	line 5393
+0xca	sdio-pwrseq	line 6128
+0xcb	sdmmc1-bus4	line 5406
+0xcc	sdmmc1-cmd	line 5416
+0xcd	sdmmc1-clk	line 5411
+0xce	i2c1m0-xfer	line 4593
+0xcf	i2c2m0-xfer	line 4606
+0xd0	tp-gpio	line 5897
+0xd1	dsi@ffb10000	line 3776
+0xd2	sensor-gpio	line 5934
+0xd3	i2c3m0-xfer	line 4619
+0xd4	i2c4m0-xfer	line 4632
+0xd5	gpio@ffac0000	line 3962
+0xd6	vcc-mipipwr-regulator	line 6004
+0xd7	LDO_REG8	line 1816
+0xd8	LDO_REG9	line 1829
+0xd9	flash-rgb13h	line 6056
+0xda	dw9714@c	line 3521
+0xdb	endpoint@1	line 405
+0xdc	endpoint@2	line 478
+0xdd	endpoint@2	line 412
+0xde	endpoint@3	line 419
+0xdf	i2c5m0-xfer	line 4645
+0xe0	cpu-tsadc-trim-l@2a	line 3333
+0xe1	cpu-tsadc-trim-h@2b	line 3338
+0xe2	tsadc-trim-base@2d	line 3349
+0xe3	tsadc-trim-base-frac@2c	line 3343
+0xe4	stmmac-axi-config	line 3728
+0xe5	rx-queues-config	line 3735
+0xe6	tx-queues-config	line 3743
+0xe7	endpoint	line 3870
+0xe8	backlight	line 6035
+0xe9	lcd-enable-gpio	line 5926
+0xea	lcd-rst-gpio	line 5921
+0xeb	timing0	line 3845
+0xec	endpoint	line 3813
+0xed	pinctrl	line 3915
+0xee	pcfg-pull-none	line 3998
+0xef	pcfg-pull-up-drv-level-2	line 4111
+0xf0	pcfg-pull-none-smt	line 4303
+0xf1	pcfg-pull-up	line 3988
+0xf2	pcfg-output-low	line 4374
+0xf3	pcfg-pull-none-drv-level-1	line 4009
+0xf4	pcfg-pull-none-drv-level-3	line 4021
+0xf5	pcfg-pull-none-drv-level-4	line 4027
+0xf6	pcfg-pull-down	line 3993
+0xf7	uart0m0-xfer	line 5569
+0xf8	mipicam-pwr	line 4429
+0xf9	saradc@ff730000	line 2993
+0xfa	pwm@ff720020	line 2967
+0xfb	flash-led	line 4444
+0xfc	sai@ff820000	line 3093
+0xfd	bt-sco	line 6087
+0xfe	sai@ff800000	line 3053
+0xff	codec	line 1896
+0x100	hp-det	line 5913
+0x101	pmic@20	line 1600
+0x102	wifi-enable-h	line 5942
+0x103	wifi-rx-h	line 5947
+0x104	vcc-sd-h	line 5955
+0x105	pwm@ff700030	line 2876
+0x106	pwm@ff700020	line 2863
+0x107	wifi-host-wake-irq	line 5963
+0x108	gpio@ff620000	line 3936
+0x109	uart1m0-rtsn	line 5592
+0x10a	uart1-gpios	line 5971
+0x10b	xin32k	line 59
+0x10c	xin24m	line 67
+0x10d	hclk_vepu@ff100324	line 75
+0x10e	aclk_vdpu@ff100328	line 85
+0x10f	aclk_vepu@ff100324	line 115
+0x110	aclk_rga_jdec@ff100338	line 125
+0x111	mclkin-sai0	line 135
+0x112	mclkin-sai1	line 143
+0x113	mclkin-sai2	line 151
+0x114	mclkout-sai1@ff040070	line 169
+0x115	mclkout-sai2@ff040070	line 179
+0x116	arm-pmu	line 369
+0x117	bus-soc	line 376
+0x118	csi2-dphy0	line 390
+0x119	csi2-dphy1	line 442
+0x11a	csi2-dphy2	line 449
+0x11b	csi2-dphy3	line 456
+0x11c	csi2-dphy4	line 463
+0x11d	csi2-dphy5	line 501
+0x11e	display-subsystem	line 508
+0x11f	route-dsi	line 518
+0x120	route-lvds	line 528
+0x121	route-rgb	line 538
+0x122	dmc	line 550
+0x123	scmi	line 591
+0x124	optee	line 606
+0x125	mipi0-csi2	line 621
+0x126	mipi1-csi2	line 659
+0x127	mipi2-csi2	line 666
+0x128	mipi3-csi2	line 704
+0x129	reserved-memory	line 716
+0x12a	ramoops@110000	line 740
+0x12b	rkcif-mipi-lvds-sditf	line 769
+0x12c	rkcif-mipi-lvds-sditf-vir1	line 784
+0x12d	rkcif-mipi-lvds-sditf-vir2	line 791
+0x12e	rkcif-mipi-lvds-sditf-vir3	line 798
+0x12f	rkcif-mipi-lvds1-sditf	line 813
+0x130	rkcif-mipi-lvds1-sditf-vir1	line 820
+0x131	rkcif-mipi-lvds1-sditf-vir2	line 827
+0x132	rkcif-mipi-lvds1-sditf-vir3	line 834
+0x133	rkcif-mipi-lvds2-sditf	line 857
+0x134	rkcif-mipi-lvds2-sditf-vir1	line 872
+0x135	rkcif-mipi-lvds2-sditf-vir2	line 879
+0x136	rkcif-mipi-lvds2-sditf-vir3	line 886
+0x137	rkcif-mipi-lvds3-sditf	line 901
+0x138	rkcif-mipi-lvds3-sditf-vir1	line 908
+0x139	rkcif-mipi-lvds3-sditf-vir2	line 915
+0x13a	rkcif-mipi-lvds3-sditf-vir3	line 922
+0x13b	rkisp-vir0	line 929
+0x13c	rkisp-vir1	line 953
+0x13d	rkisp-vir2	line 960
+0x13e	rkisp-vir3	line 967
+0x13f	rockchip-system-monitor	line 974
+0x140	thermal-zones	line 980
+0x141	soc-thermal	line 983
+0x142	trip-point-0	line 992
+0x143	soc-crit	line 1006
+0x144	vendor-storage	line 1036
+0x145	usbdrd	line 1049
+0x146	usb@fe500000	line 1059
+0x147	usb@fed00000	line 1099
+0x148	usb@fed40000	line 1111
+0x149	debug@fed90000	line 1123
+0x14a	qos@fee03800	line 1129
+0x14b	shaping@fee03888	line 1135
+0x14c	qos@fee10000	line 1141
+0x14d	shaping@fee10088	line 1147
+0x14e	qos@fee10100	line 1153
+0x14f	shaping@fee10188	line 1159
+0x150	qos@fee10200	line 1165
+0x151	shaping@fee10288	line 1171
+0x152	qos@fee10300	line 1177
+0x153	shaping@fee10388	line 1183
+0x154	qos@fee10400	line 1189
+0x155	qos@fee20000	line 1195
+0x156	shaping@fee20088	line 1201
+0x157	qos@fee20100	line 1207
+0x158	shaping@fee20188	line 1213
+0x159	qos@feeb0000	line 1365
+0x15a	shaping@feeb0088	line 1371
+0x15b	qos@feeb0100	line 1377
+0x15c	shaping@feeb0188	line 1383
+0x15d	qos@feeb0200	line 1389
+0x15e	shaping@feeb0288	line 1395
+0x15f	qos@feeb0300	line 1401
+0x160	shaping@feeb0388	line 1407
+0x161	qos@feeb0400	line 1413
+0x162	shaping@feeb0488	line 1419
+0x163	qos@feeb0500	line 1425
+0x164	shaping@feeb0588	line 1431
+0x165	qos@feeb0600	line 1437
+0x166	shaping@feeb0688	line 1443
+0x167	qos@feeb0700	line 1449
+0x168	shaping@feeb0788	line 1455
+0x169	qos@feeb0800	line 1461
+0x16a	shaping@feeb0888	line 1467
+0x16b	reboot-mode	line 1478
+0x16c	lvds	line 1499
+0x16d	rgb	line 1537
+0x16e	i2c@ff200000	line 1587
+0x16f	pinctrl_rk8xx	line 1630
+0x170	rk817_slppin_null	line 1635
+0x171	DCDC_REG3	line 1695
+0x172	DCDC_REG4	line 1707
+0x173	LDO_REG1	line 1722
+0x174	LDO_REG2	line 1736
+0x175	LDO_REG3	line 1749
+0x176	LDO_REG4	line 1763
+0x177	LDO_REG6	line 1789
+0x178	husb320@21	line 1914
+0x179	serial@ff210000	line 1935
+0x17a	spi@ff220000	line 1948
+0x17b	pwm@ff230000	line 1965
+0x17c	pwm@ff230010	line 1978
+0x17d	pwm@ff230020	line 1991
+0x17e	pwm@ff230030	line 2004
+0x17f	power-management@ff258000	line 2017
+0x180	mailbox@ff290000	line 2084
+0x181	npu@ff300000	line 2095
+0x182	rkvdec@ff340100	line 2302
+0x183	rkvenc@ff360000	line 2339
+0x184	vop@ff400000	line 2515
+0x185	port@0	line 2538
+0x186	rga@ff440000	line 2579
+0x187	jpegd@ff450000	line 2605
+0x188	pcie@ff500000	line 2645
+0x189	spi@ff640000	line 2684
+0x18a	spi@ff650000	line 2701
+0x18b	serial@ff670000	line 2718
+0x18c	serial@ff680000	line 2733
+0x18d	serial@ff690000	line 2746
+0x18e	serial@ff6a0000	line 2759
+0x18f	serial@ff6b0000	line 2772
+0x190	serial@ff6c0000	line 2785
+0x191	serial@ff6d0000	line 2798
+0x192	serial@ff6e0000	line 2811
+0x193	serial@ff6f0000	line 2824
+0x194	pwm@ff700000	line 2837
+0x195	pwm@ff700010	line 2850
+0x196	pwm@ff710000	line 2889
+0x197	pwm@ff710010	line 2902
+0x198	pwm@ff710020	line 2915
+0x199	pwm@ff710030	line 2928
+0x19a	pwm@ff720000	line 2941
+0x19b	pwm@ff720010	line 2954
+0x19c	pwm@ff720030	line 2980
+0x19d	sai@ff810000	line 3073
+0x19e	pdm@ff830000	line 3114
+0x19f	spdif@ff840000	line 3130
+0x1a0	dsm@ff850000	line 3147
+0x1a1	spi@ff860000	line 3162
+0x1a2	mmc@ff870000	line 3176
+0x1a3	mmc@ff880000	line 3197
+0x1a4	mmc@ff890000	line 3222
+0x1a5	crypto@ff8a0000	line 3248
+0x1a6	rng@ff8e0000	line 3262
+0x1a7	otp@ff930000	line 3274
+0x1a8	dma-controller@ff9a0000	line 3401
+0x1a9	hwspinlock@ff9e0000	line 3414
+0x1aa	i2c@ffa00000	line 3422
+0x1ab	i2c@ffa10000	line 3436
+0x1ac	i2c@ffa20000	line 3494
+0x1ad	i2c@ffa30000	line 3508
+0x1ae	ov5648@36	line 3534
+0x1af	gc02m1@37	line 3563
+0x1b0	ov5695@35	line 3589
+0x1b1	gc5035@438	line 3618
+0x1b2	i2c@ffa40000	line 3648
+0x1b3	timer@ffa50000	line 3662
+0x1b4	watchdog@ffa60000	line 3671
+0x1b5	ethernet@ffa80000	line 3702
+0x1b6	mdio	line 3721
+0x1b7	saradc@ffaa0000	line 3752
+0x1b8	mailbox@ffae0000	line 3765
+0x1b9	port@0	line 3796
+0x1ba	ethernet@ffb30000	line 3893
+0x1bb	mdio	line 3907
+0x1bc	gpio@ff630000	line 3949
+0x1bd	pcfg-pull-none-drv-level-0	line 4003
+0x1be	pcfg-pull-none-drv-level-2	line 4015
+0x1bf	pcfg-pull-none-drv-level-5	line 4033
+0x1c0	pcfg-pull-none-drv-level-6	line 4039
+0x1c1	pcfg-pull-none-drv-level-7	line 4045
+0x1c2	pcfg-pull-none-drv-level-8	line 4051
+0x1c3	pcfg-pull-none-drv-level-9	line 4057
+0x1c4	pcfg-pull-none-drv-level-10	line 4063
+0x1c5	pcfg-pull-none-drv-level-11	line 4069
+0x1c6	pcfg-pull-none-drv-level-12	line 4075
+0x1c7	pcfg-pull-none-drv-level-13	line 4081
+0x1c8	pcfg-pull-none-drv-level-14	line 4087
+0x1c9	pcfg-pull-none-drv-level-15	line 4093
+0x1ca	pcfg-pull-up-drv-level-0	line 4099
+0x1cb	pcfg-pull-up-drv-level-1	line 4105
+0x1cc	pcfg-pull-up-drv-level-3	line 4117
+0x1cd	pcfg-pull-up-drv-level-4	line 4123
+0x1ce	pcfg-pull-up-drv-level-5	line 4129
+0x1cf	pcfg-pull-up-drv-level-6	line 4135
+0x1d0	pcfg-pull-up-drv-level-7	line 4141
+0x1d1	pcfg-pull-up-drv-level-8	line 4147
+0x1d2	pcfg-pull-up-drv-level-9	line 4153
+0x1d3	pcfg-pull-up-drv-level-10	line 4159
+0x1d4	pcfg-pull-up-drv-level-11	line 4165
+0x1d5	pcfg-pull-up-drv-level-12	line 4171
+0x1d6	pcfg-pull-up-drv-level-13	line 4177
+0x1d7	pcfg-pull-up-drv-level-14	line 4183
+0x1d8	pcfg-pull-up-drv-level-15	line 4189
+0x1d9	pcfg-pull-down-drv-level-0	line 4195
+0x1da	pcfg-pull-down-drv-level-1	line 4201
+0x1db	pcfg-pull-down-drv-level-2	line 4207
+0x1dc	pcfg-pull-down-drv-level-3	line 4213
+0x1dd	pcfg-pull-down-drv-level-4	line 4219
+0x1de	pcfg-pull-down-drv-level-5	line 4225
+0x1df	pcfg-pull-down-drv-level-6	line 4231
+0x1e0	pcfg-pull-down-drv-level-7	line 4237
+0x1e1	pcfg-pull-down-drv-level-8	line 4243
+0x1e2	pcfg-pull-down-drv-level-9	line 4249
+0x1e3	pcfg-pull-down-drv-level-10	line 4255
+0x1e4	pcfg-pull-down-drv-level-11	line 4261
+0x1e5	pcfg-pull-down-drv-level-12	line 4267
+0x1e6	pcfg-pull-down-drv-level-13	line 4273
+0x1e7	pcfg-pull-down-drv-level-14	line 4279
+0x1e8	pcfg-pull-down-drv-level-15	line 4285
+0x1e9	pcfg-pull-up-smt	line 4291
+0x1ea	pcfg-pull-down-smt	line 4297
+0x1eb	pcfg-pull-none-drv-level-0-smt	line 4309
+0x1ec	pcfg-pull-none-drv-level-1-smt	line 4316
+0x1ed	pcfg-pull-none-drv-level-2-smt	line 4323
+0x1ee	pcfg-pull-none-drv-level-3-smt	line 4330
+0x1ef	pcfg-pull-none-drv-level-4-smt	line 4337
+0x1f0	pcfg-pull-none-drv-level-5-smt	line 4344
+0x1f1	pcfg-output-high	line 4351
+0x1f2	pcfg-output-high-pull-up	line 4356
+0x1f3	pcfg-output-high-pull-down	line 4362
+0x1f4	pcfg-output-high-pull-none	line 4368
+0x1f5	pcfg-output-low-pull-up	line 4379
+0x1f6	pcfg-output-low-pull-down	line 4385
+0x1f7	pcfg-output-low-pull-none	line 4391
+0x1f8	camm0-clk1-out	line 4404
+0x1f9	camm1-clk0-out	line 4409
+0x1fa	camm1-clk1-out	line 4414
+0x1fb	cam-clk2-out	line 4419
+0x1fc	cam-clk3-out	line 4424
+0x1fd	camera-rst	line 4434
+0x1fe	camera-af	line 4439
+0x1ff	can0m0-pins	line 4452
+0x200	can0m1-pins	line 4457
+0x201	can0m2-pins	line 4462
+0x202	can1m0-pins	line 4470
+0x203	can1m1-pins	line 4475
+0x204	clk-32k-in	line 4483
+0x205	clk0-32k-out	line 4491
+0x206	clk1-32k-out	line 4499
+0x207	cpu-pins	line 4507
+0x208	emmc-bus8	line 4523
+0x209	emmc-clk	line 4528
+0x20a	emmc-cmd	line 4533
+0x20b	emmc-strb	line 4538
+0x20c	ethm0-pins	line 4546
+0x20d	ethm1-pins	line 4551
+0x20e	fspi-pins	line 4559
+0x20f	fspi-csn0	line 4564
+0x210	fspi-csn1	line 4569
+0x211	gpu-pins	line 4577
+0x212	i2c1m1-xfer	line 4598
+0x213	i2c2m1-xfer	line 4611
+0x214	i2c3m1-xfer	line 4624
+0x215	i2c4m1-xfer	line 4637
+0x216	i2c5m1-xfer	line 4650
+0x217	i2s0m0-sdi1	line 4678
+0x218	i2s0m0-sdi2	line 4683
+0x219	i2s0m0-sdi3	line 4688
+0x21a	i2s0m0-sdo1	line 4698
+0x21b	i2s0m0-sdo2	line 4703
+0x21c	i2s0m0-sdo3	line 4708
+0x21d	i2s0m1-lrck	line 4713
+0x21e	i2s0m1-mclk	line 4718
+0x21f	i2s0m1-sclk	line 4723
+0x220	i2s0m1-sdi0	line 4728
+0x221	i2s0m1-sdi1	line 4733
+0x222	i2s0m1-sdi2	line 4738
+0x223	i2s0m1-sdi3	line 4743
+0x224	i2s0m1-sdo0	line 4748
+0x225	i2s0m1-sdo1	line 4753
+0x226	i2s0m1-sdo2	line 4758
+0x227	i2s0m1-sdo3	line 4763
+0x228	i2s1m0-mclk	line 4776
+0x229	i2s1m1-lrck	line 4826
+0x22a	i2s1m1-mclk	line 4831
+0x22b	i2s1m1-sclk	line 4836
+0x22c	i2s1m1-sdi0	line 4841
+0x22d	i2s1m1-sdi1	line 4846
+0x22e	i2s1m1-sdi2	line 4851
+0x22f	i2s1m1-sdi3	line 4856
+0x230	i2s1m1-sdo0	line 4861
+0x231	i2s1m1-sdo1	line 4866
+0x232	i2s1m1-sdo2	line 4871
+0x233	i2s1m1-sdo3	line 4876
+0x234	i2s2m0-mclk	line 4889
+0x235	i2s2m1-lrck	line 4909
+0x236	i2s2m1-mclk	line 4914
+0x237	i2s2m1-sclk	line 4919
+0x238	i2s2m1-sdi	line 4924
+0x239	i2s2m1-sdo	line 4929
+0x23a	isp-pins	line 4937
+0x23b	jtagm0-pins	line 4945
+0x23c	jtagm1-pins	line 4950
+0x23d	npu-pins	line 4958
+0x23e	pcie20m0-pins	line 4966
+0x23f	pcie20m1-pins	line 4971
+0x240	pcie20-buttonrstn	line 4976
+0x241	pdmm1-clk0	line 5014
+0x242	pdmm1-clk1	line 5019
+0x243	pdmm1-sdi0	line 5024
+0x244	pdmm1-sdi1	line 5029
+0x245	pdmm1-sdi2	line 5034
+0x246	pdmm1-sdi3	line 5039
+0x247	pmu-pins	line 5065
+0x248	pwm0m1-pins	line 5078
+0x249	pwm1m1-pins	line 5091
+0x24a	pwm2m1-pins	line 5104
+0x24b	pwm3m1-pins	line 5117
+0x24c	pwm4m1-pins	line 5130
+0x24d	pwm5m1-pins	line 5143
+0x24e	pwm6m1-pins	line 5156
+0x24f	pwm7m1-pins	line 5169
+0x250	pwm8m1-pins	line 5182
+0x251	pwm9m1-pins	line 5195
+0x252	pwm10m1-pins	line 5208
+0x253	pwm11m1-pins	line 5221
+0x254	pwm12m1-pins	line 5234
+0x255	pwm13m1-pins	line 5247
+0x256	pwm14m1-pins	line 5260
+0x257	pwm15m1-pins	line 5273
+0x258	pwr-pins	line 5281
+0x259	ref-pins	line 5289
+0x25a	rgmiim0-miim	line 5297
+0x25b	rgmiim0-rx_er	line 5302
+0x25c	rgmiim0-rx_bus2	line 5307
+0x25d	rgmiim0-tx_bus2	line 5312
+0x25e	rgmiim0-rgmii_clk	line 5317
+0x25f	rgmiim0-rgmii_bus	line 5322
+0x260	rgmiim0-clk	line 5327
+0x261	rgmiim1-miim	line 5332
+0x262	rgmiim1-rx_er	line 5337
+0x263	rgmiim1-rx_bus2	line 5342
+0x264	rgmiim1-tx_bus2	line 5347
+0x265	rgmiim1-rgmii_clk	line 5352
+0x266	rgmiim1-rgmii_bus	line 5357
+0x267	rgmiim1-clk	line 5362
+0x268	rmii-pins	line 5370
+0x269	sdmmc0-pwren	line 5398
+0x26a	sdmmc1-det	line 5421
+0x26b	sdmmc1-pwren	line 5426
+0x26c	spdifm1-pins	line 5439
+0x26d	spdifm2-pins	line 5444
+0x26e	spi0m1-pins	line 5467
+0x26f	spi0m1-csn0	line 5472
+0x270	spi0m1-csn1	line 5477
+0x271	spi1m1-pins	line 5500
+0x272	spi1m1-csn0	line 5505
+0x273	spi1m1-csn1	line 5510
+0x274	spi2m1-pins	line 5533
+0x275	spi2m1-csn0	line 5538
+0x276	spi2m1-csn1	line 5543
+0x277	tsadcm0-pins	line 5551
+0x278	tsadcm1-pins	line 5556
+0x279	tsadc-shut-org	line 5561
+0x27a	uart0m1-xfer	line 5574
+0x27b	uart1m1-xfer	line 5597
+0x27c	uart1m1-ctsn	line 5602
+0x27d	uart1m1-rtsn	line 5607
+0x27e	uart2m0-xfer	line 5615
+0x27f	uart2m0-ctsn	line 5620
+0x280	uart2m0-rtsn	line 5625
+0x281	uart2m1-xfer	line 5630
+0x282	uart2m1-ctsn	line 5635
+0x283	uart2m1-rtsn	line 5640
+0x284	uart3m0-xfer	line 5648
+0x285	uart3m0-ctsn	line 5653
+0x286	uart3m0-rtsn	line 5658
+0x287	uart3m1-xfer	line 5663
+0x288	uart3m1-ctsn	line 5668
+0x289	uart3m1-rtsn	line 5673
+0x28a	uart4m0-xfer	line 5681
+0x28b	uart4m0-ctsn	line 5686
+0x28c	uart4m0-rtsn	line 5691
+0x28d	uart4m1-xfer	line 5696
+0x28e	uart4m1-ctsn	line 5701
+0x28f	uart4m1-rtsn	line 5706
+0x290	uart5m0-xfer	line 5714
+0x291	uart5m0-ctsn	line 5719
+0x292	uart5m0-rtsn	line 5724
+0x293	uart5m1-xfer	line 5729
+0x294	uart5m1-ctsn	line 5734
+0x295	uart5m1-rtsn	line 5739
+0x296	uart6m0-xfer	line 5747
+0x297	uart6m0-ctsn	line 5752
+0x298	uart6m0-rtsn	line 5757
+0x299	uart6m1-xfer	line 5762
+0x29a	uart6m1-ctsn	line 5767
+0x29b	uart6m1-rtsn	line 5772
+0x29c	uart7m0-xfer	line 5780
+0x29d	uart7m0-ctsn	line 5785
+0x29e	uart7m0-rtsn	line 5790
+0x29f	uart7m1-xfer	line 5795
+0x2a0	uart8m0-xfer	line 5803
+0x2a1	uart8m0-ctsn	line 5808
+0x2a2	uart8m0-rtsn	line 5813
+0x2a3	uart8m1-xfer	line 5818
+0x2a4	uart8m1-ctsn	line 5823
+0x2a5	uart8m1-rtsn	line 5828
+0x2a6	uart9m0-xfer	line 5836
+0x2a7	uart9m0-ctsn	line 5841
+0x2a8	uart9m0-rtsn	line 5846
+0x2a9	uart9m1-xfer	line 5851
+0x2aa	bt1120-pins	line 5864
+0x2ab	bt656-pins	line 5869
+0x2ac	rgb3x8-pins-m0	line 5874
+0x2ad	rgb3x8-pins-m1	line 5879
+0x2ae	rgb565-pins	line 5884
+0x2af	rgb666-pins	line 5889
+0x2b0	rockchip-suspend	line 5978
+0x2b1	chosen	line 5987
+0x2b2	adc-keys	line 6014
+0x2b3	seekwcn_boot	line 6193
+
+====================================================================================================
+GPIO / CAMERA / USB RELEVANT PHANDLE REFERENCES
+====================================================================================================
+204: cpu-supply = <0x08>;
+    -> 0x8=DCDC_REG2@L1679
+407: remote-endpoint = <0x17>;
+    -> 0x17=endpoint@L3555
+408: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+414: remote-endpoint = <0x18>;
+    -> 0x18=endpoint@L3610
+415: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+421: remote-endpoint = <0x19>;
+    -> 0x19=endpoint@L3639
+422: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+434: remote-endpoint = <0x1a>;
+    -> 0x1a=endpoint@1@L636
+435: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+480: remote-endpoint = <0x1b>;
+    -> 0x1b=endpoint@L3581
+481: data-lanes = <0x01>;
+    -> 0x1=interrupt-controller@fe901000@L1089
+493: remote-endpoint = <0x1c>;
+    -> 0x1c=endpoint@1@L681
+494: data-lanes = <0x01>;
+    -> 0x1=interrupt-controller@fe901000@L1089
+565: center-supply = <0x25>;
+    -> 0x25=DCDC_REG1@L1662
+638: remote-endpoint = <0x2e>;
+    -> 0x2e=endpoint@0@L432
+639: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+651: remote-endpoint = <0x2f>;
+    -> 0x2f=endpoint@L762
+652: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+683: remote-endpoint = <0x30>;
+    -> 0x30=endpoint@0@L491
+684: data-lanes = <0x01>;
+    -> 0x1=interrupt-controller@fe901000@L1089
+696: remote-endpoint = <0x31>;
+    -> 0x31=endpoint@L850
+697: data-lanes = <0x01>;
+    -> 0x1=interrupt-controller@fe901000@L1089
+763: remote-endpoint = <0x34>;
+    -> 0x34=endpoint@0@L649
+778: remote-endpoint = <0x36>;
+    -> 0x36=endpoint@0@L939
+851: remote-endpoint = <0x38>;
+    -> 0x38=endpoint@0@L694
+866: remote-endpoint = <0x3a>;
+    -> 0x3a=endpoint@1@L945
+941: remote-endpoint = <0x3d>;
+    -> 0x3d=endpoint@L777
+947: remote-endpoint = <0x3e>;
+    -> 0x3e=endpoint@L865
+1064: phys = <0x43>;
+    -> 0x43=otg-port@L3018
+1105: phys = <0x46>;
+    -> 0x46=host-port@L3028
+1117: phys = <0x46>;
+    -> 0x46=host-port@L3028
+1501: phys = <0x47>;
+    -> 0x47=phy@ffb20000@L3879
+1517: remote-endpoint = <0x21>;
+    -> 0x21=endpoint@2@L2556
+1540: pinctrl-0 = <0x48>;
+    -> 0x48=vo-pins@L5859
+1555: remote-endpoint = <0x22>;
+    -> 0x22=endpoint@0@L2544
+1594: pinctrl-0 = <0x49>;
+    -> 0x49=i2c0-xfer@L4585
+1606: pinctrl-0 = <0x4b>;
+    -> 0x4b=pmic-int@L5047
+1607: pinctrl-1 = <0x4c 0x4d>;
+    -> 0x4c=soc-slppin-slp@L5057, 0x4d=rk817_slppin_slp@L1641
+1608: pinctrl-2 = <0x4e 0x4f>;
+    -> 0x4e=soc-slppin-gpio@L5052, 0x4f=rk817_slppin_pwrdn@L1647
+1609: pinctrl-3 = <0x4e 0x50>;
+    -> 0x4e=soc-slppin-gpio@L5052, 0x50=rk817_slppin_rst@L1653
+1615: vcc1-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+1616: vcc2-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+1617: vcc3-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+1618: vcc4-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+1619: vcc5-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+1620: vcc6-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+1621: vcc7-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+1622: vcc8-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+1623: vcc9-supply = <0x52>;
+    -> 0x52=BOOST@L1842
+1632: #gpio-cells = <0x02>;
+    -> 0x2=clock-controller@ff100000@L1576
+1904: pinctrl-0 = <0x54>;
+    -> 0x54=i2s0m0-mclk@L4663
+1908: spk-ctl-gpios = <0x55 0x0f 0x00>;
+    -> 0x55=gpio@ffad0000@L3975, 0xf=cpu@1@L208
+1920: husb320,int-gpio = <0x4a 0x07 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0x7=cpu0-opp-table@L262
+1921: husb320,int-gpio_num = <0x07>;
+    -> 0x7=cpu0-opp-table@L262
+1923: pinctrl-0 = <0x56>;
+    -> 0x56=husb320-gpio@L5905
+1925: husb320,init-mode = <0x14>;
+    -> 0x14=cpu-code@2@L3285
+1926: husb320,host-current = <0x02>;
+    -> 0x2=clock-controller@ff100000@L1576
+1927: husb320,drp-toggle-time = <0x01>;
+    -> 0x1=interrupt-controller@fe901000@L1089
+1929: husb320,autosink-threshold = <0x01>;
+    -> 0x1=interrupt-controller@fe901000@L1089
+1930: husb320,cc-debounce-time = <0x03>;
+    -> 0x3=aclk_vi_isp@ff10032c@L95
+1959: pinctrl-0 = <0x58 0x59 0x5a>;
+    -> 0x58=spi0m0-csn0@L5457, 0x59=spi0m0-csn1@L5462, 0x5a=spi0m0-pins@L5452
+1971: pinctrl-0 = <0x5b>;
+    -> 0x5b=pwm0m0-pins@L5073
+1984: pinctrl-0 = <0x5c>;
+    -> 0x5c=pwm1m0-pins@L5086
+1997: pinctrl-0 = <0x5d>;
+    -> 0x5d=pwm2m0-pins@L5099
+2010: pinctrl-0 = <0x5e>;
+    -> 0x5e=pwm3m0-pins@L5112
+2109: rknpu-supply = <0x79>;
+    -> 0x79=vdd-npu@L6178
+2227: mali-supply = <0x7e>;
+    -> 0x7e=vdd-gpu@L6163
+2469: pinctrl-0 = <0x85>;
+    -> 0x85=camm0-clk0-out@L4399
+2546: remote-endpoint = <0x89>;
+    -> 0x89=endpoint@0@L1553
+2552: remote-endpoint = <0x8a>;
+    -> 0x8a=endpoint@0@L3802
+2558: remote-endpoint = <0x8b>;
+    -> 0x8b=endpoint@0@L1515
+2664: phys = <0x90 0x02>;
+    -> 0x90=phy@ff750000@L3037, 0x2=clock-controller@ff100000@L1576
+2695: pinctrl-0 = <0x91 0x92 0x93>;
+    -> 0x91=spi1m0-csn0@L5490, 0x92=spi1m0-csn1@L5495, 0x93=spi1m0-pins@L5485
+2712: pinctrl-0 = <0x94 0x95 0x96>;
+    -> 0x94=spi2m0-csn0@L5523, 0x95=spi2m0-csn1@L5528, 0x96=spi2m0-pins@L5518
+2729: pinctrl-0 = <0x97 0x98>;
+    -> 0x97=uart1m0-xfer@L5582, 0x98=uart1m0-ctsn@L5587
+2843: pinctrl-0 = <0x99>;
+    -> 0x99=pwm4m0-pins@L5125
+2856: pinctrl-0 = <0x9a>;
+    -> 0x9a=pwm5m0-pins@L5138
+2869: pinctrl-0 = <0x9b>;
+    -> 0x9b=pwm6m0-pins@L5151
+2882: pinctrl-0 = <0x9c>;
+    -> 0x9c=pwm7m0-pins@L5164
+2895: pinctrl-0 = <0x9d>;
+    -> 0x9d=pwm8m0-pins@L5177
+2908: pinctrl-0 = <0x9e>;
+    -> 0x9e=pwm9m0-pins@L5190
+2921: pinctrl-0 = <0x9f>;
+    -> 0x9f=pwm10m0-pins@L5203
+2934: pinctrl-0 = <0xa0>;
+    -> 0xa0=pwm11m0-pins@L5216
+2947: pinctrl-0 = <0xa1>;
+    -> 0xa1=pwm12m0-pins@L5229
+2960: pinctrl-0 = <0xa2>;
+    -> 0xa2=pwm13m0-pins@L5242
+2973: pinctrl-0 = <0xa3>;
+    -> 0xa3=pwm14m0-pins@L5255
+2986: pinctrl-0 = <0xa4>;
+    -> 0xa4=pwm15m0-pins@L5268
+3003: vref-supply = <0xa5>;
+    -> 0xa5=LDO_REG7@L1803
+3014: rockchip,usbgrf = <0xa6>;
+    -> 0xa6=syscon@ff090000@L1564
+3024: vbus-supply = <0xa7>;
+    -> 0xa7=OTG_SWITCH@L1855
+3040: #phy-cells = <0x01>;
+    -> 0x1=interrupt-controller@fe901000@L1089
+3048: rockchip,pipe-phy-grf = <0xa9>;
+    -> 0xa9=syscon@ff098000@L1570
+3066: pinctrl-0 = <0xaa 0xab 0xac 0xad>;
+    -> 0xaa=i2s0m0-lrck@L4658, 0xab=i2s0m0-sclk@L4668, 0xac=i2s0m0-sdi0@L4673, 0xad=i2s0m0-sdo0@L4693
+3086: pinctrl-0 = <0xae 0xaf 0xb0 0xb1 0xb2 0xb3 0xb4 0xb5 0xb6 0xb7>;
+    -> 0xae=i2s1m0-lrck@L4771, 0xaf=i2s1m0-sclk@L4781, 0xb0=i2s1m0-sdi0@L4786, 0xb1=i2s1m0-sdi1@L4791, 0xb2=i2s1m0-sdi2@L4796, 0xb3=i2s1m0-sdi3@L4801, 0xb4=i2s1m0-sdo0@L4806, 0xb5=i2s1m0-sdo1@L4811, 0xb6=i2s1m0-sdo2@L4816, 0xb7=i2s1m0-sdo3@L4821
+3106: pinctrl-0 = <0xb8 0xb9 0xba 0xbb>;
+    -> 0xb8=i2s2m0-lrck@L4884, 0xb9=i2s2m0-sclk@L4894, 0xba=i2s2m0-sdi@L4899, 0xbb=i2s2m0-sdo@L4904
+3124: pinctrl-0 = <0xbc 0xbd 0xbe 0xbf 0xc0 0xc1>;
+    -> 0xbc=pdmm0-clk0@L4984, 0xbd=pdmm0-clk1@L4989, 0xbe=pdmm0-sdi0@L4994, 0xbf=pdmm0-sdi1@L4999, 0xc0=pdmm0-sdi2@L5004, 0xc1=pdmm0-sdi3@L5009
+3142: pinctrl-0 = <0xc2>;
+    -> 0xc2=spdifm0-pins@L5434
+3156: pinctrl-0 = <0xc3>;
+    -> 0xc3=dsm-pins@L4515
+3215: vmmc-supply = <0xc4>;
+    -> 0xc4=vcc-sd@L6140
+3216: vqmmc-supply = <0xc5>;
+    -> 0xc5=LDO_REG5@L1776
+3218: pinctrl-0 = <0xc6 0xc7 0xc8 0xc9>;
+    -> 0xc6=sdmmc0-bus4@L5378, 0xc7=sdmmc0-clk@L5383, 0xc8=sdmmc0-cmd@L5388, 0xc9=sdmmc0-det@L5393
+3243: pinctrl-0 = <0xcb 0xcc 0xcd>;
+    -> 0xcb=sdmmc1-bus4@L5406, 0xcc=sdmmc1-cmd@L5416, 0xcd=sdmmc1-clk@L5411
+3429: pinctrl-0 = <0xce>;
+    -> 0xce=i2c1m0-xfer@L4593
+3443: pinctrl-0 = <0xcf>;
+    -> 0xcf=i2c2m0-xfer@L4606
+3452: irq_gpio_number = <0x4a 0x13 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0x13=cpu-version@8@L3290
+3453: rst_gpio_number = <0x4a 0x0f 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0xf=cpu@1@L208
+3455: pinctrl-0 = <0xd0>;
+    -> 0xd0=tp-gpio@L5897
+3466: pinctrl-0 = <0xd2>;
+    -> 0xd2=sensor-gpio@L5934
+3467: irq-gpio = <0x4a 0x14 0x08>;
+    -> 0x4a=gpio@ff260000@L3923, 0x14=cpu-code@2@L3285, 0x8=DCDC_REG2@L1679
+3501: pinctrl-0 = <0xd3>;
+    -> 0xd3=i2c3m0-xfer@L4619
+3515: pinctrl-0 = <0xd4>;
+    -> 0xd4=i2c4m0-xfer@L4632
+3530: xsd-gpios = <0xd5 0x11 0x00>;
+    -> 0xd5=gpio@ffac0000@L3962, 0x11=cpu@3@L234
+3540: reset-gpios = <0xd5 0x0d 0x01>;
+    -> 0xd5=gpio@ffac0000@L3962, 0xd=syscon@ff030000@L1494, 0x1=interrupt-controller@fe901000@L1089
+3541: pwdn-gpios = <0xd5 0x0c 0x00>;
+    -> 0xd5=gpio@ffac0000@L3962, 0xc=cpu-pvtpll@46@L3374
+3542: avdd-supply = <0xd6>;
+    -> 0xd6=vcc-mipipwr-regulator@L6004
+3543: dovdd-supply = <0xd7>;
+    -> 0xd7=LDO_REG8@L1816
+3544: dvdd-supply = <0xd8>;
+    -> 0xd8=LDO_REG9@L1829
+3556: remote-endpoint = <0xdb>;
+    -> 0xdb=endpoint@1@L405
+3557: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+3569: pwdn-gpios = <0xd5 0x10 0x01>;
+    -> 0xd5=gpio@ffac0000@L3962, 0x10=cpu@2@L221, 0x1=interrupt-controller@fe901000@L1089
+3570: avdd-supply = <0xd6>;
+    -> 0xd6=vcc-mipipwr-regulator@L6004
+3571: dovdd-supply = <0xd7>;
+    -> 0xd7=LDO_REG8@L1816
+3572: dvdd-supply = <0xd8>;
+    -> 0xd8=LDO_REG9@L1829
+3582: remote-endpoint = <0xdc>;
+    -> 0xdc=endpoint@2@L478
+3583: data-lanes = <0x01>;
+    -> 0x1=interrupt-controller@fe901000@L1089
+3595: reset-gpios = <0xd5 0x0d 0x01>;
+    -> 0xd5=gpio@ffac0000@L3962, 0xd=syscon@ff030000@L1494, 0x1=interrupt-controller@fe901000@L1089
+3596: pwdn-gpios = <0xd5 0x0c 0x00>;
+    -> 0xd5=gpio@ffac0000@L3962, 0xc=cpu-pvtpll@46@L3374
+3597: avdd-supply = <0xd6>;
+    -> 0xd6=vcc-mipipwr-regulator@L6004
+3598: dovdd-supply = <0xd7>;
+    -> 0xd7=LDO_REG8@L1816
+3599: dvdd-supply = <0xd8>;
+    -> 0xd8=LDO_REG9@L1829
+3611: remote-endpoint = <0xdd>;
+    -> 0xdd=endpoint@2@L412
+3612: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+3624: reset-gpios = <0xd5 0x0d 0x00>;
+    -> 0xd5=gpio@ffac0000@L3962, 0xd=syscon@ff030000@L1494
+3625: pwdn-gpios = <0xd5 0x0c 0x00>;
+    -> 0xd5=gpio@ffac0000@L3962, 0xc=cpu-pvtpll@46@L3374
+3626: avdd-supply = <0xd6>;
+    -> 0xd6=vcc-mipipwr-regulator@L6004
+3627: dovdd-supply = <0xd7>;
+    -> 0xd7=LDO_REG8@L1816
+3628: dvdd-supply = <0xd8>;
+    -> 0xd8=LDO_REG9@L1829
+3640: remote-endpoint = <0xde>;
+    -> 0xde=endpoint@3@L419
+3641: data-lanes = <0x01 0x02>;
+    -> 0x1=interrupt-controller@fe901000@L1089, 0x2=clock-controller@ff100000@L1576
+3655: pinctrl-0 = <0xdf>;
+    -> 0xdf=i2c5m0-xfer@L4645
+3784: phys = <0x47>;
+    -> 0x47=phy@ffb20000@L3879
+3804: remote-endpoint = <0x20>;
+    -> 0x20=endpoint@1@L2550
+3814: remote-endpoint = <0xe7>;
+    -> 0xe7=endpoint@L3870
+3824: enable-gpios = <0x55 0x0e 0x00>;
+    -> 0x55=gpio@ffad0000@L3975, 0xe=cpu@0@L194
+3825: reset-gpios = <0x55 0x0d 0x01>;
+    -> 0x55=gpio@ffad0000@L3975, 0xd=syscon@ff030000@L1494, 0x1=interrupt-controller@fe901000@L1089
+3827: pinctrl-0 = <0xe9 0xea>;
+    -> 0xe9=lcd-enable-gpio@L5926, 0xea=lcd-rst-gpio@L5921
+3871: remote-endpoint = <0xec>;
+    -> 0xec=endpoint@L3813
+3929: #gpio-cells = <0x02>;
+    -> 0x2=clock-controller@ff100000@L1576
+3930: gpio-ranges = <0xed 0x00 0x00 0x20>;
+    -> 0xed=pinctrl@L3915, 0x20=endpoint@1@L2550
+3942: #gpio-cells = <0x02>;
+    -> 0x2=clock-controller@ff100000@L1576
+3943: gpio-ranges = <0xed 0x00 0x20 0x20>;
+    -> 0xed=pinctrl@L3915, 0x20=endpoint@1@L2550
+3955: #gpio-cells = <0x02>;
+    -> 0x2=clock-controller@ff100000@L1576
+3956: gpio-ranges = <0xed 0x00 0x40 0x20>;
+    -> 0xed=pinctrl@L3915, 0x40=trip-point-1@L999, 0x20=endpoint@1@L2550
+3968: #gpio-cells = <0x02>;
+    -> 0x2=clock-controller@ff100000@L1576
+3969: gpio-ranges = <0xed 0x00 0x60 0x20>;
+    -> 0xed=pinctrl@L3915, 0x60=shaping@fee30088@L1226, 0x20=endpoint@1@L2550
+3981: #gpio-cells = <0x02>;
+    -> 0x2=clock-controller@ff100000@L1576
+3982: gpio-ranges = <0xed 0x00 0x80 0x20>;
+    -> 0xed=pinctrl@L3915, 0x80=gpu-opp-info@34@L3359, 0x20=endpoint@1@L2550
+5983: rockchip,wakeup-config = <0x10>;
+    -> 0x10=cpu@2@L221
+6000: pinctrl-0 = <0xf7>;
+    -> 0xf7=uart0m0-xfer@L5569
+6006: gpio = <0xd5 0x0b 0x00>;
+    -> 0xd5=gpio@ffac0000@L3962, 0xb=mbist-vmin@9@L3296
+6008: pinctrl-0 = <0xf8>;
+    -> 0xf8=mipicam-pwr@L4429
+6061: pinctrl-0 = <0xfb>;
+    -> 0xfb=flash-led@L4444
+6065: enable-gpio = <0xd5 0x12 0x00>;
+    -> 0xd5=gpio@ffac0000@L3962, 0x12=id@a@L3308
+6097: hp-det-gpio = <0xd5 0x00 0x01>;
+    -> 0xd5=gpio@ffac0000@L3962, 0x1=interrupt-controller@fe901000@L1089
+6107: pinctrl-0 = <0x100>;
+    -> 0x100=hp-det@L5913
+6133: pinctrl-0 = <0x102 0x103>;
+    -> 0x102=wifi-enable-h@L5942, 0x103=wifi-rx-h@L5947
+6135: vbat-gpios = <0x4a 0x00 0x01>;
+    -> 0x4a=gpio@ff260000@L3923, 0x1=interrupt-controller@fe901000@L1089
+6136: reset-gpios = <0x4a 0x0b 0x01>;
+    -> 0x4a=gpio@ff260000@L3923, 0xb=mbist-vmin@9@L3296, 0x1=interrupt-controller@fe901000@L1089
+6143: enable-gpio = <0x4a 0x05 0x01>;
+    -> 0x4a=gpio@ff260000@L3923, 0x5=protocol@14@L599, 0x1=interrupt-controller@fe901000@L1089
+6147: pinctrl-0 = <0x104>;
+    -> 0x104=vcc-sd-h@L5955
+6173: pwm-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+6188: pwm-supply = <0x51>;
+    -> 0x51=vcc-sys@L6153
+6200: gpio_host_wake = <0x4a 0x15 0x01>;
+    -> 0x4a=gpio@ff260000@L3923, 0x15=csi2-dphy0-hw@ff3c0000@L2430, 0x1=interrupt-controller@fe901000@L1089
+6201: gpio_chip_wake = <0x4a 0x0c 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0xc=cpu-pvtpll@46@L3374
+6202: gpio_chip_en = <0x4a 0x0b 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0xb=mbist-vmin@9@L3296
+6211: pinctrl-0 = <0x107>;
+    -> 0x107=wifi-host-wake-irq@L5963
+6212: WIFI,host_wake_irq = <0x4a 0x0c 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0xc=cpu-pvtpll@46@L3374
+6213: WIFI,poweren_gpio = <0x4a 0x0b 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0xb=mbist-vmin@9@L3296
+6214: WIFI,vbat_gpio = <0x4a 0x00 0x00>;
+    -> 0x4a=gpio@ff260000@L3923
+6222: uart_rts_gpios = <0x108 0x1a 0x01>;
+    -> 0x108=gpio@ff620000@L3936, 0x1a=endpoint@1@L636, 0x1=interrupt-controller@fe901000@L1089
+6224: pinctrl-0 = <0x109>;
+    -> 0x109=uart1m0-rtsn@L5592
+6225: pinctrl-1 = <0x10a>;
+    -> 0x10a=uart1-gpios@L5971
+6226: BT,wake_gpio = <0x4a 0x17 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0x17=endpoint@L3555
+6227: BT,wake_host_irq = <0x4a 0x16 0x00>;
+    -> 0x4a=gpio@ff260000@L3923, 0x16=csi2-dphy1-hw@ff3d0000@L2442

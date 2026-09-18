@@ -1,0 +1,336 @@
+=== KERNEL ===
+77168c8d5ab82399f65a80e9f807b50ba37cf483
+77168c8d5-dirty
+VERSION = 6
+PATCHLEVEL = 1
+SUBLEVEL = 172
+
+=== TYPE-C TREE ===
+altmodes
+anx7411.c
+built-in.a
+bus.c
+bus.h
+bus.o
+class.c
+class.h
+class.o
+hd3ss3220.c
+Kconfig
+Makefile
+modules.order
+mux
+mux.c
+mux.h
+mux.o
+pd.c
+pd.h
+pd.o
+port-mapper.c
+qcom-pmic-typec.c
+retimer.c
+retimer.h
+retimer.o
+rt1719.c
+stusb160x.c
+tcpm
+tipd
+ucsi
+wusb3801.c
+
+=== ROLE SWITCH API ===
+src/kernel/include/linux/usb/role.h:8:struct usb_role_switch;
+src/kernel/include/linux/usb/role.h:16:typedef int (*usb_role_switch_set_t)(struct usb_role_switch *sw,
+src/kernel/include/linux/usb/role.h:18:typedef enum usb_role (*usb_role_switch_get_t)(struct usb_role_switch *sw);
+src/kernel/include/linux/usb/role.h:21: * struct usb_role_switch_desc - USB Role Switch Descriptor
+src/kernel/include/linux/usb/role.h:38:struct usb_role_switch_desc {
+src/kernel/include/linux/usb/role.h:44:	usb_role_switch_get_t get;
+src/kernel/include/linux/usb/role.h:52:int usb_role_switch_set_role(struct usb_role_switch *sw, enum usb_role role);
+src/kernel/include/linux/usb/role.h:53:enum usb_role usb_role_switch_get_role(struct usb_role_switch *sw);
+src/kernel/include/linux/usb/role.h:54:struct usb_role_switch *usb_role_switch_get(struct device *dev);
+src/kernel/include/linux/usb/role.h:55:struct usb_role_switch *fwnode_usb_role_switch_get(struct fwnode_handle *node);
+src/kernel/include/linux/usb/role.h:56:void usb_role_switch_put(struct usb_role_switch *sw);
+src/kernel/include/linux/usb/role.h:58:struct usb_role_switch *
+src/kernel/include/linux/usb/role.h:61:struct usb_role_switch *
+src/kernel/include/linux/usb/role.h:63:			 const struct usb_role_switch_desc *desc);
+src/kernel/include/linux/usb/role.h:64:void usb_role_switch_unregister(struct usb_role_switch *sw);
+src/kernel/include/linux/usb/role.h:66:void usb_role_switch_set_drvdata(struct usb_role_switch *sw, void *data);
+src/kernel/include/linux/usb/role.h:67:void *usb_role_switch_get_drvdata(struct usb_role_switch *sw);
+src/kernel/include/linux/usb/role.h:70:static inline int usb_role_switch_set_role(struct usb_role_switch *sw,
+src/kernel/include/linux/usb/role.h:76:static inline enum usb_role usb_role_switch_get_role(struct usb_role_switch *sw)
+src/kernel/include/linux/usb/role.h:81:static inline struct usb_role_switch *usb_role_switch_get(struct device *dev)
+src/kernel/include/linux/usb/role.h:86:static inline struct usb_role_switch *
+src/kernel/include/linux/usb/role.h:87:fwnode_usb_role_switch_get(struct fwnode_handle *node)
+src/kernel/include/linux/usb/role.h:92:static inline void usb_role_switch_put(struct usb_role_switch *sw) { }
+src/kernel/include/linux/usb/role.h:94:static inline struct usb_role_switch *
+src/kernel/include/linux/usb/role.h:100:static inline struct usb_role_switch *
+src/kernel/include/linux/usb/role.h:102:			 const struct usb_role_switch_desc *desc)
+src/kernel/include/linux/usb/role.h:107:static inline void usb_role_switch_unregister(struct usb_role_switch *sw) { }
+src/kernel/include/linux/usb/role.h:110:usb_role_switch_set_drvdata(struct usb_role_switch *sw, void *data)
+src/kernel/include/linux/usb/role.h:114:static inline void *usb_role_switch_get_drvdata(struct usb_role_switch *sw)
+src/kernel/drivers/usb/cdns3/core.c:341:static enum usb_role cdns_role_get(struct usb_role_switch *sw)
+src/kernel/drivers/usb/cdns3/core.c:343:	struct cdns *cdns = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/cdns3/core.c:357:static int cdns_role_set(struct usb_role_switch *sw, enum usb_role role)
+src/kernel/drivers/usb/cdns3/core.c:359:	struct cdns *cdns = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/cdns3/core.c:440:		struct usb_role_switch_desc sw_desc = { };
+src/kernel/drivers/usb/cdns3/core.h:116:	struct usb_role_switch		*role_sw;
+src/kernel/drivers/usb/chipidea/ci.h:223:	struct usb_role_switch		*role_switch;
+src/kernel/drivers/usb/chipidea/core.c:601:static enum usb_role ci_usb_role_switch_get(struct usb_role_switch *sw)
+src/kernel/drivers/usb/chipidea/core.c:603:	struct ci_hdrc *ci = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/chipidea/core.c:614:static int ci_usb_role_switch_set(struct usb_role_switch *sw,
+src/kernel/drivers/usb/chipidea/core.c:617:	struct ci_hdrc *ci = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/chipidea/core.c:664:static struct usb_role_switch_desc ci_role_switch = {
+src/kernel/drivers/usb/chipidea/core.c:666:	.get = ci_usb_role_switch_get,
+src/kernel/drivers/usb/common/usb-conn-gpio.c:36:	struct usb_role_switch *role_sw;
+src/kernel/drivers/usb/common/usb-conn-gpio.c:104:	ret = usb_role_switch_set_role(info->role_sw, role);
+src/kernel/drivers/usb/common/usb-conn-gpio.c:233:	info->role_sw = usb_role_switch_get(dev);
+src/kernel/drivers/usb/common/usb-conn-gpio.c:286:	usb_role_switch_put(info->role_sw);
+src/kernel/drivers/usb/common/usb-conn-gpio.c:302:	usb_role_switch_put(info->role_sw);
+src/kernel/drivers/usb/dwc2/core.h:1057:	struct usb_role_switch *role_sw;
+src/kernel/drivers/usb/dwc2/drd.c:86:static int dwc2_drd_role_sw_set(struct usb_role_switch *sw, enum usb_role role)
+src/kernel/drivers/usb/dwc2/drd.c:88:	struct dwc2_hsotg *hsotg = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/dwc2/drd.c:183:	struct usb_role_switch_desc role_sw_desc = {0};
+src/kernel/drivers/usb/dwc2/drd.c:184:	struct usb_role_switch *role_sw;
+src/kernel/drivers/usb/dwc2/drd.c:232:		role = usb_role_switch_get_role(hsotg->role_sw);
+src/kernel/drivers/usb/dwc3/core.h:1202:	struct usb_role_switch	*role_sw;
+src/kernel/drivers/usb/dwc3/drd.c:465:static int dwc3_usb_role_switch_set(struct usb_role_switch *sw,
+src/kernel/drivers/usb/dwc3/drd.c:468:	struct dwc3 *dwc = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/dwc3/drd.c:495:static enum usb_role dwc3_usb_role_switch_get(struct usb_role_switch *sw)
+src/kernel/drivers/usb/dwc3/drd.c:497:	struct dwc3 *dwc = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/dwc3/drd.c:525:	struct usb_role_switch_desc dwc3_role_switch = {NULL};
+src/kernel/drivers/usb/dwc3/drd.c:539:	dwc3_role_switch.get = dwc3_usb_role_switch_get;
+src/kernel/drivers/usb/dwc3/dwc3-meson-g12a.c:267:	struct usb_role_switch_desc switch_desc;
+src/kernel/drivers/usb/dwc3/dwc3-meson-g12a.c:268:	struct usb_role_switch	*role_switch;
+src/kernel/drivers/usb/dwc3/dwc3-meson-g12a.c:521:static int dwc3_meson_g12a_role_set(struct usb_role_switch *sw,
+src/kernel/drivers/usb/dwc3/dwc3-meson-g12a.c:524:	struct dwc3_meson_g12a *priv = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/dwc3/dwc3-meson-g12a.c:542:static enum usb_role dwc3_meson_g12a_role_get(struct usb_role_switch *sw)
+src/kernel/drivers/usb/dwc3/dwc3-meson-g12a.c:544:	struct dwc3_meson_g12a *priv = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/gadget/udc/renesas_usb3.c:347:	struct usb_role_switch *role_sw;
+src/kernel/drivers/usb/gadget/udc/renesas_usb3.c:679:	usb_role_switch_set_role(usb3->role_sw, usb3->role);
+src/kernel/drivers/usb/gadget/udc/renesas_usb3.c:2387:static enum usb_role renesas_usb3_role_switch_get(struct usb_role_switch *sw)
+src/kernel/drivers/usb/gadget/udc/renesas_usb3.c:2389:	struct renesas_usb3 *usb3 = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/gadget/udc/renesas_usb3.c:2472:static int renesas_usb3_role_switch_set(struct usb_role_switch *sw,
+src/kernel/drivers/usb/gadget/udc/renesas_usb3.c:2475:	struct renesas_usb3 *usb3 = usb_role_switch_get_drvdata(sw);
+src/kernel/drivers/usb/gadget/udc/renesas_usb3.c:2784:static struct usb_role_switch_desc renesas_usb3_role_switch_desc = {
+src/kernel/drivers/usb/misc/qcom_eud.c:35:	struct usb_role_switch		*role_sw;
+src/kernel/drivers/usb/misc/qcom_eud.c:51:	return usb_role_switch_set_role(priv->role_sw, USB_ROLE_DEVICE);
+src/kernel/drivers/usb/misc/qcom_eud.c:158:		ret = usb_role_switch_set_role(chip->role_sw, USB_ROLE_DEVICE);
+src/kernel/drivers/usb/misc/qcom_eud.c:160:		ret = usb_role_switch_set_role(chip->role_sw, USB_ROLE_HOST);
+src/kernel/drivers/usb/misc/qcom_eud.c:175:	usb_role_switch_put(chip->role_sw);
+src/kernel/drivers/usb/misc/qcom_eud.c:189:	chip->role_sw = usb_role_switch_get(&pdev->dev);
+src/kernel/drivers/usb/mtu3/mtu3.h:217:	struct usb_role_switch *role_sw;
+
+=== TYPE-C API ===
+src/kernel/include/linux/usb/typec.h:249: * struct typec_capability - USB Type-C Port Capabilities
+src/kernel/include/linux/usb/typec.h:264:struct typec_capability {
+src/kernel/include/linux/usb/typec.h:285:struct typec_port *typec_register_port(struct device *parent,
+src/kernel/include/linux/usb/typec.h:286:				       const struct typec_capability *cap);
+src/kernel/include/linux/usb/typec.h:305:void typec_set_data_role(struct typec_port *port, enum typec_data_role role);
+src/kernel/include/linux/usb/typec.h:306:void typec_set_pwr_role(struct typec_port *port, enum typec_role role);
+src/kernel/include/linux/usb/typec.h:308:void typec_set_pwr_opmode(struct typec_port *port, enum typec_pwr_opmode mode);
+src/kernel/include/linux/usb/typec.h:310:int typec_set_orientation(struct typec_port *port,
+src/kernel/include/linux/usb/typec.h:317:int typec_get_fw_cap(struct typec_capability *cap,
+src/kernel/drivers/usb/typec/anx7411.c:254:	struct typec_capability caps;
+src/kernel/drivers/usb/typec/anx7411.c:366:		typec_set_pwr_opmode(ctx->typec.port, mode - 1);
+src/kernel/drivers/usb/typec/anx7411.c:370:	typec_set_pwr_opmode(ctx->typec.port, TYPEC_PWR_MODE_PD);
+src/kernel/drivers/usb/typec/anx7411.c:437:		typec_set_orientation(ctx->typec.port, TYPEC_ORIENTATION_NORMAL);
+src/kernel/drivers/usb/typec/anx7411.c:442:		typec_set_orientation(ctx->typec.port, TYPEC_ORIENTATION_REVERSE);
+src/kernel/drivers/usb/typec/anx7411.c:496:	typec_set_data_role(ctx->typec.port, ctx->typec.data_role);
+src/kernel/drivers/usb/typec/anx7411.c:521:	typec_set_pwr_role(ctx->typec.port, ctx->typec.power_role);
+src/kernel/drivers/usb/typec/anx7411.c:1158:	struct typec_capability *cap = &ctx->typec.caps;
+src/kernel/drivers/usb/typec/anx7411.c:1263:	ctx->typec.port = typec_register_port(dev, cap);
+src/kernel/drivers/usb/typec/class.c:1771: * typec_set_data_role - Report data role change
+src/kernel/drivers/usb/typec/class.c:1777:void typec_set_data_role(struct typec_port *port, enum typec_data_role role)
+src/kernel/drivers/usb/typec/class.c:1797:EXPORT_SYMBOL_GPL(typec_set_data_role);
+src/kernel/drivers/usb/typec/class.c:1800: * typec_set_pwr_role - Report power role change
+src/kernel/drivers/usb/typec/class.c:1806:void typec_set_pwr_role(struct typec_port *port, enum typec_role role)
+src/kernel/drivers/usb/typec/class.c:1815:EXPORT_SYMBOL_GPL(typec_set_pwr_role);
+src/kernel/drivers/usb/typec/class.c:1837: * typec_set_pwr_opmode - Report changed power operation mode
+src/kernel/drivers/usb/typec/class.c:1846:void typec_set_pwr_opmode(struct typec_port *port,
+src/kernel/drivers/usb/typec/class.c:1871:EXPORT_SYMBOL_GPL(typec_set_pwr_opmode);
+src/kernel/drivers/usb/typec/class.c:1951: * typec_set_orientation - Set USB Type-C cable plug orientation
+src/kernel/drivers/usb/typec/class.c:1957:int typec_set_orientation(struct typec_port *port,
+src/kernel/drivers/usb/typec/class.c:1972:EXPORT_SYMBOL_GPL(typec_set_orientation);
+src/kernel/drivers/usb/typec/class.c:2043:int typec_get_fw_cap(struct typec_capability *cap,
+src/kernel/drivers/usb/typec/class.c:2173: * typec_register_port - Register a USB Type-C Port
+src/kernel/drivers/usb/typec/class.c:2181:struct typec_port *typec_register_port(struct device *parent,
+src/kernel/drivers/usb/typec/class.c:2182:				       const struct typec_capability *cap)
+src/kernel/drivers/usb/typec/class.c:2295:EXPORT_SYMBOL_GPL(typec_register_port);
+src/kernel/drivers/usb/typec/class.c:2301: * Unregister device created with typec_register_port().
+src/kernel/drivers/usb/typec/class.h:60:	const struct typec_capability	*cap;
+src/kernel/drivers/usb/typec/hd3ss3220.c:93:	typec_set_data_role(hd3ss3220->port, role);
+src/kernel/drivers/usb/typec/hd3ss3220.c:113:		typec_set_data_role(hd3ss3220->port, TYPEC_HOST);
+src/kernel/drivers/usb/typec/hd3ss3220.c:116:		typec_set_data_role(hd3ss3220->port, TYPEC_DEVICE);
+src/kernel/drivers/usb/typec/hd3ss3220.c:154:	struct typec_capability typec_cap = { };
+src/kernel/drivers/usb/typec/hd3ss3220.c:201:	hd3ss3220->port = typec_register_port(&client->dev, &typec_cap);
+src/kernel/drivers/usb/typec/qcom-pmic-typec.c:80:		typec_set_orientation(qcom_usb->port, orientation);
+src/kernel/drivers/usb/typec/qcom-pmic-typec.c:134:	struct typec_capability cap;
+src/kernel/drivers/usb/typec/qcom-pmic-typec.c:188:	qcom_usb->port = typec_register_port(dev, &cap);
+src/kernel/drivers/usb/typec/rt1719.c:211:	typec_set_data_role(data->port, data_role);
+src/kernel/drivers/usb/typec/rt1719.c:271:	typec_set_pwr_opmode(data->port, pwr_opmode);
+src/kernel/drivers/usb/typec/rt1719.c:297:	typec_set_pwr_opmode(data->port, TYPEC_PWR_MODE_USB);
+src/kernel/drivers/usb/typec/rt1719.c:373:		typec_set_pwr_opmode(data->port, TYPEC_PWR_MODE_PD);
+src/kernel/drivers/usb/typec/rt1719.c:847:	struct typec_capability typec_cap = { };
+src/kernel/drivers/usb/typec/rt1719.c:900:	data->port = typec_register_port(&i2c->dev, &typec_cap);
+src/kernel/drivers/usb/typec/stusb160x.c:156:	struct typec_capability capability;
+src/kernel/drivers/usb/typec/stusb160x.c:341:	typec_set_data_role(chip->port, data_role);
+src/kernel/drivers/usb/typec/stusb160x.c:370:	typec_set_pwr_role(chip->port, STUSB160X_CC_POWER_ROLE(status));
+src/kernel/drivers/usb/typec/stusb160x.c:371:	typec_set_pwr_opmode(chip->port, stusb160x_get_pwr_opmode(chip));
+src/kernel/drivers/usb/typec/stusb160x.c:391:	typec_set_pwr_role(chip->port, STUSB160X_CC_POWER_ROLE(status));
+src/kernel/drivers/usb/typec/stusb160x.c:392:	typec_set_pwr_opmode(chip->port, TYPEC_PWR_MODE_USB);
+src/kernel/drivers/usb/typec/stusb160x.c:738:	chip->port = typec_register_port(chip->dev, &chip->capability);
+src/kernel/drivers/usb/typec/stusb160x.c:748:	typec_set_pwr_opmode(chip->port, chip->pwr_opmode);
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:303:	struct typec_capability typec_caps;
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:947:	ret = typec_set_orientation(port->typec_port, orientation);
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:1085:	typec_set_data_role(port->typec_port, data);
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:1086:	typec_set_pwr_role(port->typec_port, role);
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:1101:	typec_set_pwr_role(port->typec_port, role);
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:4145:		typec_set_pwr_opmode(port->typec_port, opmode);
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:4232:		typec_set_pwr_opmode(port->typec_port, TYPEC_PWR_MODE_PD);
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:4385:		typec_set_pwr_opmode(port->typec_port, opmode);
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:4525:			typec_set_pwr_opmode(port->typec_port,
+src/kernel/drivers/usb/typec/tcpm/tcpm.c:6745:	port->typec_port = typec_register_port(port->dev, &port->typec_caps);
+src/kernel/drivers/usb/typec/tipd/core.c:92:	struct typec_capability typec_cap;
+src/kernel/drivers/usb/typec/tipd/core.c:229:	typec_set_data_role(tps->port, role);
+src/kernel/drivers/usb/typec/tipd/core.c:254:	typec_set_pwr_opmode(tps->port, mode);
+src/kernel/drivers/usb/typec/tipd/core.c:255:	typec_set_pwr_role(tps->port, TPS_STATUS_TO_TYPEC_PORTROLE(status));
+src/kernel/drivers/usb/typec/tipd/core.c:258:		typec_set_orientation(tps->port, TYPEC_ORIENTATION_REVERSE);
+src/kernel/drivers/usb/typec/tipd/core.c:260:		typec_set_orientation(tps->port, TYPEC_ORIENTATION_NORMAL);
+src/kernel/drivers/usb/typec/tipd/core.c:280:	typec_set_pwr_opmode(tps->port, TYPEC_PWR_MODE_USB);
+src/kernel/drivers/usb/typec/tipd/core.c:281:	typec_set_pwr_role(tps->port, TPS_STATUS_TO_TYPEC_PORTROLE(status));
+src/kernel/drivers/usb/typec/tipd/core.c:283:	typec_set_orientation(tps->port, TYPEC_ORIENTATION_NONE);
+src/kernel/drivers/usb/typec/tipd/core.c:404:	typec_set_pwr_role(tps->port, role);
+src/kernel/drivers/usb/typec/tipd/core.c:712:	struct typec_capability typec_cap = { };
+src/kernel/drivers/usb/typec/tipd/core.c:836:	tps->port = typec_register_port(&client->dev, &typec_cap);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:655:		typec_set_pwr_opmode(con->port, TYPEC_PWR_MODE_PD);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:661:		typec_set_pwr_opmode(con->port, TYPEC_PWR_MODE_1_5A);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:665:		typec_set_pwr_opmode(con->port, TYPEC_PWR_MODE_3_0A);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:669:		typec_set_pwr_opmode(con->port, TYPEC_PWR_MODE_USB);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:732:		typec_set_data_role(con->port, TYPEC_HOST);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:736:		typec_set_data_role(con->port, TYPEC_DEVICE);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:808:		typec_set_pwr_role(con->port, role);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:817:		typec_set_pwr_role(con->port, role);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:1088:	struct typec_capability *cap = &con->typec_cap;
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:1159:	con->port = typec_register_port(ucsi->dev, cap);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:1189:		typec_set_data_role(con->port, TYPEC_HOST);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:1193:		typec_set_data_role(con->port, TYPEC_DEVICE);
+src/kernel/drivers/usb/typec/ucsi/ucsi.c:1201:		typec_set_pwr_role(con->port,
+src/kernel/drivers/usb/typec/ucsi/ucsi.h:337:	struct typec_capability typec_cap;
+src/kernel/drivers/usb/typec/wusb3801.c:87:	struct typec_capability	cap;
+src/kernel/drivers/usb/typec/wusb3801.c:285:		typec_set_data_role(port, data_role);
+src/kernel/drivers/usb/typec/wusb3801.c:286:		typec_set_pwr_role(port, pwr_role);
+src/kernel/drivers/usb/typec/wusb3801.c:290:	typec_set_pwr_opmode(wusb3801->port,
+src/kernel/drivers/usb/typec/wusb3801.c:294:	typec_set_orientation(wusb3801->port,
+
+=== REGMAP/I2C ===
+src/kernel/drivers/usb/typec/anx7411.c:1533:	ret = devm_request_threaded_irq(dev, plat->intp_irq,
+src/kernel/drivers/usb/typec/hd3ss3220.c:168:	hd3ss3220->regmap = devm_regmap_init_i2c(client, &config);
+src/kernel/drivers/usb/typec/hd3ss3220.c:221:		ret = devm_request_threaded_irq(&client->dev, client->irq, NULL,
+src/kernel/drivers/usb/typec/qcom-pmic-typec.c:207:	ret = devm_request_threaded_irq(qcom_usb->dev, irq, NULL,
+src/kernel/drivers/usb/typec/rt1719.c:650:	return devm_request_threaded_irq(&i2c->dev, i2c->irq, NULL,
+src/kernel/drivers/usb/typec/rt1719.c:857:	data->regmap = devm_regmap_init_i2c(i2c, &rt1719_regmap_config);
+src/kernel/drivers/usb/typec/stusb160x.c:452:	ret = devm_request_threaded_irq(chip->dev, irq, NULL,
+src/kernel/drivers/usb/typec/stusb160x.c:650:	chip->regmap = devm_regmap_init_i2c(client, regmap_config);
+src/kernel/drivers/usb/typec/wusb3801.c:338:	wusb3801->regmap = devm_regmap_init_i2c(client, &config);
+
+=== C20E DWC3 ===
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1218-&usbdrd30 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1219-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1220-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1221-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts:1222:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1223-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1224-	dr_mode = "otg";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1225-	maximum-speed = "high-speed";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1226-	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1227-	phy-names = "usb2-phy";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1228-	snps,dis_u2_susphy_quirk;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1229-	snps,usb2-lpm-disable;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1230-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1231-	usb-role-switch;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1232-	port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1233-		#address-cells = <1>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1234-		#size-cells = <0>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1235-		dwc3_role_switch: endpoint@0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1236-			reg = <0>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1237-			remote-endpoint = <&usbc0_role_sw>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1238-		};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1239-	};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts-1240-};
+--
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-884-&usbdrd30 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-885-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-886-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-887-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi:888:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-889-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-890-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-891-	dr_mode = "otg";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-892-	maximum-speed = "high-speed";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-893-	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-894-	phy-names = "usb2-phy";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-895-	snps,dis_u2_susphy_quirk;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-896-	snps,usb2-lpm-disable;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-897-	usb-role-switch;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-898-	port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-899-		#address-cells = <1>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-900-		#size-cells = <0>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-901-		dwc3_role_switch: endpoint@0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-902-			reg = <0>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-903-			remote-endpoint = <&usbc0_role_sw>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-904-		};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-905-	};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi-906-};
+--
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-494-&usbdrd30 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-495-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-496-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-497-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi:498:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-499-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-500-	dr_mode = "otg";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-501-	extcon = <&u2phy>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-502-	maximum-speed = "high-speed";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-503-	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-504-	phy-names = "usb2-phy";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-505-	snps,dis_u2_susphy_quirk;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-506-	snps,usb2-lpm-disable;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-507-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-508-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-509-&vcc3v3_lcd_n {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-510-	gpio = <&gpio0 RK_PC3 GPIO_ACTIVE_HIGH>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-511-	enable-active-high;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-512-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-513-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-514-&video_phy {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-515-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi-516-};
+--
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-592-&usbdrd30 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-593-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-594-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-595-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi:596:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-597-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-598-	dr_mode = "otg";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-599-	extcon = <&u2phy>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-600-	snps,dis_u2_susphy_quirk;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-601-	snps,usb2-lpm-disable;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-602-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-603-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-604-&video_phy {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-605-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-606-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-607-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-608-&vop {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-609-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-610-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-611-
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-612-&vop_mmu {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-613-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi-614-};
+--
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562j-core-ddr4-v10.dts-452-&usbdrd30 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562j-core-ddr4-v10.dts-453-	status = "okay";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562j-core-ddr4-v10.dts-454-};
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562j-core-ddr4-v10.dts-455-

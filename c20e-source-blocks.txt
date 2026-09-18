@@ -1,0 +1,163 @@
+
+====================================================================================================
+CURRENT PANFROST: SEEKWAVE
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts
+
+	seekwcn_boot: seekwcn_boot {
+		compatible = "seekwave,sv6160";
+		dma_type = <1>;
+		status = "disabled";
+		gpio_host_wake = <&gpio0 RK_PB4 GPIO_ACTIVE_LOW>;
+		gpio_chip_wake = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
+		gpio_chip_en = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
+	};
+
+====================================================================================================
+CURRENT PANFROST: WIRELESS WLAN
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts
+
+	wireless-wlan {
+		compatible = "wlan-platdata";
+		rockchip,grf = <&sys_grf>;
+		wifi_chip_type = "sv6160";
+		pinctrl-names = "default";
+		pinctrl-0 = <&wifi_host_wake_irq>;
+		WIFI,host_wake_irq = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
+		WIFI,poweren_gpio = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
+		WIFI,vbat_gpio = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
+		status = "disabled";
+	};
+
+====================================================================================================
+CURRENT PANFROST: USB2 OTG PHY
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts
+
+&u2phy_otg {
+	status = "okay";
+	vbus-supply = <&otg_switch>;
+};
+
+====================================================================================================
+CURRENT PANFROST: DWC3
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts
+
+&usbdrd_dwc3 {
+	dr_mode = "otg";
+	status = "okay";
+	maximum-speed = "high-speed";
+	phys = <&u2phy_otg>;
+	phy-names = "usb2-phy";
+	snps,dis_u2_susphy_quirk;
+	snps,usb2-lpm-disable;
+	extcon = <&u2phy>;
+};
+
+====================================================================================================
+RK3562 CAMERA: DW9714
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi
+
+	dw9714: dw9714@c {
+		compatible = "dongwoon,dw9714";
+		status = "disabled";
+		reg = <0x0c>;
+		avdd-supply = <&vcc1v8_dvp>;
+		xsd-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,vcm-start-current = <5>;
+		rockchip,vcm-rated-current = <90>;
+		rockchip,vcm-step-mode = <5>;
+	};
+
+====================================================================================================
+RK3562 CAMERA: OV5648
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi
+
+	ov5648: ov5648@35 {
+		status = "disabled";
+		compatible = "ovti,ov5648";
+		reg = <0x35>;
+		clocks = <&cru CLK_CAM0_OUT2IO>;
+		clock-names = "xvclk";
+		pwdn-gpios = <&gpio3 RK_PC0 GPIO_ACTIVE_HIGH>;
+		avdd-supply = <&vcc_mipipwr>;
+		dovdd-supply = <&vcc1v8_dvp>;
+		dvdd-supply = <&vcc1v2_dvp>;
+		rockchip,camera-module-index = <1>;
+		rockchip,camera-module-facing = "front";
+		rockchip,camera-module-name = "HS5885-BNSM1018-V01";
+		rockchip,camera-module-lens-name = "default";
+
+		port {
+			ov5648_out0: endpoint {
+				remote-endpoint = <&mipi_in_ov5648>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+====================================================================================================
+RK3562 CAMERA: OV5648 CSI ENDPOINT
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi
+
+			mipi_in_ov5648: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&ov5648_out0>;
+				data-lanes = <1 2>;
+			};
+
+====================================================================================================
+ROCKCHIP GC02M1 REFERENCE
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi
+
+	gc02m1: gc02m1@37 {
+		status = "okay";
+		compatible = "galaxycore,gc02m1";
+		reg = <0x37>;
+		clocks = <&cru CLK_MIPI_CAMERAOUT_M1>;
+		clock-names = "xvclk";
+		pinctrl-names = "default";
+		pinctrl-0 = <&cam_clk1m0_clk1>;
+		pwdn-gpios = <&gpio3 RK_PD3 GPIO_ACTIVE_LOW>;
+		reset-gpios = <&gpio3 RK_PB0 GPIO_ACTIVE_HIGH>;
+		avdd-supply = <&vcc_mipipwr>;
+		//dovdd-supply = <&vcc_1v8_cam>;
+		//dvdd-supply = <&vcc1v2_dvp>;
+		dvdd-supply = <&vcc_1v2_cam>;
+		rockchip,camera-module-index = <2>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "KYT-8789-V10";
+		rockchip,camera-module-lens-name = "default";
+		port {
+			gc02m1_out: endpoint {
+				remote-endpoint = <&mipi_in_gc02m1>;
+				data-lanes = <1>;
+			};
+		};
+	};
+
+====================================================================================================
+ROCKCHIP GC02M1 CSI REFERENCE
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi
+
+			mipi_in_gc02m1: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&gc02m1_out>;
+				data-lanes = <1>;
+			};
+
+====================================================================================================
+HYNETEK HUSB311 REFERENCE
+====================================================================================================
+FILE: src/kernel/arch/arm64/boot/dts/rockchip/rk3576-tablet.dtsi
+
+NODE NOT FOUND

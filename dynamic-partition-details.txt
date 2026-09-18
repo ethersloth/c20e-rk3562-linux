@@ -1,0 +1,69 @@
+=== SLOT ===
+_a
+
+
+=== SUPER PROPERTIES ===
+[ro.boot.dynamic_partitions]: [true]
+[ro.boot.slot_suffix]: [_a]
+
+=== DM DEVICES ===
+dm-0  <restricted>
+dm-1  <restricted>
+dm-10  <restricted>
+dm-11  <restricted>
+dm-12  <restricted>
+dm-13  <restricted>
+dm-14  <restricted>
+dm-15  <restricted>
+dm-18  <restricted>
+dm-2  <restricted>
+dm-20  <restricted>
+dm-21  <restricted>
+dm-23  <restricted>
+dm-24  <restricted>
+dm-25  <restricted>
+dm-27  <restricted>
+dm-29  <restricted>
+dm-3  <restricted>
+dm-31  <restricted>
+dm-33  <restricted>
+dm-34  <restricted>
+dm-35  <restricted>
+dm-36  <restricted>
+dm-37  <restricted>
+dm-38  <restricted>
+dm-39  <restricted>
+dm-4  <restricted>
+dm-40  <restricted>
+dm-42  <restricted>
+dm-45  <restricted>
+dm-47  <restricted>
+dm-49  <restricted>
+dm-5  <restricted>
+dm-50  <restricted>
+dm-51  <restricted>
+dm-52  <restricted>
+dm-53  <restricted>
+dm-6  <restricted>
+dm-7  <restricted>
+dm-8  <restricted>
+dm-9  <restricted>
+
+=== SYSTEM_DLKM MAPPER ===
+lrwxrwxrwx 1 root root 15 2026-09-16 15:43 /dev/block/mapper/system_dlkm_a -> /dev/block/dm-4
+
+=== SUPER DEVICE ===
+lrwxrwxrwx 1 root root 21 2026-09-16 15:43 /dev/block/by-name/super -> /dev/block/mmcblk2p24
+
+=== LP TOOLS ===
+lpdump     /system/bin/lpdump
+lpunpack   NOT-FOUND
+dmctl      /system/bin/dmctl
+dmsetup    NOT-FOUND
+
+=== DMCTL INFO ===
+09-16 15:45:15.702  3983  3983 E dmctl   : dm.cpp:54 Failed to open device-mapper: Permission denied
+09-16 15:45:15.703  3983  3983 E dmctl   : dm.cpp:457 DM_LIST_DEVICES failed: Bad file descriptor
+Failed to read available device mapper devices
+
+=== SUPER/LP STRINGS FROM PROC CMDLINE/BOOTCONFIG ===

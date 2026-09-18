@@ -1,0 +1,59 @@
+=== MODULE SYSFS ===
+total 0
+drwxr-xr-x   6 root root    0 2026-09-16 15:09 .
+drwxr-xr-x 408 root root    0 2026-09-16 15:09 ..
+-r--r--r--   1 root root 4096 2026-09-16 15:10 coresize
+drwxr-xr-x   2 root root    0 2026-09-16 15:10 drivers
+drwxr-xr-x   2 root root    0 2026-09-16 15:10 holders
+-r--r--r--   1 root root 4096 2026-09-16 15:10 initsize
+-r--r--r--   1 root root 4096 2026-09-16 15:10 initstate
+drwxr-xr-x   2 root root    0 2026-09-16 15:10 notes
+-r--r--r--   1 root root 4096 2026-09-16 15:10 refcnt
+drwxr-xr-x   2 root root    0 2026-09-16 15:10 sections
+-r--r--r--   1 root root 4096 2026-09-16 15:10 taint
+--w-------   1 root root 4096 2026-09-16 15:10 uevent
+
+=== MODULE SECTIONS ===
+total 0
+drwxr-xr-x 2 root root  0 2026-09-16 15:10 .
+drwxr-xr-x 6 root root  0 2026-09-16 15:09 ..
+-r-------- 1 root root 19 2026-09-16 15:10 .bss
+-r-------- 1 root root 19 2026-09-16 15:10 .data
+-r-------- 1 root root 19 2026-09-16 15:10 .exit.data
+-r-------- 1 root root 19 2026-09-16 15:10 .exit.text
+-r-------- 1 root root 19 2026-09-16 15:10 .gnu.linkonce.this_module
+-r-------- 1 root root 19 2026-09-16 15:10 .init.data
+-r-------- 1 root root 19 2026-09-16 15:10 .init.eh_frame
+-r-------- 1 root root 19 2026-09-16 15:10 .init.plt
+-r-------- 1 root root 19 2026-09-16 15:10 .init.text
+-r-------- 1 root root 19 2026-09-16 15:10 .note.Linux
+-r-------- 1 root root 19 2026-09-16 15:10 .note.gnu.build-id
+-r-------- 1 root root 19 2026-09-16 15:10 .note.gnu.property
+-r-------- 1 root root 19 2026-09-16 15:10 .plt
+-r-------- 1 root root 19 2026-09-16 15:10 .rodata
+-r-------- 1 root root 19 2026-09-16 15:10 .rodata.str1.1
+-r-------- 1 root root 19 2026-09-16 15:10 .strtab
+-r-------- 1 root root 19 2026-09-16 15:10 .symtab
+-r-------- 1 root root 19 2026-09-16 15:10 .text
+-r-------- 1 root root 19 2026-09-16 15:10 .text.ftrace_trampoline
+
+=== MODULE PARAMETERS ===
+ls: /sys/module/tcpc_husb320/parameters: No such file or directory
+
+=== HOLDERS ===
+total 0
+drwxr-xr-x 2 root root 0 2026-09-16 15:10 .
+drwxr-xr-x 6 root root 0 2026-09-16 15:09 ..
+
+=== REFCOUNT ===
+cat: /sys/module/tcpc_husb320/refcnt: Permission denied
+
+=== TAINT ===
+cat: /sys/module/tcpc_husb320/taint: Permission denied
+
+=== MODULE LIST ENTRY ===
+tcpc_husb320 45056 0 - Live 0x0000000000000000 (E)
+
+=== ALL MODULE FILES MATCHING HUSB/TCPC/TYPEC ===
+
+=== ALL KO FILES WITH HUSB320 STRING ===

@@ -1,0 +1,768 @@
+=== HUSB320 SOURCE ===
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-v10.dts:441:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb1.dtsi:324:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-tablet.dtsi:882:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-test1.dtsi:371:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-test5.dtsi:175:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-evb1.dtsi:259:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-tablet-v10.dts:880:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-ai-box-v10.dts:463:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb10.dtsi:521:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb3-lp5.dtsi:894:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-v11.dtsi:588:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-robotic-evb-v11.dtsi:527:		compatible = "hynetek,husb311";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-x0.dtsi:407:		compatible = "hynetek,husb311";
+
+=== SEEKWAVE / WIFI SOURCE ===
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:193:		wifi_chip_type = "sv6160";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:202:	seekwcn_boot: seekwcn_boot {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:203:		compatible = "seekwave,sv6160";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:206:		gpio_host_wake = <&gpio0 RK_PB4 GPIO_ACTIVE_LOW>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:207:		gpio_chip_wake = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:208:		gpio_chip_en = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:269:	seekwcn_boot:seekwcn_boot {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:270:		compatible = "seekwave,sv6160";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:273:		sv6160_path = "/vendor/bin/sv6160.bin";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:274:		sv6160_dram_path = "/vendor/etc/firmware/RAM_RW_KERNEL_DRAM";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:275:		sv6160_iram_path = "/vendor/etc/firmware/ROM_EXEC_KERNEL_IRAM";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:277:		gpio_host_wake = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>; /* [> CP2AP<] */
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:278:		gpio_chip_wake = <&gpio1 RK_PC7 GPIO_ACTIVE_HIGH>; /* AP2CP */
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:279:		gpio_chip_en = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>; /* CP POWERON */
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:194:		wifi_chip_type = "sv6160";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:203:	seekwcn_boot: seekwcn_boot {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:204:		compatible = "seekwave,sv6160";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:207:		gpio_host_wake = <&gpio0 RK_PB4 GPIO_ACTIVE_LOW>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:208:		gpio_chip_wake = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:209:		gpio_chip_en = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
+
+=== CAMERA SOURCE ===
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-cam.dtsi:58:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-cam.dtsi:59:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-cam.dtsi:86:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-cam.dtsi:105:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-cam.dtsi:106:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-cam.dtsi:129:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-cam.dtsi:152:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-cam.dtsi:165:	dw9714_1: dw9714_1@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-cam.dtsi:166:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-cam.dtsi:189:		lens-focus = <&dw9714_1>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-cam.dtsi:212:		lens-focus = <&dw9714_1>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10-dual-camera.dts:87:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10-dual-camera.dts:88:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10-dual-camera.dts:112:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi:105:			mipi_in_ov5648: endpoint@1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi:107:				remote-endpoint = <&ov5648_out0>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi:155:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi:156:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi:221:	ov5648: ov5648@35 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi:223:		compatible = "ovti,ov5648";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi:237:			ov5648_out0: endpoint {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-camera.dtsi:238:				remote-endpoint = <&mipi_in_ov5648>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10.dtsi:259:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10.dtsi:260:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10.dtsi:287:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10.dtsi:337:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb3-ddr3-v10.dtsi:199:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb3-ddr3-v10.dtsi:200:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb3-ddr3-v10.dtsi:254:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb3-ddr3-v10.dtsi:278:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w103.dts:326:				/*remote-endpoint = <&ov5648_out>;*/
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:226:				remote-endpoint = <&ov5648_out>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:542:	ov5648: ov5648@36 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:544:		compatible = "ovti,ov5648";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:564:			ov5648_out: endpoint {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-k108.dts:840:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-k108.dts:841:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-k108.dts:896:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-v10.dts:767:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-v10.dts:768:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-v10.dts:823:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet.dts:772:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet.dts:773:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet.dts:828:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb1-ddr4-v10.dtsi:273:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb1-ddr4-v10.dtsi:274:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb1-ddr4-v10.dtsi:300:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb1-ddr4-v10.dtsi:344:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb5-ddr4-v10.dtsi:304:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb5-ddr4-v10.dtsi:305:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb5-ddr4-v10.dtsi:331:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb5-ddr4-v10.dtsi:375:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb6-ddr3-v10.dtsi:141:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb6-ddr3-v10.dtsi:142:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb6-ddr3-v10.dtsi:190:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb6-ddr3-v10.dtsi:213:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:74:			mipi_in_gc02m1: endpoint@1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:76:				remote-endpoint = <&gc02m1_out>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:128:	gc02m1: gc02m1@37 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:130:		compatible = "galaxycore,gc02m1";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:147:			gc02m1_out: endpoint {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:148:				remote-endpoint = <&mipi_in_gc02m1>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:160:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:161:		compatible = "dongwoon,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-camera.dtsi:216:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-imx258.dtsi:39:	dw9714: dw9714@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-imx258.dtsi:40:		compatible = "silicon touch,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-imx258.dtsi:72:		lens-focus = <&dw9714>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-imx258.dtsi:183:	dw9714_1: dw9714_1@c {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-imx258.dtsi:184:		compatible = "silicon touch,dw9714";
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-imx258.dtsi:216:		lens-focus = <&dw9714_1>;
+
+=== USB PHY SOURCE ===
+src/kernel/arch/arm64/boot/dts/rockchip/px30-ad-d6-anx6345.dts:499:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-ad-r35-mb.dtsi:465:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-engicam-common.dtsi:109:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-lvds-v10.dts:619:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-robot-linux.dts:561:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-robot-no-gpu-linux.dts:561:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10.dtsi:741:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb.dts:606:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-z7-a0-rk618-dsi.dts:714:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30.dtsi:1294:			u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/px30.dtsi:1355:		phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk1808-evb.dtsi:563:	/* Disable usbdrd_dwc3 and usbdrd3 if using pcie0 */
+src/kernel/arch/arm64/boot/dts/rockchip/rk1808-evb.dtsi:622:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk1808-evb.dtsi:640:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk1808.dtsi:372:		usbdrd_dwc3: dwc3@fd000000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk1808.dtsi:377:			phys = <&u2phy_otg>, <&combphy PHY_TYPE_USB3>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk1808.dtsi:457:			u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-ai-va-v10.dts:685:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-v10.dtsi:764:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-v11.dtsi:831:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-partybox-coreboard-demo.dtsi:181:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts:277:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308.dtsi:484:			u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308.dtsi:1246:		phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308b-evb-v10.dtsi:776:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3318-a95x-z2.dts:344:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-863-lp3-v10.dtsi:714:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-86v-v10.dts:714:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-ai-va-v10.dts:1188:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-ai-va-v11-i2s-dmic.dts:1209:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-ai-va-v11.dts:1196:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-ai-va-v12.dts:1196:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-lp3-v10-robot-linux.dts:594:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-lp3-v10-robot-no-gpu-linux.dts:589:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-lp3-v10.dtsi:782:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-odroid-go2.dts:583:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-a1.dts:346:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-box-liantong.dtsi:605:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-evb-android.dtsi:647:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-evb.dts:597:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts:377:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-roc-cc.dts:351:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-rock64-android.dtsi:544:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts:381:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328.dtsi:1353:			u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328.dtsi:1517:		phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3358-evb-ddr3.dtsi:955:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3358m-automotive-ddr3-v11.dtsi:681:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3358m-vehicle-ddr3.dtsi:980:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-808.dtsi:753:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-sheep.dts:589:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-tablet.dts:1053:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368a-817-tablet-bnd.dts:1010:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368a-817-tablet.dts:1269:	u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-android.dtsi:252:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-box.dtsi:601:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-box.dtsi:611:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-eaidk-610.dts:902:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-eaidk-610.dts:920:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-evb-ind.dtsi:1284:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-evb-ind.dtsi:1297:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-evb.dtsi:506:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-evb.dtsi:515:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-ficus.dts:156:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-ficus.dts:160:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-firefly-android.dts:1027:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-firefly-android.dts:1032:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts:985:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts:990:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-firefly.dts:915:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-firefly.dts:924:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-gru-chromebook.dtsi:548:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-gru.dtsi:666:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-hugsun-x99.dts:744:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-hugsun-x99.dts:753:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-khadas-edge.dtsi:809:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-khadas-edge.dtsi:818:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-kobol-helios64.dts:552:	/* phy for &usbdrd_dwc3_1 */
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-kobol-helios64.dts:568:		/* phy for &usbdrd_dwc3_1 */
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-leez-p710.dts:624:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-leez-p710.dts:633:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-mid-818-android.dts:878:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts:126:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi:723:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi:727:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-orangepi.dts:867:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-orangepi.dts:876:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-pinebook-pro.dts:1089:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-pinebook-pro.dts:1098:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-puma-haikou.dts:233:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-puma.dtsi:551:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-roc-pc-plus.dts:202:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi:816:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-roc-pc.dtsi:824:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock-4c-plus.dts:674:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock-4c-plus.dts:683:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dtsi:768:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4.dtsi:773:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock960-ab.dts:720:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock960-ab.dts:730:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock960.dts:142:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock960.dts:146:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock960.dtsi:645:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock960.dtsi:653:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dtsi:933:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dtsi:942:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-sapphire.dtsi:765:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-sapphire.dtsi:783:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-tve1030g.dtsi:1026:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-tve1205g.dts:993:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-tve1205g.dts:1010:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399.dtsi:482:		usbdrd_dwc3_0: usb@fe800000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399.dtsi:522:		usbdrd_dwc3_1: usb@fe900000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-lp4-v11-linux.dts:1192:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-lp4-v11-linux.dts:1205:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v10-linux.dts:1082:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v10-linux.dts:1095:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v10.dts:954:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v10.dts:967:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v11-linux.dts:1103:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v11-linux.dts:1116:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v11.dts:937:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v11.dts:950:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-npu-evb-v10.dts:109:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-npu-evb-v10.dts:117:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-npu.dtsi:143:		usbdrd_dwc3: dwc3@fd000000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-npu.dtsi:148:			phys = <&u2phy_otg>, <&combphy PHY_TYPE_USB3>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-npu.dtsi:202:			u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-vmarc-som.dtsi:460:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3518-evb.dtsi:599:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3518-evb.dtsi:620:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo.dtsi:447:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo.dtsi:468:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo.dtsi:472:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb.dtsi:632:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb.dtsi:653:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb2-ddr3-v10.dtsi:109:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb2-ddr3-v10.dtsi:110:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb3-lp4x-v10.dtsi:100:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb3-lp4x-v10.dtsi:101:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528.dtsi:648:		usbdrd_dwc3: dwc3@fe500000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528.dtsi:653:			phys = <&u2phy_otg>, <&combphy_pu PHY_TYPE_USB3>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528.dtsi:2406:		u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo.dtsi:152:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-evb.dtsi:273:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538.dtsi:949:			phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538.dtsi:2019:			u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts:1207:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts:1222:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts:1226:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi:860:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi:888:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi:893:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi:475:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi:498:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi:503:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi:580:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-iotest-lp3-v10.dtsi:596:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-project-demo.dtsi:473:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-project-demo.dtsi:487:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-project-demo.dtsi:493:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:919:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:934:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:938:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test1-ddr3-v10.dtsi:387:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test1-ddr3-v10.dtsi:410:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test2-ddr4-v10.dtsi:105:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test2-ddr4-v10.dtsi:113:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test2-ddr4-v10.dtsi:118:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-toybrick.dtsi:486:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-toybrick.dtsi:527:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-toybrick.dtsi:532:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562.dtsi:930:		usbdrd_dwc3: usb@fe500000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562.dtsi:935:			phys = <&u2phy_otg>, <&combphy_pu PHY_TYPE_USB3>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562.dtsi:2640:		u2phy_otg: otg-port {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562j-core-ddr4-v10.dts:404:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562j-core-ddr4-v10.dts:456:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562j-core-ddr4-v10.dts:461:	phys = <&u2phy_otg>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-box.dtsi:426:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w103.dts:1063:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:914:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook.dts:901:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-k108.dts:1243:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-rkg11.dts:1127:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-v10.dts:1154:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet.dts:1165:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566.dtsi:43:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566pro.dtsi:33:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb-rk628-ddr4-v10.dtsi:144:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb.dtsi:1804:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-iotest-ddr3-v10-linux.dts:59:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-iotest-ddr3-v10.dts:34:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-nvr.dtsi:467:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-pcie-ep-lp4x-v10-linux.dts:594:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-toybrick.dtsi:1728:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568.dtsi:470:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568m-serdes-evb-lp4x-v10-camera.dtsi:165:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568m-serdes-evb-lp4x-v10.dtsi:181:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568m-serdes-v1-evb-lp4x-v10.dtsi:264:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk356x.dtsi:596:		usbdrd_dwc3: usb@fcc00000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb-aibox.dtsi:571:	rockchip,dis-u2-susphy;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle-evb-v20.dtsi:372:	rockchip,dis-u2-susphy;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle-evb.dtsi:435:	rockchip,dis-u2-susphy;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-ai-box-v10.dts:931:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb.dtsi:1227:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb.dtsi:1244:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb1-lp4-v10-ipc-6x-linux.dts:178:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb1-lp4.dtsi:804:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb10.dtsi:973:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb2-lp4.dtsi:572:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb3-lp5.dtsi:1257:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb4-lp4.dtsi:511:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb5-lp4.dtsi:287:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb6-lp4.dtsi:534:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-lp4.dtsi:882:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-lp4.dtsi:888:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-v11.dtsi:961:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-nvr-demo-v10-android.dts:104:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-nvr-demo-v10-ipc-4x-linux.dts:171:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-nvr-demo.dtsi:820:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-nvr-demo.dtsi:825:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-nvr-demo1-v21.dtsi:186:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-pc.dtsi:314:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-pcie-ep-demo.dtsi:584:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-robotic-evb-v11.dtsi:937:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-robotic-v11.dtsi:1165:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-robotic-v11.dtsi:1182:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-edp-x0.dtsi:784:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-x0.dtsi:763:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick.dtsi:1191:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick.dtsi:1208:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca-android.dts:970:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca.dtsi:447:	rockchip,dis-u2-susphy;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca.dtsi:490:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca.dtsi:501:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb-linux.dts:948:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb.dtsi:363:	rockchip,dis-u2-susphy;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb.dtsi:406:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb.dtsi:417:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v20.dtsi:352:	rockchip,dis-u2-susphy;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v20.dtsi:395:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v20.dtsi:406:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v21.dtsi:372:	rockchip,dis-u2-susphy;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v21.dtsi:415:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v21.dtsi:426:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v22.dts:594:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v23.dts:886:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb.dtsi:664:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb.dtsi:671:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-s66-v10.dtsi:240:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-s66-v10.dtsi:247:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-s66.dtsi:368:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-s66.dtsi:386:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-v20.dtsi:394:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-v20.dtsi:411:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle.dtsi:479:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle.dtsi:496:&usbdrd_dwc3_1 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588.dtsi:38:		usbdrd_dwc3_1: usb@fc400000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb.dtsi:1105:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb1-lp4x.dtsi:830:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb2-lp5.dtsi:982:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb3-lp4x.dtsi:384:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb4-lp4x.dtsi:963:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb8-lp4x.dtsi:791:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-rk806-single.dtsi:1631:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-single.dtsi:1348:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet.dtsi:1271:&usbdrd_dwc3_0 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s.dtsi:3340:		usbdrd_dwc3_0: usb@fc000000 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:907:&u2phy_otg {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:922:&usbdrd_dwc3 {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:926:	phys = <&u2phy_otg>;
+
+=== GPIO DEFINITIONS / PINCTRL ===
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-lvds-v10.dts:168:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-robot-linux.dts:99:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10-robot-no-gpu-linux.dts:99:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/px30-evb-ddr3-v10.dtsi:157:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk1808-evb.dtsi:204:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk1808-evb.dtsi:686:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-ai-va-v10.dts:199:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-ai-va-v10.dts:629:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-audio-v10.dtsi:10:	/delete-node/ wireless-wlan;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-audio-v10.dtsi:15:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-v10.dtsi:256:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-v11.dtsi:272:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-v11.dtsi:810:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-v13.dtsi:13:	/delete-node/ wireless-wlan;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308-evb-v13.dtsi:14:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308b-evb-v10.dtsi:242:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308b-evb-v10.dtsi:705:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308bs-evb-v11.dtsi:15:	/delete-node/ wireless-wlan;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3308bs-evb-v11.dtsi:37:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-863-lp3-v10.dtsi:122:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-ai-va-v10.dts:187:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-ai-va-v11-i2s-dmic.dts:197:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-ai-va-v11.dts:187:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-ai-va-v12.dts:187:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-lp3-v10-robot-linux.dts:92:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-lp3-v10-robot-no-gpu-linux.dts:92:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3326-evb-lp3-v10.dtsi:140:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-box-liantong.dtsi:181:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-evb-android.dtsi:144:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3328-evb.dts:131:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3358-evb-ddr3.dtsi:166:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3358m-vehicle-ddr3.dtsi:217:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-808.dtsi:243:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-p9.dtsi:126:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-px5-evb-android.dts:195:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-r88-dcdc.dts:130:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-tablet.dts:160:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368-xikp.dtsi:133:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368a-817-tablet-bnd.dts:140:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3368a-817-tablet.dts:141:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-box.dtsi:123:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-evb-ind.dtsi:172:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-evb.dtsi:203:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-excavator-sapphire.dtsi:78:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-firefly-android.dts:344:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts:282:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-mid-818-android.dts:237:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-rock960-ab.dts:156:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-tve1030g.dtsi:182:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-tve1205g.dts:244:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399-videostrong-linux.dts:130:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-lp4-v11-linux.dts:238:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v10-linux.dts:223:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v10.dts:223:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v11-linux.dts:238:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3399pro-evb-v11.dts:225:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3518-evb1-ddr4-v10.dtsi:39:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3518-evb1-ddr4-v10.dtsi:44:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3518-evb1-ddr4-v10.dtsi:98:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3518-evb1-ddr4-v10.dtsi:99:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo1-lp4-v10.dtsi:36:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo1-lp4-v10.dtsi:41:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo1-lp4-v10.dtsi:78:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo1-lp4-v10.dtsi:79:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo4-ddr4-v10.dtsi:35:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo4-ddr4-v10.dtsi:40:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo4-ddr4-v10.dtsi:77:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo4-ddr4-v10.dtsi:78:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo6-ddr3-v10.dtsi:67:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo6-ddr3-v10.dtsi:72:		pinctrl-0 = <&wifi_host_wake_irq >;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo6-ddr3-v10.dtsi:262:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-demo6-ddr3-v10.dtsi:263:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb1-ddr4-v10.dtsi:39:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb1-ddr4-v10.dtsi:44:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb1-ddr4-v10.dtsi:129:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb1-ddr4-v10.dtsi:130:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb2-ddr3-v10.dtsi:68:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb2-ddr3-v10.dtsi:73:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb2-ddr3-v10.dtsi:128:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb2-ddr3-v10.dtsi:129:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb3-lp4x-v10.dtsi:69:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb3-lp4x-v10.dtsi:74:		pinctrl-0 = <&wifi_enable &wifi_host_wake_irq &clkm0_32k_out>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb3-lp4x-v10.dtsi:109:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3528-evb3-lp4x-v10.dtsi:118:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo1-v10.dtsi:116:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo1-v10.dtsi:120:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo1-v10.dtsi:155:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo1-v10.dtsi:156:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo2-v10.dtsi:123:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo2-v10.dtsi:127:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo2-v10.dtsi:292:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo2-v10.dtsi:293:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo3-v10.dtsi:155:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo3-v10.dtsi:159:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo3-v10.dtsi:190:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo3-v10.dtsi:191:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo4-v10.dtsi:122:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo4-v10.dtsi:126:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo4-v10.dtsi:291:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-demo4-v10.dtsi:292:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-evb1-ddr4-v10.dtsi:179:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-evb1-ddr4-v10.dtsi:183:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-evb1-ddr4-v10.dtsi:265:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-evb1-ddr4-v10.dtsi:266:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-test1-lp4x-v10.dtsi:56:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-test1-lp4x-v10.dtsi:60:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-test1-lp4x-v10.dtsi:224:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-test1-lp4x-v10.dtsi:225:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-test2-ddr3-v10.dtsi:130:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-test2-ddr3-v10.dtsi:134:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-test2-ddr3-v10.dtsi:177:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3538-test2-ddr3-v10.dtsi:178:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3539-demo2-v10.dtsi:123:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3539-demo2-v10.dtsi:127:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3539-demo2-v10.dtsi:292:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3539-demo2-v10.dtsi:293:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3539-evb1-ddr4-v10.dtsi:179:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3539-evb1-ddr4-v10.dtsi:183:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3539-evb1-ddr4-v10.dtsi:298:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3539-evb1-ddr4-v10.dtsi:299:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts:140:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts:145:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts:1040:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-dictpen-test3-v20.dts:1041:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi:196:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi:201:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi:798:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb1-lp4x-v10.dtsi:799:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi:155:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi:160:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi:293:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-evb2-ddr4-v10.dtsi:294:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-project-demo.dtsi:204:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-project-demo.dtsi:209:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-project-demo.dtsi:417:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-project-demo.dtsi:418:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:190:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:195:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:784:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10.dts:785:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test1-ddr3-v10.dtsi:145:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test1-ddr3-v10.dtsi:150:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test1-ddr3-v10.dtsi:316:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-test1-ddr3-v10.dtsi:317:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-toybrick.dtsi:196:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-toybrick.dtsi:201:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-toybrick.dtsi:411:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-toybrick.dtsi:412:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-box-demo-v10.dtsi:100:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-box-demo-v10.dtsi:105:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-box-demo-v10.dtsi:517:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-box-demo-v10.dtsi:518:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb-mipitest-v10.dtsi:470:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb-mipitest-v10.dtsi:501:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb-mipitest-v10.dtsi:502:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb1-ddr4-v10.dtsi:454:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb1-ddr4-v10.dtsi:483:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb1-ddr4-v10.dtsi:484:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10.dtsi:474:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10.dtsi:475:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10.dtsi:612:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb3-ddr3-v10.dtsi:374:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb3-ddr3-v10.dtsi:375:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb3-ddr3-v10.dtsi:525:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb5-lp4x-v10.dtsi:297:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb5-lp4x-v10.dtsi:324:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-evb5-lp4x-v10.dtsi:325:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w103.dts:194:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w103.dts:199:		pinctrl-0 = <&wifi_vbat &wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w103.dts:894:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w103.dts:899:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:144:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:149:		pinctrl-0 = <&wifi_vbat &wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:763:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook-w6.dts:768:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook.dts:120:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook.dts:125:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook.dts:785:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-ebook.dts:786:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-k108.dts:208:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-k108.dts:213:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-k108.dts:1090:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-k108.dts:1091:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-rkg11.dts:165:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-rkg11.dts:170:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-rkg11.dts:991:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-rkg11.dts:992:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-v10.dts:190:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-v10.dts:195:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-v10.dts:1007:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet-v10.dts:1008:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet.dts:190:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet.dts:195:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet.dts:1017:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566-rk817-tablet.dts:1018:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566pro-evb2-lp4x-v10.dtsi:465:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566pro-evb2-lp4x-v10.dtsi:466:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3566pro-evb2-lp4x-v10.dtsi:602:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3567-evb2-lp4x-v10.dtsi:489:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3567-evb2-lp4x-v10.dtsi:490:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3567-evb2-lp4x-v10.dtsi:626:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb.dtsi:341:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb1-ddr4-v10.dtsi:400:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb1-ddr4-v10.dtsi:401:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb1-ddr4-v10.dtsi:494:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb2-lp4x-v10.dtsi:380:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb2-lp4x-v10.dtsi:381:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb2-lp4x-v10.dtsi:583:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb5-ddr4-v10.dtsi:447:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb5-ddr4-v10.dtsi:448:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb5-ddr4-v10.dtsi:553:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb6-ddr3-v10.dtsi:358:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb6-ddr3-v10.dtsi:359:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-evb6-ddr3-v10.dtsi:440:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-toybrick-sd0.dtsi:471:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-toybrick-sd0.dtsi:596:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-toybrick-sd0.dtsi:597:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-toybrick-x0.dtsi:592:	pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-toybrick-x0.dtsi:714:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-toybrick-x0.dtsi:715:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3568-toybrick.dtsi:361:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-v10.dts:216:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-v10.dts:220:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-v10.dts:863:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-v10.dts:864:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-x3-v10.dts:224:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-x3-v10.dts:228:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-x3-v10.dts:727:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-ebook-x3-v10.dts:728:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb-aibox.dtsi:506:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb-aibox.dtsi:507:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb.dtsi:221:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb.dtsi:225:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb.dtsi:731:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb.dtsi:732:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb1.dtsi:522:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb1.dtsi:523:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb2.dtsi:559:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-evb2.dtsi:560:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-tablet.dtsi:268:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-tablet.dtsi:272:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-tablet.dtsi:1031:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-tablet.dtsi:1032:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-test1.dtsi:554:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-test1.dtsi:555:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-toybrick-d0-linux.dts:251:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-toybrick-d0-linux.dts:255:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-toybrick-d0-linux.dts:1189:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-toybrick-d0-linux.dts:1190:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle-evb-v20.dtsi:339:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle-evb-v20.dtsi:340:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle-evb.dtsi:375:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle-evb.dtsi:376:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle.dtsi:187:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle.dtsi:191:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle.dtsi:352:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576-vehicle.dtsi:353:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-evb.dtsi:221:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-evb.dtsi:225:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-evb.dtsi:714:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-evb.dtsi:715:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-evb1.dtsi:435:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-evb1.dtsi:436:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:272:		pinctrl-0 = <&wifi_host_wake_irq>,<&wifi_chip_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:310:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:314:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:1172:		wifi_host_wake_irq: wifi_host_wake_irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-rk809-tablet-v10.dts:1252:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-tablet-v10.dts:275:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-tablet-v10.dts:279:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-tablet-v10.dts:1029:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3576s-tablet-v10.dts:1030:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-ai-box-v10.dts:234:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-ai-box-v10.dts:238:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-ai-box-v10.dts:727:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-ai-box-v10.dts:728:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb1-lp4.dtsi:230:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb1-lp4.dtsi:234:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb1-lp4.dtsi:709:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb1-lp4.dtsi:710:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb10.dtsi:272:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb10.dtsi:276:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb10.dtsi:857:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb10.dtsi:858:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb2-lp4.dtsi:187:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb2-lp4.dtsi:191:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb2-lp4.dtsi:496:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb2-lp4.dtsi:497:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb3-lp5.dtsi:191:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb3-lp5.dtsi:195:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb3-lp5.dtsi:1166:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb3-lp5.dtsi:1167:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-lp4.dtsi:254:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-lp4.dtsi:258:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-lp4.dtsi:773:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-lp4.dtsi:774:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-v11.dtsi:266:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-v11.dtsi:270:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-v11.dtsi:848:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-evb7-v11.dtsi:849:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-robotic-evb-v11.dtsi:191:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-robotic-evb-v11.dtsi:195:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-robotic-evb-v11.dtsi:783:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-robotic-evb-v11.dtsi:784:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-edp-x0.dtsi:162:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-edp-x0.dtsi:166:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-edp-x0.dtsi:722:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-edp-x0.dtsi:723:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-x0.dtsi:218:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-x0.dtsi:222:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-x0.dtsi:696:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-toybrick-x0.dtsi:697:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca-android.dts:561:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca-android.dts:565:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca-android.dts:830:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca-android.dts:831:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca.dtsi:181:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca.dtsi:185:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca.dtsi:346:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-soca.dtsi:347:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb-linux.dts:561:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb-linux.dts:565:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb-linux.dts:811:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb-linux.dts:812:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb.dtsi:151:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb.dtsi:155:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb.dtsi:297:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-dual-evb-v10-socb.dtsi:298:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v20.dtsi:112:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v20.dtsi:116:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v20.dtsi:270:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v20.dtsi:271:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v21.dtsi:124:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v21.dtsi:128:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v21.dtsi:282:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v21.dtsi:283:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v22.dts:327:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v23.dts:510:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v23.dts:514:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v23.dts:786:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb-v23.dts:787:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb.dtsi:194:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb.dtsi:198:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb.dtsi:550:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-evb.dtsi:551:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588-vehicle-s66-v10.dtsi:84:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb1-lp4x.dtsi:232:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb1-lp4x.dtsi:236:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb1-lp4x.dtsi:638:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb1-lp4x.dtsi:639:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb4-lp4x.dtsi:213:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb4-lp4x.dtsi:217:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb4-lp4x.dtsi:762:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb4-lp4x.dtsi:763:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb8-lp4x.dtsi:215:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb8-lp4x.dtsi:219:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb8-lp4x.dtsi:600:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-evb8-lp4x.dtsi:601:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-rk806-single.dtsi:196:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-rk806-single.dtsi:200:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-rk806-single.dtsi:1505:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-rk806-single.dtsi:1506:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-single.dtsi:312:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-single.dtsi:316:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-single.dtsi:1046:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet-single.dtsi:1047:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet.dtsi:309:	wireless_wlan: wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet.dtsi:313:		pinctrl-0 = <&wifi_host_wake_irq>, <&wifi_poweren_gpio>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet.dtsi:986:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3588s-tablet.dtsi:987:		wifi_host_wake_irq: wifi-host-wake-irq {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126b-evb1-v10.dtsi:121:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126b-evb1-v10.dtsi:436:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126b-evb2-v10.dtsi:221:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126b-evb2-v10.dtsi:405:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126b-evb3-v10.dts:215:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126b-evb3-v10.dts:541:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126b-evb4-v10.dts:124:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126b-evb4-v10.dts:471:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126bp-evb-v14.dtsi:71:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rv1126bp-evb-v14.dtsi:462:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:191:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:196:		pinctrl-0 = <&wifi_host_wake_irq>;
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:772:	wireless-wlan {
+src/kernel/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts:773:		wifi_host_wake_irq: wifi-host-wake-irq {

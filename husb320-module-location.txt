@@ -1,0 +1,40 @@
+=== MODULE UEVENT ===
+cat: /sys/module/tcpc_husb320/uevent: Permission denied
+
+=== MODULE SIZES ===
+coresize:    cat: /sys/module/tcpc_husb320/coresize: Permission denied
+initsize:    cat: /sys/module/tcpc_husb320/initsize: Permission denied
+refcnt:      cat: /sys/module/tcpc_husb320/refcnt: Permission denied
+taint:       cat: /sys/module/tcpc_husb320/taint: Permission denied
+initstate:   cat: /sys/module/tcpc_husb320/initstate: Permission denied
+
+=== MODULE LIST FILE SEARCH ===
+--- /vendor ---
+--- /vendor_dlkm ---
+--- /odm ---
+--- /odm_dlkm ---
+--- /system ---
+--- /system_dlkm ---
+--- /system_ext ---
+
+=== FILE SEARCH ===
+
+=== PROC MODULE NEIGHBORHOOD ===
+180-i2c_gpio 20480 0 - Live 0x0000000000000000 (E)
+181-i2c_rk3x 24576 0 - Live 0x0000000000000000 (E)
+182-i2c_dev 40960 0 - Live 0x0000000000000000 (E)
+183-rtc_rk808 20480 1 - Live 0x0000000000000000 (E)
+184-rtc_hym8563 20480 0 - Live 0x0000000000000000 (E)
+185-rk805_pwrkey 20480 0 - Live 0x0000000000000000 (E)
+186-adc_keys 20480 0 - Live 0x0000000000000000 (E)
+187-usb_f_rndis 36864 2 - Live 0x0000000000000000 (E)
+188:tcpc_husb320 45056 0 - Live 0x0000000000000000 (E)
+189:tcpci_husb311 20480 0 - Live 0x0000000000000000 (E)
+190-fusb302 36864 0 - Live 0x0000000000000000 (E)
+191-trancevibrator 20480 0 - Live 0x0000000000000000 (E)
+192-cdc_wdm 36864 0 - Live 0x0000000000000000 (E)
+193-usblp 40960 0 - Live 0x0000000000000000 (E)
+194-ohci_platform 20480 0 - Live 0x0000000000000000 (E)
+195-ohci_hcd 45056 1 ohci_platform, Live 0x0000000000000000 (E)
+196-dwc2 196608 0 - Live 0x0000000000000000 (E)
+197-phy_rockchip_inno_usb3 28672 0 - Live 0x0000000000000000 (E)
