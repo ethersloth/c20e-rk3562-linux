@@ -1,4 +1,32 @@
-# rkdebian — Debian 13 for Doogee U10 (RK3562)
+# c20e-rk3562-linux
+
+Linux enablement for the C20e RK3562 tablet. Debian 13 is the current development target; Fedora support is planned.
+
+> [!WARNING]
+> C20e support is under active hardware qualification. The upstream Doogee U10 images and release links below are not C20e images and must not be flashed to C20e hardware.
+
+## Current C20e Status
+
+| Feature | Status |
+|---------|--------|
+| Boot and Debian 13 userspace | Working |
+| Display and GSL3673 touch enumeration | Working; manual touch coverage pending |
+| Seekwave EA6621Q/SV6160 Wi-Fi | Working with V5.9r2 hybrid driver |
+| Panfrost GPU | Hardware rendering observed; stability qualification pending |
+| RK817 audio | ALSA playback/capture enumerated; functional tests pending |
+| Battery and charging | Reporting present; kernel/UPower state discrepancy under investigation |
+| Bluetooth | V5.9r3 Bluetooth module built; deployment validation pending |
+| USB-C | HUSB320 Type-C state present; host/device tests pending |
+| Cameras | Sensors/media graph enumerate; end-to-end capture pending |
+| Suspend/resume | Deep sleep advertised; manual qualification pending |
+
+The passive collector is [scripts/qualify-hardware.sh](scripts/qualify-hardware.sh). Potentially destabilizing GPU probes remain disabled unless explicitly requested.
+
+This work builds on [tech4bot/rk3562deb](https://github.com/tech4bot/rk3562deb). Its original Doogee U10 documentation follows for build-system background.
+
+---
+
+## rkdebian — Debian 13 for Doogee U10 (RK3562)
 
 ![Doogee U10 tablet running debian 13](docs/Doogee_U10_debian.jpeg)
 

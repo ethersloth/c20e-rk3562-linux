@@ -20,6 +20,11 @@ c20e-*-20??????-??????/
 c20e-*.tar.gz
 c20e-*.tar.gz.sha256
 
+# Loose tablet qualification copies and reports
+/qualify-hardware.sh
+/qualify-hardware.txt
+/qualification*.txt
+
 # Downloaded/upstream source trees (re-cloned by build scripts)
 src/
 kernel

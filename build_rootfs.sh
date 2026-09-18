@@ -2967,9 +2967,7 @@ Restart=on-failure
 RestartSec=2
 RK_BT_OVERRIDE
 
-mkdir -p "${ROOTFS_MNT}/etc/systemd/system/multi-user.target.wants"
-ln -sf /lib/systemd/system/bluetooth.service \
-    "${ROOTFS_MNT}/etc/systemd/system/multi-user.target.wants/bluetooth.service"
+chroot "${ROOTFS_MNT}" systemctl enable bluetooth.service
 
 # Screen rotation tray icon — manual rotation selector with optional
 # accelerometer auto-rotate.  Replaces the old rk-autorotate.service daemon.
@@ -4175,7 +4173,6 @@ cat > "${ROOTFS_MNT}/etc/systemd/system/rk-power-tune.service" << 'RK_POWER_TUNE
 [Unit]
 Description=RK3562 power tuning (responsive CPU governor, WiFi power-save)
 After=local-fs.target
-Before=display-manager.service
 
 [Service]
 Type=oneshot
