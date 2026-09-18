@@ -65,6 +65,8 @@ Options:
   --cpu-governor VALUE
   --force-clean-rootfs
   --no-force-clean-rootfs
+  --enable-usb-role-manager
+  --disable-usb-role-manager
   -h, --help
 EOF
 }
@@ -118,6 +120,14 @@ parse_args() {
                 RKDEBIAN_FORCE_CLEAN_ROOTFS=0
                 shift
                 ;;
+            --enable-usb-role-manager)
+                RKDEBIAN_ENABLE_USB_ROLE_MANAGER=1
+                shift
+                ;;
+            --disable-usb-role-manager)
+                RKDEBIAN_ENABLE_USB_ROLE_MANAGER=0
+                shift
+                ;;
             -h|--help)
                 usage
                 exit 0
@@ -152,8 +162,9 @@ export RKDEBIAN_UI_SESSION
 export RKDEBIAN_GPU_STACK
 export RKDEBIAN_CPU_GOVERNOR
 export RKDEBIAN_FORCE_CLEAN_ROOTFS
+export RKDEBIAN_ENABLE_USB_ROLE_MANAGER
 
-echo "[*] Build profile: session=${RKDEBIAN_UI_SESSION} gpu=${RKDEBIAN_GPU_STACK} display=${RKDEBIAN_DISPLAY_SERVER} clean_rootfs=${RKDEBIAN_FORCE_CLEAN_ROOTFS}"
+echo "[*] Build profile: session=${RKDEBIAN_UI_SESSION} gpu=${RKDEBIAN_GPU_STACK} display=${RKDEBIAN_DISPLAY_SERVER} clean_rootfs=${RKDEBIAN_FORCE_CLEAN_ROOTFS} usb_role_manager=${RKDEBIAN_ENABLE_USB_ROLE_MANAGER}"
 
 case "${RKDEBIAN_DISPLAY_SERVER}" in
     auto|wayland|x11) ;;
@@ -376,7 +387,7 @@ sanitize_kbuild_cmd_files() {
 }
 
 run_build_rootfs() {
-    local preserve_env="RKDEBIAN_FORCE_CLEAN_ROOTFS,ROOTFS_IMAGE_SIZE,ROOTFS_HEADROOM_MB,ROOTFS_MIN_MB,RKDEBIAN_DISPLAY_SERVER,RKDEBIAN_GPU_STACK,RKDEBIAN_UI_SESSION,RKDEBIAN_CPU_GOVERNOR,RKDEBIAN_PREINSTALL_FREETUBE,RKDEBIAN_MINIMIZE_IMAGE"
+    local preserve_env="RKDEBIAN_FORCE_CLEAN_ROOTFS,ROOTFS_IMAGE_SIZE,ROOTFS_HEADROOM_MB,ROOTFS_MIN_MB,RKDEBIAN_DISPLAY_SERVER,RKDEBIAN_GPU_STACK,RKDEBIAN_UI_SESSION,RKDEBIAN_CPU_GOVERNOR,RKDEBIAN_PREINSTALL_FREETUBE,RKDEBIAN_MINIMIZE_IMAGE,RKDEBIAN_ENABLE_USB_ROLE_MANAGER"
     if [ "${EUID}" -eq 0 ]; then
         bash "${ROOT_DIR}/build_rootfs.sh"
     else
@@ -436,12 +447,19 @@ build_uboot() {
     
     # Store artifacts
     local spl_loader
-    spl_loader=$(ls -1 rk3562_spl_loader_*.bin 2>/dev/null | head -n1 || true)
+
+    # Rockchip's RK3562 SDK may emit the combined SPL+DDR loader as either
+    # rk3562_spl_loader_*.bin or rk3562_loader_*.bin depending on SDK version.
+    spl_loader=$(find . -maxdepth 1 -type f \
+        \( -name 'rk3562_spl_loader_*.bin' -o -name 'rk3562_loader_*.bin' \) \
+        -printf '%f\n' 2>/dev/null | sort | head -n1 || true)
+
     if [ -z "${spl_loader}" ]; then
-        echo "[-] Error: rk3562_spl_loader_*.bin not found in U-Boot output."
+        echo "[-] Error: RK3562 SPL/DDR loader not found in U-Boot output."
         exit 1
     fi
 
+    echo "[*] Using RK3562 loader: ${spl_loader}"
     cp "${spl_loader}" "${OUT_DIR}/idbloader.img"
     cp uboot.img "${OUT_DIR}/u-boot.itb"
     
@@ -526,21 +544,18 @@ build_kernel() {
         fi
     fi
 
-    # RK817 boot SOC OCV calibration fix:
-    # always recalibrate dsoc/cap from PMIC OCV register at boot so the
-    # battery percentage reflects real pack voltage, not stale scratch state.
-    local rk817_boot_ocv_patch="${ROOT_DIR}/overlay/kernel-patches/rk817-boot-ocv-calibration.patch"
-    if [ -f "${rk817_boot_ocv_patch}" ]; then
-        if grep -q "boot OCV calib" drivers/power/supply/rk817_battery.c; then
-            echo "[*] RK817 boot OCV calibration fix already present."
-        else
-            echo "[*] Applying RK817 boot OCV calibration fix..."
-            if ! git apply --whitespace=nowarn "${rk817_boot_ocv_patch}"; then
-                echo "[-] Error: failed to apply RK817 boot OCV calibration fix."
-                exit 1
-            fi
-        fi
-    fi
+    # RK817 boot SOC OCV calibration fix is intentionally disabled for now.
+    #
+    # The current Rockchip develop-6.1 rk817_battery.c does not provide
+    # rk817_bat_get_ocv_voltage() or the OCV_VOL_H/OCV_VOL_L register fields
+    # required by rk817-boot-ocv-calibration.patch.  The older overlay driver
+    # does provide them, but build_kernel() deliberately restores the upstream
+    # RK817 battery driver before applying local fixes.
+    #
+    # Applying the OCV patch therefore produces an uncompilable kernel.
+    # Keep the patch in-tree for a future proper port rather than substituting
+    # rk817_bat_get_sys_voltage(), which is not equivalent to PMIC-latched OCV.
+    echo "[*] Skipping RK817 boot OCV calibration fix (not compatible with current kernel driver)."
 
     # Use the configured defconfig, with a rockchip fallback if needed.
     if [ ! -f "arch/arm64/configs/${KERNEL_DEFCONFIG}" ]; then
@@ -574,6 +589,8 @@ build_kernel() {
         # Enable Rockchip sensor framework before selecting accel drivers.
         scripts/config --enable SENSOR_DEVICE || true
         scripts/config --enable GSENSOR_DEVICE || true
+      # Enable Hynetek HUSB320 USB Type-C controller for C20e USB role detection.
+      scripts/config --enable TYPEC_HUSB320 || true
         scripts/config --enable SKW_LOG_WARN || true
         scripts/config --disable SKW_LOG_DEBUG || true
         scripts/config --disable SKW_LOG_DETAIL || true

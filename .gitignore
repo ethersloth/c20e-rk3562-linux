@@ -12,6 +12,14 @@ prebuilt_rootfs/
 *.log
 uart.log
 
+# C20e local diagnostics, backups, and generated integration snapshots
+c20e-analysis/
+c20e-backup/
+c20e-thirdparty/
+c20e-*-20??????-??????/
+c20e-*.tar.gz
+c20e-*.tar.gz.sha256
+
 # Downloaded/upstream source trees (re-cloned by build scripts)
 src/
 kernel

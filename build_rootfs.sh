@@ -27,6 +27,7 @@ RKDEBIAN_UI_SESSION="${RKDEBIAN_UI_SESSION:-phosh}"
 RKDEBIAN_MALI_GBM_PROVIDER="${RKDEBIAN_MALI_GBM_PROVIDER:-vendor}"
 RKDEBIAN_PREINSTALL_FREETUBE="${RKDEBIAN_PREINSTALL_FREETUBE:-1}"
 RKDEBIAN_MINIMIZE_IMAGE="${RKDEBIAN_MINIMIZE_IMAGE:-0}"
+RKDEBIAN_ENABLE_USB_ROLE_MANAGER="${RKDEBIAN_ENABLE_USB_ROLE_MANAGER:-1}"
 
 case "${RKDEBIAN_DISPLAY_SERVER}" in
     auto|wayland|x11) ;;
@@ -84,8 +85,16 @@ case "${RKDEBIAN_MINIMIZE_IMAGE}" in
         ;;
 esac
 
+case "${RKDEBIAN_ENABLE_USB_ROLE_MANAGER}" in
+    0|1) ;;
+    *)
+        echo "[-] Unsupported RKDEBIAN_ENABLE_USB_ROLE_MANAGER=${RKDEBIAN_ENABLE_USB_ROLE_MANAGER} (expected 0 or 1)."
+        exit 1
+        ;;
+esac
+
 echo "[*] Building Debian 13 Trixie arm64 rootfs..."
-echo "[*] UI session: ${RKDEBIAN_UI_SESSION} | GPU stack: ${RKDEBIAN_GPU_STACK} | mali libgbm: ${RKDEBIAN_MALI_GBM_PROVIDER} | preinstall-freetube: ${RKDEBIAN_PREINSTALL_FREETUBE} | minimize: ${RKDEBIAN_MINIMIZE_IMAGE}"
+echo "[*] UI session: ${RKDEBIAN_UI_SESSION} | GPU stack: ${RKDEBIAN_GPU_STACK} | mali libgbm: ${RKDEBIAN_MALI_GBM_PROVIDER} | preinstall-freetube: ${RKDEBIAN_PREINSTALL_FREETUBE} | minimize: ${RKDEBIAN_MINIMIZE_IMAGE} | usb-role-manager: ${RKDEBIAN_ENABLE_USB_ROLE_MANAGER}"
 
 chroot_cleanup() {
     local mount_path
@@ -1279,6 +1288,7 @@ RKDEBIAN_UI_SESSION=${RKDEBIAN_UI_SESSION}
 RKDEBIAN_DISPLAY_SERVER=${RKDEBIAN_DISPLAY_SERVER}
 RKDEBIAN_GPU_STACK=${RKDEBIAN_GPU_STACK}
 RKDEBIAN_CPU_GOVERNOR=${RKDEBIAN_CPU_GOVERNOR}
+RKDEBIAN_ENABLE_USB_ROLE_MANAGER=${RKDEBIAN_ENABLE_USB_ROLE_MANAGER}
 RKDEBIAN_FORCE_CLEAN_ROOTFS=${RKDEBIAN_FORCE_CLEAN_ROOTFS:-0}
 PROFILE_EOF
 
@@ -4061,9 +4071,15 @@ if [ -f "${ROOT_DIR}/overlay/usb-mode-switch.sh" ] && [ -f "${ROOT_DIR}/overlay/
     cp "${ROOT_DIR}/overlay/usb-mode-switch.sh" "${ROOTFS_MNT}/usr/local/bin/usb-mode-switch.sh"
     chmod +x "${ROOTFS_MNT}/usr/local/bin/usb-mode-switch.sh"
     cp "${ROOT_DIR}/overlay/usb-role-manager.service" "${ROOTFS_MNT}/etc/systemd/system/usb-role-manager.service"
+    chmod 0644 "${ROOTFS_MNT}/etc/systemd/system/usb-role-manager.service"
     # Clean up deprecated services that caused one-sided behavior.
     chroot "${ROOTFS_MNT}" systemctl disable usb-force-host.service usb-otg-host.service >/dev/null 2>&1 || true
-    chroot "${ROOTFS_MNT}" systemctl enable usb-role-manager.service
+    if [ "${RKDEBIAN_ENABLE_USB_ROLE_MANAGER}" = "1" ]; then
+        chroot "${ROOTFS_MNT}" systemctl enable usb-role-manager.service
+    else
+        echo "[*] USB role manager installed but disabled (RKDEBIAN_ENABLE_USB_ROLE_MANAGER=0)."
+        chroot "${ROOTFS_MNT}" systemctl disable usb-role-manager.service >/dev/null 2>&1 || true
+    fi
 fi
 
 # 10b. Front camera ISP setup service (s5k5e8 → rkisp → /dev/video23)
