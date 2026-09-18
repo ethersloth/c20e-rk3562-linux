@@ -6,18 +6,28 @@ BOOT_PARTUUID='f2e4c648-207d-45f0-b5ad-7886f75e57eb'
 COMMAND_TIMEOUT="${C20E_QUALIFY_TIMEOUT:-15}"
 ACTIVE_TESTS="${C20E_QUALIFY_ACTIVE_TESTS:-0}"
 
+# Keep progress visible on the invoking terminal even when report output is piped.
+exec 3>&2
+
 if [[ -n "$OUTPUT" ]]; then
     mkdir -p "$(dirname "$OUTPUT")"
     exec > >(tee "$OUTPUT") 2>&1
 fi
 
+progress() {
+    printf '[%(%H:%M:%S)T] %-7s %s\n' -1 "$1" "$2" >&3
+}
+
 section() {
+    progress SECTION "$1"
     printf '\n===== %s =====\n' "$1"
 }
 
 run() {
     local description="$1"
+    local started=$SECONDS
     shift
+    progress START "$description"
     printf '\n--- %s ---\n' "$description"
     if command -v "$1" >/dev/null 2>&1; then
         if command -v timeout >/dev/null 2>&1; then
@@ -27,11 +37,16 @@ run() {
         fi
         local command_status=$?
         if (( command_status == 124 || command_status == 137 )); then
+            progress TIMEOUT "$description ($((SECONDS - started))s)"
             printf '[WARN] command timed out after %s seconds\n' "$COMMAND_TIMEOUT"
         elif (( command_status != 0 )); then
+            progress FAILED "$description (exit $command_status, $((SECONDS - started))s)"
             printf '[WARN] command exited %d\n' "$command_status"
+        else
+            progress DONE "$description ($((SECONDS - started))s)"
         fi
     else
+        progress SKIP "$description (command not installed: $1)"
         printf '[SKIP] command not installed: %s\n' "$1"
     fi
 }
@@ -40,6 +55,7 @@ active_run() {
     if [[ "$ACTIVE_TESTS" == 1 ]]; then
         run "$@"
     else
+        progress SKIP "$1 (active probe disabled)"
         printf '\n--- %s ---\n' "$1"
         printf '[SKIP] active probe disabled; set C20E_QUALIFY_ACTIVE_TESTS=1 to run\n'
     fi
@@ -51,6 +67,7 @@ show_glob() {
     for path in $1; do
         [[ -e "$path" ]] || continue
         found=1
+        progress INSPECT "$path"
         printf '\n--- %s ---\n' "$path"
         if [[ -d "$path" ]]; then
             find "$path" -maxdepth 1 -mindepth 1 -printf '%f\n' 2>/dev/null | sort
@@ -59,20 +76,27 @@ show_glob() {
         else
             ls -l "$path" 2>/dev/null || printf '[WARN] unable to inspect %s\n' "$path"
         fi
+        progress DONE "$path"
     done
-    (( found )) || printf '[NONE] %s\n' "$1"
+    if (( ! found )); then
+        progress NONE "$1"
+        printf '[NONE] %s\n' "$1"
+    fi
 }
 
 show_active_boot() {
     local device="/dev/disk/by-partuuid/$BOOT_PARTUUID"
     local mountpoint_path
 
+    progress START "Active boot filesystem inspection"
     if [[ ! -e "$device" ]]; then
+        progress FAILED "Active boot filesystem (PARTUUID not present)"
         printf '[WARN] boot PARTUUID %s is not present\n' "$BOOT_PARTUUID"
         return
     fi
     mountpoint_path="$(findmnt -nr -S "$(readlink -f "$device")" -o TARGET 2>/dev/null | head -n 1)"
     if [[ -z "$mountpoint_path" ]]; then
+        progress FAILED "Active boot filesystem (not mounted)"
         printf '[WARN] active boot partition %s is not mounted; hashes unavailable\n' "$device"
         return
     fi
@@ -81,6 +105,7 @@ show_active_boot() {
     sha256sum "$mountpoint_path/Image" "$mountpoint_path/rk3562.dtb" 2>&1 || true
     printf '\n--- extlinux.conf ---\n'
     cat "$mountpoint_path/extlinux/extlinux.conf" 2>&1 || true
+    progress DONE "Active boot filesystem inspection"
 }
 
 printf 'C20e RK3562 hardware qualification report\n'
@@ -183,4 +208,5 @@ cat <<'CHECKLIST'
 [ ] several-hour stability run with Wi-Fi traffic and charging
 CHECKLIST
 
+progress COMPLETE 'Hardware qualification report'
 printf '\nReport complete. Review [WARN], [SKIP], [NONE], and manual checks above.\n'
