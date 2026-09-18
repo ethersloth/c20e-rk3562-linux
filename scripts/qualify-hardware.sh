@@ -21,12 +21,12 @@ run() {
     printf '\n--- %s ---\n' "$description"
     if command -v "$1" >/dev/null 2>&1; then
         if command -v timeout >/dev/null 2>&1; then
-            timeout --foreground --kill-after=2s "${COMMAND_TIMEOUT}s" "$@" 2>&1
+            timeout --kill-after=2s "${COMMAND_TIMEOUT}s" "$@" </dev/null 2>&1
         else
-            "$@" 2>&1
+            "$@" </dev/null 2>&1
         fi
         local command_status=$?
-        if (( command_status == 124 )); then
+        if (( command_status == 124 || command_status == 137 )); then
             printf '[WARN] command timed out after %s seconds\n' "$COMMAND_TIMEOUT"
         elif (( command_status != 0 )); then
             printf '[WARN] command exited %d\n' "$command_status"
