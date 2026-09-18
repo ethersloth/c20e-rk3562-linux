@@ -15,7 +15,7 @@ Linux enablement for the C20e RK3562 tablet. Debian 13 is the current developmen
 | Panfrost GPU | Hardware rendering observed; stability qualification pending |
 | RK817 audio | ALSA playback/capture enumerated; functional tests pending |
 | Battery and charging | Reporting present; kernel/UPower state discrepancy under investigation |
-| Bluetooth | V5.9r3 Bluetooth module built; deployment validation pending |
+| Bluetooth | Blocked; modern `skwbt` corrupts kernel memory with the V5.9r2 hybrid stack and is disabled |
 | USB-C | HUSB320 Type-C state present; host/device tests pending |
 | Cameras | Sensors/media graph enumerate; end-to-end capture pending |
 | Suspend/resume | Deep sleep advertised; manual qualification pending |

@@ -717,9 +717,10 @@ if [ -n "${BCM_CLM}" ]; then
     cp -f "${BCM_CLM}" "${ROOTFS_MNT}/vendor/etc/firmware/bcmdhd_clm.blob"
 fi
 
-# Auto-load bluetooth driver module
+# Keep the incompatible Seekwave Bluetooth upper module disabled. Loading the
+# modern skwbt against the V5.9r2 hybrid stack corrupts kernel memory.
 mkdir -p "${ROOTFS_MNT}/etc/modules-load.d/"
-echo "skwbt" > "${ROOTFS_MNT}/etc/modules-load.d/skwbt.conf"
+echo "# skwbt disabled: incompatible with the V5.9r2 hybrid stack" > "${ROOTFS_MNT}/etc/modules-load.d/skwbt.conf"
 
 # 7. Add Mali GPU udev rules
 echo "[*] Adding Mali GPU udev rules..."
@@ -2893,10 +2894,6 @@ if command -v rfkill >/dev/null 2>&1; then
     rfkill unblock all || true
 fi
 
-if command -v modprobe >/dev/null 2>&1; then
-    modprobe skwbt >/dev/null 2>&1 || true
-fi
-
 for _ in $(seq 1 20); do
     if controller_ready; then
         printf 'power on\nquit\n' | bluetoothctl >/dev/null 2>&1 || true
@@ -2948,26 +2945,10 @@ mkdir -p "${ROOTFS_MNT}/etc/systemd/system/timers.target.wants"
 rm -f "${ROOTFS_MNT}/etc/systemd/system/multi-user.target.wants/rk-bluetooth-recover.service"
 rm -f "${ROOTFS_MNT}/etc/systemd/system/timers.target.wants/rk-bluetooth-recover.timer"
 
-# Harden bluetooth.service startup ordering for Seekwave BT.
-echo "[*] Installing Bluetooth service override..."
-mkdir -p "${ROOTFS_MNT}/etc/systemd/system/bluetooth.service.d"
-cat > "${ROOTFS_MNT}/etc/systemd/system/bluetooth.service.d/rk-skwbt.conf" << 'RK_BT_OVERRIDE'
-[Unit]
-# Drop Debian's default ConditionPathIsDirectory=/sys/class/bluetooth so
-# bluetoothd can start and request module bring-up on first boot.
-ConditionPathIsDirectory=
-After=systemd-modules-load.service rk-unblock-rfkill.service
-Wants=rk-unblock-rfkill.service
-
-[Service]
-ExecStartPre=/bin/sh -c '/usr/sbin/modprobe skwbt >/dev/null 2>&1 || true; for i in $(seq 1 20); do [ -d /sys/class/bluetooth ] && exit 0; sleep 1; done; exit 0'
-ExecStartPre=/bin/sh -c '/usr/sbin/rfkill unblock all >/dev/null 2>&1 || true'
-ExecStartPost=/bin/sh -c 'printf "power on\nquit\n" | /usr/bin/bluetoothctl >/dev/null 2>&1 || true'
-Restart=on-failure
-RestartSec=2
-RK_BT_OVERRIDE
-
-chroot "${ROOTFS_MNT}" systemctl enable bluetooth.service
+# Do not let D-Bus activation or bluetooth.service load skwbt indirectly.
+echo "[*] Disabling incompatible Seekwave Bluetooth service path..."
+rm -f "${ROOTFS_MNT}/etc/systemd/system/bluetooth.service.d/rk-skwbt.conf"
+chroot "${ROOTFS_MNT}" systemctl disable bluetooth.service 2>/dev/null || true
 
 # Screen rotation tray icon — manual rotation selector with optional
 # accelerometer auto-rotate.  Replaces the old rk-autorotate.service daemon.
