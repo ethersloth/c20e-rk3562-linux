@@ -6,6 +6,8 @@ TARGET="${1:-/dev/sda}"
 KREL=6.1.172
 EXPECT_MODEL='Storage Device'
 EXPECT_SIZE='29.1G'
+EXPECT_BOOT_PARTUUID='f2e4c648-207d-45f0-b5ad-7886f75e57eb'
+EXPECT_ROOT_PARTUUID='c0ffee11-2233-4455-6677-8899aabbccdd'
 EXPECT_KERNEL_COMMIT='77168c8d5ab82399f65a80e9f807b50ba37cf483'
 EXPECT_SEEKWAVE_COMMIT='b1b15016119cb21965fc64dd374e42f46f011bb4'
 KERNEL="$REPO/src/kernel"
@@ -41,9 +43,12 @@ printf 'Target: %s\n' "$TARGET"
 
 [[ -b "$TARGET" ]] || die "target is not a block device: $TARGET"
 [[ "$(lsblk -dnro TRAN "$TARGET" 2>/dev/null)" == usb ]] || die "$TARGET is not reported as USB"
-[[ "$(lsblk -dnro MODEL "$TARGET" 2>/dev/null | xargs)" == "$EXPECT_MODEL" ]] || die "unexpected target model"
-[[ "$(lsblk -dnro SIZE "$TARGET" 2>/dev/null | xargs)" == "$EXPECT_SIZE" ]] || die "unexpected target size"
+[[ "$(lsblk -dno MODEL "$TARGET" 2>/dev/null | xargs)" == "$EXPECT_MODEL" ]] || die "unexpected target model"
+[[ "$(lsblk -dno SIZE "$TARGET" 2>/dev/null | xargs)" == "$EXPECT_SIZE" ]] || die "unexpected target size"
+[[ -b "${TARGET}3" ]] || die "boot partition is missing: ${TARGET}3"
 [[ -b "${TARGET}4" ]] || die "root partition is missing: ${TARGET}4"
+[[ "$(lsblk -dnro PARTUUID "${TARGET}3")" == "$EXPECT_BOOT_PARTUUID" ]] || die "unexpected boot partition identity"
+[[ "$(lsblk -dnro PARTUUID "${TARGET}4")" == "$EXPECT_ROOT_PARTUUID" ]] || die "unexpected root partition identity"
 [[ "$(lsblk -dnro FSTYPE "${TARGET}4")" == ext4 ]] || die "${TARGET}4 is not ext4"
 [[ "$(git -C "$KERNEL" rev-parse HEAD)" == "$EXPECT_KERNEL_COMMIT" ]] || die "unexpected kernel source commit"
 [[ "$(git -C "$MODERN" rev-parse HEAD)" == "$EXPECT_SEEKWAVE_COMMIT" ]] || die "unexpected Seekwave source commit"
@@ -72,8 +77,8 @@ sudo mount "${TARGET}4" "$MNT"
 MOUNTED=1
 [[ -f "$MNT/etc/os-release" ]] || die "target does not look like a Linux root filesystem"
 [[ -d "$MNT/lib/modules/$KREL" ]] || die "target lacks kernel modules for $KREL"
-[[ "$(sudo modinfo -b "$MNT" -F version skw 2>/dev/null)" == 1.0.0-c20e-v5.9r2 ]] || die "target is not the V5.9r2 hybrid Wi-Fi installation"
-sudo modinfo -b "$MNT" skw_sdio_lite >/dev/null 2>&1 || die "target lacks skw_sdio_lite"
+[[ "$(sudo modinfo -b "$MNT" -k "$KREL" -F version skw 2>/dev/null)" == 1.0.0-c20e-v5.9r2 ]] || die "target is not the V5.9r2 hybrid Wi-Fi installation"
+sudo modinfo -b "$MNT" -k "$KREL" skw_sdio_lite >/dev/null 2>&1 || die "target lacks skw_sdio_lite"
 
 echo '[3/5] Back up service configuration and install skwbt.ko'
 for file in \
@@ -101,8 +106,8 @@ sudo systemctl --root="$MNT" enable bluetooth.service
 sudo systemctl --root="$MNT" enable rk-power-tune.service rk-power-profile-sync.service
 
 echo '[5/5] Validate installed module and service state'
-sudo modinfo -b "$MNT" skwbt
-[[ "$(sudo modinfo -b "$MNT" -F vermagic skwbt | awk '{print $1}')" == "$KREL" ]] || die "installed Bluetooth module vermagic mismatch"
+sudo modinfo -b "$MNT" -k "$KREL" skwbt
+[[ "$(sudo modinfo -b "$MNT" -k "$KREL" -F vermagic skwbt | awk '{print $1}')" == "$KREL" ]] || die "installed Bluetooth module vermagic mismatch"
 sudo systemctl --root="$MNT" is-enabled bluetooth.service
 sudo systemctl --root="$MNT" is-enabled rk-power-tune.service
 sudo systemctl --root="$MNT" is-enabled rk-power-profile-sync.service
