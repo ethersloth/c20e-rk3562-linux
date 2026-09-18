@@ -8,10 +8,12 @@ ACTIVE_TESTS="${C20E_QUALIFY_ACTIVE_TESTS:-0}"
 
 # Keep progress visible on the invoking terminal even when report output is piped.
 exec 3>&2
+printf '[%(%H:%M:%S)T] STARTING C20e hardware qualification\n' -1 >&3
 
 if [[ -n "$OUTPUT" ]]; then
     mkdir -p "$(dirname "$OUTPUT")"
-    exec > >(tee "$OUTPUT") 2>&1
+    exec >"$OUTPUT" 2>&1
+    printf '[%(%H:%M:%S)T] REPORT  Detailed output: %s\n' -1 "$OUTPUT" >&3
 fi
 
 progress() {
