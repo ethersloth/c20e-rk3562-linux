@@ -35,8 +35,16 @@ case "$MODE" in
         IDB="$REPO/bootloader/c20e-factory-idbloader.img"
         UBOOT="$REPO/bootloader/c20e-factory-uboot.itb" ;;
     clear) IDB=""; UBOOT="" ;;
-    *) echo "ERROR: mode must be upstream, factory or clear" >&2; exit 1 ;;
+    verify|verify-upstream)
+        # Read-only: confirm what is actually on the card right now.
+        IDB="$REPO/bootloader/upstream-idbloader.img"
+        UBOOT="$REPO/bootloader/upstream-u-boot.itb" ;;
+    verify-factory)
+        IDB="$REPO/bootloader/c20e-factory-idbloader.img"
+        UBOOT="$REPO/bootloader/c20e-factory-uboot.itb" ;;
+    *) echo "ERROR: mode must be upstream, factory, clear or verify" >&2; exit 1 ;;
 esac
+case "$MODE" in verify*) VERIFY_ONLY=1 ;; *) VERIFY_ONLY=0 ;; esac
 
 IDB_SEEK=64        # 32 KiB  / 512
 UB_SEEK=16384      # 8 MiB   / 512
@@ -46,7 +54,7 @@ UB_LEN=8192        # 4 MiB   / 512
 die(){ echo "ERROR: $*" >&2; exit 1; }
 
 [[ $EUID -eq 0 ]] || die "Run with sudo."
-[[ -b "$DEV" ]] || die "Usage: sudo $0 /dev/sdX [upstream|factory|clear]"
+[[ -b "$DEV" ]] || die "Usage: sudo $0 /dev/sdX [upstream|factory|clear|verify]"
 [[ "$DEV" == /dev/sd? ]] || die "Refusing non-/dev/sdX target: $DEV"
 [[ "$(lsblk -dnro TRAN "$DEV" 2>/dev/null)" == "usb" ]] || die "$DEV is not reported as USB."
 lsblk -nrpo MOUNTPOINTS "$DEV" | grep -q '/' && die "A partition on $DEV is mounted."
@@ -85,25 +93,44 @@ fi
 head -c4 "$IDB" | grep -qE 'RKNS|LDR ' || die "$IDB is not a recognised Rockchip loader"
 [[ "$(xxd -p -l4 "$UBOOT")" == "d00dfeed" ]] || die "$UBOOT is not a FIT image"
 
-echo "Writing:"
-echo "  $(basename "$IDB")   -> offset 32K  ($(stat -c%s "$IDB") bytes)"
-echo "  $(basename "$UBOOT") -> offset 8M   ($(stat -c%s "$UBOOT") bytes)"
-echo "Boot and rootfs partitions are NOT touched."
-echo
-read -r -p "Type C20E to write the bootloader to $DEV: " CONFIRM
-[[ "$CONFIRM" == "C20E" ]] || die "Cancelled."
+if [[ "$VERIFY_ONLY" -eq 1 ]]; then
+    echo "Verify only - nothing on $DEV will be written."
+    echo "  expecting $(basename "$IDB") at 32K and $(basename "$UBOOT") at 8M"
+    echo
+else
+    echo "Writing:"
+    echo "  $(basename "$IDB")   -> offset 32K  ($(stat -c%s "$IDB") bytes)"
+    echo "  $(basename "$UBOOT") -> offset 8M   ($(stat -c%s "$UBOOT") bytes)"
+    echo "Boot and rootfs partitions are NOT touched."
+    echo
+    read -r -p "Type C20E to write the bootloader to $DEV: " CONFIRM
+    [[ "$CONFIRM" == "C20E" ]] || die "Cancelled."
 
-dd if="$IDB"   of="$DEV" bs=512 seek="$IDB_SEEK" conv=fsync status=none
-dd if="$UBOOT" of="$DEV" bs=512 seek="$UB_SEEK"  conv=fsync status=none
-sync
+    dd if="$IDB"   of="$DEV" bs=512 seek="$IDB_SEEK" conv=fsync status=none
+    dd if="$UBOOT" of="$DEV" bs=512 seek="$UB_SEEK"  conv=fsync status=none
+    sync
+fi
+
+# Drop the block cache so the comparison below reads the card, not RAM.
+blockdev --flushbufs "$DEV" 2>/dev/null || true
 
 # Read back and compare, since a silent failure here is very expensive to debug.
+#
+# Round the sector count UP: the upstream idbloader is 539072 bytes, which is
+# not a multiple of 512, so integer division reads one sector short and the
+# comparison fails even on a perfectly good write. Compare only the first
+# file-sized bytes of the read-back.
 tmp_idb="$(mktemp)"; tmp_ub="$(mktemp)"
 trap 'rm -f "$tmp_idb" "$tmp_ub"' EXIT
-dd if="$DEV" of="$tmp_idb" bs=512 skip="$IDB_SEEK" count=$(( $(stat -c%s "$IDB") / 512 )) status=none
-dd if="$DEV" of="$tmp_ub"  bs=512 skip="$UB_SEEK"  count=$(( $(stat -c%s "$UBOOT") / 512 )) status=none
-cmp -s "$IDB" "$tmp_idb"   || die "idbloader verification FAILED."
-cmp -s "$UBOOT" "$tmp_ub"  || die "U-Boot verification FAILED."
+idb_sz=$(stat -c%s "$IDB"); ub_sz=$(stat -c%s "$UBOOT")
+dd if="$DEV" of="$tmp_idb" bs=512 skip="$IDB_SEEK" count=$(( (idb_sz + 511) / 512 )) status=none
+dd if="$DEV" of="$tmp_ub"  bs=512 skip="$UB_SEEK"  count=$(( (ub_sz  + 511) / 512 )) status=none
+cmp -s -n "$idb_sz" "$IDB"   "$tmp_idb" || die "idbloader verification FAILED."
+cmp -s -n "$ub_sz"  "$UBOOT" "$tmp_ub"  || die "U-Boot verification FAILED."
 
-echo "Verified both regions read back byte-identical."
-echo "SUCCESS - the card should boot again."
+echo "Verified both regions match byte-for-byte."
+if [[ "$VERIFY_ONLY" -eq 1 ]]; then
+    echo "SUCCESS - the card already carries this bootchain."
+else
+    echo "SUCCESS - the card should boot again."
+fi
