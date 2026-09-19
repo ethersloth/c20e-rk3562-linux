@@ -851,6 +851,16 @@ create_image() {
         --inputpath "${OUT_DIR}" \
         --outputpath "${OUT_DIR}"
 
+    # genimage runs under sudo, so its outputs land root-owned. xz then fails
+    # with "Cannot set the file group: Operation not permitted" when it tries to
+    # mirror that ownership onto the .xz. The compression itself succeeds, which
+    # makes it look worse than it is, but it still aborts the build.
+    if [ "${EUID}" -ne 0 ]; then
+        sudo chown "$(id -u):$(id -g)" "${OUT_DIR}/rk3562-debian.img" 2>/dev/null || true
+        [ -f "${OUT_DIR}/rk3562-debian.img.xz" ] && \
+            sudo chown "$(id -u):$(id -g)" "${OUT_DIR}/rk3562-debian.img.xz" 2>/dev/null || true
+    fi
+
     cp -f "${OUT_DIR}/rk3562-debian.img" "${OUTPUT_DIR}/update/update.img"
     echo "[*] Compressing final image with xz (-T0 -9e)..."
     xz -T0 -9e -f -k "${OUT_DIR}/rk3562-debian.img"
