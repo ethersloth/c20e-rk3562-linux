@@ -13,6 +13,16 @@ OUTPUT_DIR="${ROOT_DIR}/output"
 # Versions & URLs
 UBOOT_URL="https://github.com/Firefly-rk-linux/u-boot.git"
 UBOOT_BRANCH="rk356x/firefly-5.10"
+# Pin U-Boot. The branch is a moving target: tech4bot's released image (which
+# boots this tablet, and is what the original SD card was created from) was
+# built at 30d6e6f, while a clone of branch HEAD now lands on b2adc656. A card
+# flashed with the newer one does not boot -- black screen, no console output,
+# and Android will not boot either while the card is inserted, because the
+# BootROM tries the card's bootloader and stops there.
+#
+# Cloning at --depth 1 hides this entirely: nothing in the build output says
+# which U-Boot you got. Set RKDEBIAN_UBOOT_COMMIT= (empty) to track HEAD again.
+UBOOT_COMMIT="${RKDEBIAN_UBOOT_COMMIT-30d6e6f55d2b943c0910c3f69ccf4d302272ee71}"
 KERNEL_URL="https://github.com/rockchip-linux/kernel.git"
 KERNEL_BRANCH="develop-6.1"
 RKBIN_URL="https://github.com/rockchip-linux/rkbin.git"
@@ -425,10 +435,35 @@ build_uboot() {
     fi
     
     if [ ! -d "u-boot" ]; then
-        git clone --depth 1 -b ${UBOOT_BRANCH} ${UBOOT_URL} u-boot
+        if [ -n "${UBOOT_COMMIT}" ]; then
+            # Full clone: --depth 1 cannot check out an arbitrary commit.
+            git clone -b "${UBOOT_BRANCH}" "${UBOOT_URL}" u-boot
+        else
+            git clone --depth 1 -b "${UBOOT_BRANCH}" "${UBOOT_URL}" u-boot
+        fi
     fi
-    
+
     cd u-boot
+
+    # Pin to the known-booting commit and say so, so a drifting branch cannot
+    # silently produce an unbootable card again.
+    if [ -n "${UBOOT_COMMIT}" ]; then
+        if git cat-file -e "${UBOOT_COMMIT}^{commit}" 2>/dev/null; then
+            if [ "$(git rev-parse HEAD)" != "${UBOOT_COMMIT}" ]; then
+                echo "[*] Pinning U-Boot to ${UBOOT_COMMIT}..."
+                git checkout -q --detach "${UBOOT_COMMIT}" || {
+                    echo "[-] Error: could not check out pinned U-Boot commit."; exit 1; }
+            fi
+        else
+            echo "[!] Pinned U-Boot commit ${UBOOT_COMMIT} not present in this clone."
+            echo "[!] Fetching it..."
+            git fetch --unshallow origin 2>/dev/null || git fetch origin || true
+            git checkout -q --detach "${UBOOT_COMMIT}" || {
+                echo "[-] Error: pinned U-Boot commit unavailable; delete src/u-boot and retry."
+                exit 1; }
+        fi
+    fi
+    echo "[*] U-Boot at commit: $(git rev-parse --short HEAD)"
 
     if [ "${EUID}" -ne 0 ]; then
         local foreign_owner=""
