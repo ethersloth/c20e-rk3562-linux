@@ -476,47 +476,24 @@ build_uboot() {
     cp "${spl_loader}" "${OUT_DIR}/idbloader.img"
     cp uboot.img "${OUT_DIR}/u-boot.itb"
 
-    # Use the C20e factory bootchain, not the one just built.
+    # Bootloader note (2026-09-19), so this is not "fixed" again by mistake:
     #
-    # rk3562_spl_loader_*.bin is the USB maskrom DOWNLOAD loader: its magic is
-    # "LDR " (a Rockchip loader container). SD/eMMC boot requires an idblock,
-    # magic "RKNS", read by the BootROM from sector 64. Writing the loader there
-    # produces a board that does not boot and prints nothing at all, because
-    # nothing ever executes -- no console output, no USB, indistinguishable from
-    # dead hardware.
+    # The loader above is rk3562_spl_loader_*.bin, whose magic is "LDR " rather
+    # than the "RKNS" idblock seen on the eMMC. That difference looks like a bug
+    # and is not: upstream tech4bot/rk3562deb does exactly the same thing and its
+    # images boot. Swapping in the factory eMMC bootchain was tried here and did
+    # NOT help -- the board stayed black with the built loader, with the factory
+    # idblock + factory U-Boot, and with both regions zeroed.
     #
-    # This is why deploy-c20e-sd.sh only ever replaces Image and rk3562.dtb and
-    # reports "Factory bootchain was NOT modified": the working card carried the
-    # factory bootloader, and build.sh could not reproduce it. Flashing a full
-    # image therefore bricked boot until these blobs were restored.
+    # bootloader/ and restore-c20e-bootloader.sh are kept as recovery tools for
+    # putting the factory chain on a card deliberately, but they are not part of
+    # the normal image and should not be wired in without evidence.
     #
-    # bootloader/ holds that chain, carved out of c20e-backup/emmc-first-16MiB.bin
-    # (idblock at 32K, U-Boot FIT at 8M -- the same offsets genimage uses). The
-    # FIT is U-Boot 2017.09-g14cd03b177 (Mar 08 2025), matching the
-    # androidboot.fwver the working system reported.
-    #
-    # Set RKDEBIAN_BUILD_UBOOT=1 to ship the freshly built loader instead. That
-    # is for U-Boot work only; it will not boot this board as-is.
-    local fac_idb="${ROOT_DIR}/bootloader/c20e-factory-idbloader.img"
-    local fac_uboot="${ROOT_DIR}/bootloader/c20e-factory-uboot.itb"
-    if [ "${RKDEBIAN_BUILD_UBOOT:-0}" = "1" ]; then
-        echo "[!] RKDEBIAN_BUILD_UBOOT=1: shipping the freshly built loader."
-        echo "[!] This does NOT boot the C20e; expect a black screen."
-    elif [ -f "${fac_idb}" ] && [ -f "${fac_uboot}" ]; then
-        echo "[*] Installing C20e factory bootchain (idblock + U-Boot FIT)..."
-        cp -f "${fac_idb}"   "${OUT_DIR}/idbloader.img"
-        cp -f "${fac_uboot}" "${OUT_DIR}/u-boot.itb"
-        # Sanity-check the magics; a wrong idbloader is invisible at boot.
-        if ! head -c4 "${OUT_DIR}/idbloader.img" | grep -q "RKNS"; then
-            echo "[-] Error: idbloader.img is not an RKNS idblock; it will not boot."
-            exit 1
-        fi
-    else
-        echo "[-] Error: factory bootchain missing from ${ROOT_DIR}/bootloader/."
-        echo "    The built loader is a USB download image and will not boot from SD."
-        echo "    Extract it with: ./extract-c20e-factory-bootloader.sh"
-        exit 1
-    fi
+    # If a freshly flashed card does not boot, the bootloader is not where the
+    # evidence points. Get the physical UART instead: earlycon is already on the
+    # kernel cmdline (uart8250,mmio32,0xff210000 at 1500000 baud), and it will
+    # show whether the BootROM, U-Boot, or the kernel is at fault. Every correct
+    # diagnosis on this board has come from real console output.
 
     echo "[+] U-Boot build complete."
     ensure_sdk_compat_layout
