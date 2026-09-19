@@ -12,15 +12,33 @@ Linux enablement for the C20e RK3562 tablet. Debian 13 is the current developmen
 | Boot and Debian 13 userspace | Working |
 | Display and GSL3673 touch enumeration | Working; manual touch coverage pending |
 | Seekwave EA6621Q/SV6160 Wi-Fi | Working with V5.9r2 hybrid driver |
-| Panfrost GPU | Hardware rendering observed; stability qualification pending |
+| GPU (Mali vendor stack) | Working; `Mali-G52` hardware rendering, stable. Use `--gpu-stack=mali` |
+| GPU (Panfrost) | **Broken — do not use.** Corrupts kernel memory whenever the GPU is used; reproducible in seconds with `eglinfo`. This was the cause of the long-standing intermittent DRM/Phosh hard lock |
 | RK817 audio | ALSA playback/capture enumerated; functional tests pending |
 | Battery and charging | Reporting present; kernel/UPower state discrepancy under investigation |
 | Bluetooth | Blocked; modern `skwbt` corrupts kernel memory with the V5.9r2 hybrid stack and is disabled |
 | USB-C | HUSB320 Type-C state present; host/device tests pending |
 | Cameras | Sensors/media graph enumerate; end-to-end capture pending |
 | Suspend/resume | Deep sleep advertised; manual qualification pending |
+| Hang detection / hardware watchdog | Working; DW watchdog armed by systemd (22s hardware timeout), hung-task/softlockup panic + `panic=10` auto-reboot verified on-device |
 
 The passive collector is [scripts/qualify-hardware.sh](scripts/qualify-hardware.sh). Potentially destabilizing GPU probes remain disabled unless explicitly requested.
+
+### The intermittent hard lock (resolved 2026-09-19)
+
+The long-standing intermittent hard lock in the DSI + Phosh path (see `c20e-analysis/20260918-graphical-lock/`) was **Panfrost corrupting kernel memory**. It reproduces in seconds with a single `eglinfo` — no GUI, no network. Ruled out by controlled testing: the NPU DRM node, Wi-Fi/network load, GPU undervolt, the GPU interrupt mapping (verified correct against the factory Android DTB), and DVFS. Blocking Panfrost's DRM nodes made the reproducer survive; nothing else did.
+
+The signature is memory corruption, not a GPU fault: no GPU error is ever logged, and instead an unrelated process dies, e.g. `pipewire` taking a NULL dereference in `link_path_walk` during an ordinary `openat()`. The fix is to use the Mali vendor stack (`--gpu-stack=mali`), which is what upstream ships by default and what the factory Android uses. That yields `Mali-G52` hardware rendering with no crashes.
+
+Hang detection was added while chasing this and is worth keeping. Until 2026-09-18 a hard hang left no trace at all: the kernel had no lockup detection compiled in and the SoC watchdog was `status = "disabled"` in the device tree, so there was no panic, no pstore record, and no reboot — every occurrence needed a manual power cycle. Both are now enabled in
+`overlay/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts`,
+`overlay/arch/arm64/configs/rockchip_linux_defconfig`, `extlinux.conf` and `build_rootfs.sh`.
+`CONFIG_HARDLOCKUP_DETECTOR` is deliberately still off and remains untested.
+
+> [!IMPORTANT]
+> **`overlay/` is the source of truth and it can go stale.** `build.sh` copies `overlay/` over `src/kernel` on every kernel build, and the `prepare-c20e-v5.x-*.sh` scripts patch `src/kernel` directly. Any device-tree work not copied back into `overlay/` is silently reverted by the next build, and `deploy-c20e-sd.sh` will then flash that regressed DTB.
+>
+> On 2026-09-18 this cost four failed boot cycles: the committed DTS was missing the `vcc_sd` regulator fix (`gpios=` not `enable-gpio=`, plus a corrected `states` table), so the SD card holding the rootfs never powered up and the kernel hung at `Waiting for root device`. **Before deploying, decompile the freshly built DTB and diff it against a known-good one** — differences you did not intend mean `overlay/` is stale.
 
 This work builds on [tech4bot/rk3562deb](https://github.com/tech4bot/rk3562deb). Its original Doogee U10 documentation follows for build-system background.
 

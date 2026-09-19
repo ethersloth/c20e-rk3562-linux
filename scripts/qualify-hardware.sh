@@ -1168,6 +1168,51 @@ run \
         | tail -n 500
     "
 
+# Prior to the C20e 2026-09-18 graphical-lock investigation, a real hard
+# hang in the DRM/panel + Phosh path left zero trace: no /dev/watchdog,
+# no hung_task/softlockup/hardlockup panic sysctls, and an empty pstore
+# ramoops after the fact (see
+# c20e-analysis/20260918-graphical-lock/probe3-recovery-summary.txt).
+# These probes confirm that gap stays closed: the DW hardware watchdog
+# (&wdt in the board DTS) is present and armed by systemd, and the
+# kernel-side lockup detectors are compiled in and set to panic.
+run \
+    'Hardware watchdog device' \
+    sh -c \
+    "
+    ls -la /dev/watchdog* 2>&1
+    command -v wdctl >/dev/null 2>&1 && wdctl 2>&1
+    "
+
+run \
+    'Lockup/hang panic sysctls' \
+    sh -c \
+    "
+    for f in hung_task_panic softlockup_panic hardlockup_panic hung_task_timeout_secs; do
+        if [ -r \"/proc/sys/kernel/\$f\" ]; then
+            printf '%s = %s\n' \"\$f\" \"\$(cat /proc/sys/kernel/\$f)\"
+        else
+            printf '%s: sysctl not present (detector not compiled in)\n' \"\$f\"
+        fi
+    done
+    "
+
+run \
+    'systemd watchdog arming' \
+    systemctl \
+        show \
+        -p RuntimeWatchdogUSec \
+        -p RebootWatchdogUSec \
+        -p WatchdogDevice
+
+run \
+    'pstore/ramoops mount and contents' \
+    sh -c \
+    "
+    mount | grep -i pstore
+    ls -la /sys/fs/pstore/ 2>&1
+    "
+
 
 ###############################################################################
 # Additional system information

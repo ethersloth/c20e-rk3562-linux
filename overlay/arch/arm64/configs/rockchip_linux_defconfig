@@ -294,6 +294,42 @@ CONFIG_DEVFREQ_THERMAL=y
 CONFIG_ROCKCHIP_THERMAL=y
 CONFIG_WATCHDOG=y
 CONFIG_DW_WATCHDOG=y
+
+# Lockup/hang detection. Previously entirely absent: no /dev/watchdog,
+# no hung_task/softlockup/hardlockup detectors, so a real kernel-side
+# hard hang (observed intermittently in the real DRM/panel + Phosh
+# path, see c20e-analysis/20260918-graphical-lock/) left zero trace and
+# needed a manual power cycle. This turns a hang into a panic (captured
+# by the already-working PSTORE_RAM/ramoops) followed by an automatic
+# reboot via PANIC_TIMEOUT. The DW hardware watchdog (enabled in the
+# board DTS) is the last-resort backstop if the hang is bad enough that
+# even these detectors can't run.
+#
+# CONFIG_HARDLOCKUP_DETECTOR and CONFIG_BOOTPARAM_HARDLOCKUP_PANIC are
+# deliberately NOT enabled here. A first attempt at this fix enabled all
+# four options together and the tablet hung during early kernel boot,
+# before Wi-Fi or the USB-serial gadget came up (see
+# incident_c20e_hang_detection_boot_regression in project memory).
+#
+# NOTE on the 2026-09-18 boot failures: four builds of this block were
+# blamed on these options and none of them were at fault. Every one of
+# those builds also shipped a device tree rebuilt from a STALE
+# overlay/.../rk3562-rk817-tablet-v10-panfrost.dts that was missing the
+# vcc_sd regulator fix, so the SD card holding the rootfs never powered
+# up and the kernel sat forever at "Waiting for root device". build.sh
+# copies overlay/ over src/kernel on every build, so the device-tree
+# work that only ever lived in src/kernel was silently reverted each
+# time. The correct DTS is now committed in overlay/ (verified: it
+# reproduces the known-good DTB 6921af2f... byte for byte). Do not
+# re-blame these options without first confirming the built DTB matches
+# a known-good one.
+CONFIG_DEBUG_KERNEL=y
+CONFIG_SOFTLOCKUP_DETECTOR=y
+CONFIG_BOOTPARAM_SOFTLOCKUP_PANIC=y
+CONFIG_DETECT_HUNG_TASK=y
+CONFIG_BOOTPARAM_HUNG_TASK_PANIC=y
+CONFIG_WQ_WATCHDOG=y
+CONFIG_PANIC_TIMEOUT=10
 CONFIG_MFD_RK806_I2C=y
 CONFIG_MFD_RK806_SPI=y
 CONFIG_MFD_RK808=y
@@ -710,14 +746,31 @@ CONFIG_ZD1211RW=y
 CONFIG_POWER_RESET_SYSCON_POWEROFF=y
 
 # Seekwave EA6621Q WiFi driver
-CONFIG_SEEKWAVE_BSP_DRIVERS=y
-CONFIG_SKW_SDIOHAL=y
-CONFIG_SKW_BSP_UCOM=y
-CONFIG_SKW_BSP_BOOT=y
-CONFIG_WLAN_VENDOR_SEEKWAVE=y
-CONFIG_SKW_VENDOR=y
-CONFIG_SKW_DFS_MASTER=y
-CONFIG_SKW_BT=m
+#
+# The in-tree driver under overlay/drivers/net/wireless/ea6621q/ is the LEGACY
+# vendor drop: legacy skwifi on top of the legacy seekwaveplatform SDIO HAL.
+# It is deliberately NOT built here.
+#
+# The configuration that actually works on this board is the "V5.9r2 hybrid"
+# (see prepare-c20e-v5.9r2-hybrid-seekwave.sh): the MODERN skw_sdio_lite SDIO
+# layer from c20e-thirdparty/seekwave-swt6621s, plus the legacy skwifi source
+# recompiled against the modern skw_platform_data.h. Those are built as
+# out-of-tree modules and installed to
+# /lib/modules/<rel>/updates/c20e-seekwave/, loaded via
+# /etc/modules-load.d/c20e-seekwave.conf.
+#
+# Building the in-tree driver as =y breaks that: a built-in driver claims the
+# SDIO device before any module can, cannot be unloaded, and silently replaces
+# the hybrid stack on every kernel rebuild. The legacy SDIO HAL is also the
+# prime suspect for kernel memory corruption seen under heavy Wi-Fi load
+# (NULL derefs in link_path_walk in unrelated processes), which is what the
+# hybrid was built to avoid.
+#
+# Keep these disabled. Rebuild the hybrid modules whenever the kernel is
+# rebuilt -- module vermagic is tied to the kernel build.
+# CONFIG_SEEKWAVE_BSP_DRIVERS is not set
+# CONFIG_WLAN_VENDOR_SEEKWAVE is not set
+# CONFIG_SKW_BT is not set
 
 CONFIG_EXTRA_FIRMWARE="RAM_RW_KERNEL_DRAM.bin ROM_EXEC_KERNEL_IRAM.bin EA6621Q_SEEKWAVE_R00005.bin"
 CONFIG_EXTRA_FIRMWARE_DIR="firmware"

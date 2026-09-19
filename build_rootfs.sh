@@ -2960,6 +2960,24 @@ echo "[*] Disabling incompatible Seekwave Bluetooth service path..."
 rm -f "${ROOTFS_MNT}/etc/systemd/system/bluetooth.service.d/rk-skwbt.conf"
 chroot "${ROOTFS_MNT}" systemctl disable bluetooth.service 2>/dev/null || true
 
+# Arm the DesignWare hardware watchdog (&wdt, enabled in the board DTS) via
+# systemd's built-in support. PID1 pets /dev/watchdog0 on its own timer and
+# stops petting it if PID1 itself hangs, so this is a last-resort automatic
+# reset independent of the CPU scheduler -- the backstop for the intermittent
+# hard lock seen in the real DRM/panel + Phosh path (no trace, no panic, no
+# reboot, manual power cycle required; see
+# c20e-analysis/20260918-graphical-lock/probe3-recovery-summary.txt). It
+# complements, not replaces, the kernel-side hung_task/softlockup/hardlockup
+# panic detectors enabled in rockchip_linux_defconfig, which give a real
+# pstore/ramoops capture when the hang is survivable enough for them to run.
+echo "[*] Arming hardware watchdog via systemd..."
+mkdir -p "${ROOTFS_MNT}/etc/systemd/system.conf.d"
+cat > "${ROOTFS_MNT}/etc/systemd/system.conf.d/rk-hardware-watchdog.conf" << 'RK_WATCHDOG_CONF'
+[Manager]
+RuntimeWatchdogSec=20s
+RebootWatchdogSec=10min
+RK_WATCHDOG_CONF
+
 # Screen rotation tray icon — manual rotation selector with optional
 # accelerometer auto-rotate.  Replaces the old rk-autorotate.service daemon.
 echo "[*] Installing screen-rotation tray applet..."

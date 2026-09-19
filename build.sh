@@ -573,19 +573,50 @@ build_kernel() {
         scripts/config --disable FTRACE_MCOUNT_RECORD || true
         scripts/config --disable FTRACE_MCOUNT_USE_PATCHABLE_FUNCTION_ENTRY || true
 
-        # Force Seekwave SWT6621S/EA6621 stack and disable legacy Broadcom path.
+        # Disable the legacy Broadcom path.
         scripts/config --disable BCMDHD || true
         scripts/config --disable AP6XXX || true
         scripts/config --disable WL_ROCKCHIP || true
         scripts/config --disable WIFI_BUILD_MODULE || true
-        scripts/config --enable SEEKWAVE_BSP_DRIVERS || true
-        scripts/config --enable SKW_SDIOHAL || true
-        scripts/config --enable SKW_BSP_UCOM || true
-        scripts/config --enable SKW_BSP_BOOT || true
-        scripts/config --enable WLAN_VENDOR_SEEKWAVE || true
-        scripts/config --enable SKW_VENDOR || true
-        scripts/config --enable SKW_DFS_MASTER || true
-        scripts/config --module SKW_BT || true
+
+        # Seekwave Wi-Fi: do NOT build the in-tree legacy driver.
+        #
+        # overlay/drivers/net/wireless/ea6621q/ is the legacy vendor drop
+        # (legacy skwifi over the legacy seekwaveplatform SDIO HAL). The
+        # configuration that works on the C20e is the "V5.9r2 hybrid" built
+        # out-of-tree by prepare-c20e-v5.9r2-hybrid-seekwave.sh: the MODERN
+        # skw_sdio_lite SDIO layer from c20e-thirdparty/seekwave-swt6621s plus
+        # the legacy skwifi upper recompiled against the modern
+        # skw_platform_data.h, installed to
+        # /lib/modules/<rel>/updates/c20e-seekwave/.
+        #
+        # Forcing the in-tree driver to =y here silently replaced that hybrid
+        # on every kernel rebuild: a built-in driver claims the SDIO device
+        # before any module can and cannot be unloaded, so the hybrid .ko
+        # files just failed to load. Set RKDEBIAN_INTREE_SEEKWAVE=1 to restore
+        # the old behaviour; otherwise rebuild the hybrid modules after each
+        # kernel build (their vermagic is tied to the kernel build).
+        if [ "${RKDEBIAN_INTREE_SEEKWAVE:-0}" = "1" ]; then
+            echo "[!] Building the LEGACY in-tree Seekwave driver (RKDEBIAN_INTREE_SEEKWAVE=1)."
+            scripts/config --enable SEEKWAVE_BSP_DRIVERS || true
+            scripts/config --enable SKW_SDIOHAL || true
+            scripts/config --enable SKW_BSP_UCOM || true
+            scripts/config --enable SKW_BSP_BOOT || true
+            scripts/config --enable WLAN_VENDOR_SEEKWAVE || true
+            scripts/config --enable SKW_VENDOR || true
+            scripts/config --enable SKW_DFS_MASTER || true
+            scripts/config --module SKW_BT || true
+        else
+            echo "[*] In-tree Seekwave driver disabled; expecting out-of-tree V5.9r2 hybrid modules."
+            scripts/config --disable SEEKWAVE_BSP_DRIVERS || true
+            scripts/config --disable SKW_SDIOHAL || true
+            scripts/config --disable SKW_BSP_UCOM || true
+            scripts/config --disable SKW_BSP_BOOT || true
+            scripts/config --disable WLAN_VENDOR_SEEKWAVE || true
+            scripts/config --disable SKW_VENDOR || true
+            scripts/config --disable SKW_DFS_MASTER || true
+            scripts/config --disable SKW_BT || true
+        fi
         # Enable Rockchip sensor framework before selecting accel drivers.
         scripts/config --enable SENSOR_DEVICE || true
         scripts/config --enable GSENSOR_DEVICE || true

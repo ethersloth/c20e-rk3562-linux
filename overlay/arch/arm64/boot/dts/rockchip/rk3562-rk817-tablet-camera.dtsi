@@ -59,7 +59,7 @@
 
 			mipi_in_s5k4h5yb: endpoint@1 {
 				reg = <1>;
-				remote-endpoint = <&s5k4h5yb_out0>;
+				remote-endpoint = <&ov5648_out0>;
 				data-lanes = <1 2>;
 			};
 
@@ -102,22 +102,10 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			mipi_in_ov5648: endpoint@1 {
+			mipi_in_gc02m1: endpoint@1 {
 				reg = <1>;
-				remote-endpoint = <&ov5648_out0>;
-				data-lanes = <1 2>;
-			};
-
-			mipi_in_gc5035: endpoint@2 {
-				reg = <2>;
-				remote-endpoint = <&gc5035_out0>;
-				data-lanes = <1 2>;
-			};
-
-			mipi_in_s5k5e8: endpoint@3 {
-				reg = <3>;
-				remote-endpoint = <&s5k5e8_out0>;
-				data-lanes = <1 2>;
+				remote-endpoint = <&gc02m1_out>;
+				data-lanes = <1>;
 			};
 		};
 
@@ -129,7 +117,7 @@
 			csidphy4_out: endpoint@0 {
 				reg = <0>;
 				remote-endpoint = <&mipi2_csi2_input>;
-				data-lanes = <1 2>;
+				data-lanes = <1>;
 			};
 		};
 	};
@@ -142,7 +130,7 @@
 
 	fp5510: fp5510@c {
 		compatible = "fitipower,fp5510";
-		status = "okay";
+		status = "disabled";
 		reg = <0x0c>;
 		pwdn-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
 		rockchip,vcm-start-current = <8>;
@@ -154,7 +142,7 @@
 
 	dw9714: dw9714@c {
 		compatible = "dongwoon,dw9714";
-		status = "disabled";
+		status = "okay";
 		reg = <0x0c>;
 		avdd-supply = <&vcc1v8_dvp>;
 		xsd-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
@@ -218,25 +206,51 @@
 		};
 	};
 
-	ov5648: ov5648@35 {
-		status = "disabled";
+	ov5648: ov5648@36 {
+		status = "okay";
 		compatible = "ovti,ov5648";
-		reg = <0x35>;
+		reg = <0x36>;
 		clocks = <&cru CLK_CAM0_OUT2IO>;
 		clock-names = "xvclk";
-		pwdn-gpios = <&gpio3 RK_PC0 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio3 RK_PB5 GPIO_ACTIVE_LOW>;
+		pwdn-gpios = <&gpio3 RK_PB4 GPIO_ACTIVE_HIGH>;
+		avdd-supply = <&vcc_mipipwr>;
+		dovdd-supply = <&vcc1v8_dvp>;
+		dvdd-supply = <&vcc1v2_dvp>;
+		rockchip,camera-module-index = <0>;
+		rockchip,camera-module-facing = "back";
+		rockchip,camera-module-name = "HS5885-BNSM1018-V01";
+		rockchip,camera-module-lens-name = "default";
+
+		lens-focus = <&dw9714>;
+
+		port {
+			ov5648_out0: endpoint {
+				remote-endpoint = <&mipi_in_s5k4h5yb>;
+				data-lanes = <1 2>;
+			};
+		};
+	};
+
+	gc02m1: gc02m1@37 {
+		compatible = "galaxycore,gc02m1";
+		status = "okay";
+		reg = <0x37>;
+		clocks = <&cru CLK_CAM0_OUT2IO>;
+		clock-names = "xvclk";
+		pwdn-gpios = <&gpio3 RK_PC0 GPIO_ACTIVE_LOW>;
 		avdd-supply = <&vcc_mipipwr>;
 		dovdd-supply = <&vcc1v8_dvp>;
 		dvdd-supply = <&vcc1v2_dvp>;
 		rockchip,camera-module-index = <1>;
 		rockchip,camera-module-facing = "front";
-		rockchip,camera-module-name = "HS5885-BNSM1018-V01";
+		rockchip,camera-module-name = "KYT-8789-V10";
 		rockchip,camera-module-lens-name = "default";
 
 		port {
-			ov5648_out0: endpoint {
-				remote-endpoint = <&mipi_in_ov5648>;
-				data-lanes = <1 2>;
+			gc02m1_out: endpoint {
+				remote-endpoint = <&mipi_in_gc02m1>;
+				data-lanes = <1>;
 			};
 		};
 	};
@@ -258,14 +272,13 @@
 
 		port {
 			gc5035_out0: endpoint {
-				remote-endpoint = <&mipi_in_gc5035>;
 				data-lanes = <1 2>;
 			};
 		};
 	};
 
 	s5k5e8: s5k5e8@10 {
-		status = "okay";
+		status = "disabled";
 		compatible = "samsung,s5k5e8";
 		reg = <0x10>;
 		clocks = <&cru CLK_CAM0_OUT2IO>;
@@ -281,14 +294,13 @@
 
 		port {
 			s5k5e8_out0: endpoint {
-				remote-endpoint = <&mipi_in_s5k5e8>;
 				data-lanes = <1 2>;
 			};
 		};
 	};
 
 	s5k4h5yb: s5k4h5yb@36 {
-		status = "okay";
+		status = "disabled";
 		compatible = "samsung,s5k4h5yb";
 		reg = <0x36>;
 		clocks = <&cru CLK_CAM0_OUT2IO>;
@@ -306,7 +318,6 @@
 
 		port {
 			s5k4h5yb_out0: endpoint {
-				remote-endpoint = <&mipi_in_s5k4h5yb>;
 				data-lanes = <1 2>;
 			};
 		};
@@ -394,7 +405,7 @@
 			mipi2_csi2_input: endpoint@1 {
 				reg = <1>;
 				remote-endpoint = <&csidphy4_out>;
-				data-lanes = <1 2>;
+				data-lanes = <1>;
 			};
 		};
 
@@ -406,7 +417,7 @@
 			mipi2_csi2_output: endpoint@0 {
 				reg = <0>;
 				remote-endpoint = <&cif_mipi_in2>;
-				data-lanes = <1 2>;
+				data-lanes = <1>;
 			};
 		};
 	};

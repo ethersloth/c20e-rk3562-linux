@@ -131,13 +131,14 @@
 	vcc_sd: vcc-sd {
 		compatible = "regulator-gpio";
 		enable-active-low;
-		enable-gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_LOW>;
+		regulator-boot-on;
+		gpios = <&gpio0 RK_PA5 GPIO_ACTIVE_LOW>;
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&vcc_sd_h>;
 		regulator-name = "vcc_sd";
-		states = <3300000 0x0
+		states = <0 0x0
 			  3300000 0x1>;
 	};
 
@@ -196,14 +197,14 @@
 		WIFI,host_wake_irq = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
 		WIFI,poweren_gpio = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
 		WIFI,vbat_gpio = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
-		status = "okay";
+		status = "disabled";
 	};
 
 	seekwcn_boot: seekwcn_boot {
 		compatible = "seekwave,sv6160";
 		dma_type = <1>;
 		status = "okay";
-		gpio_host_wake = <&gpio0 RK_PB4 GPIO_ACTIVE_LOW>;
+		gpio_host_wake = <&gpio0 RK_PC5 GPIO_ACTIVE_LOW>;
 		gpio_chip_wake = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
 		gpio_chip_en = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
 	};
@@ -217,7 +218,6 @@
 		pinctrl-names = "default", "rts_gpio";
 		pinctrl-0 = <&uart1m0_rtsn>;
 		pinctrl-1 = <&uart1_gpios>;
-		BT,reset_gpio    = <&gpio0 RK_PC5 GPIO_ACTIVE_HIGH>;
 		BT,wake_gpio     = <&gpio0 RK_PC7 GPIO_ACTIVE_HIGH>;
 		BT,wake_host_irq = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
 		status = "okay";
@@ -285,12 +285,6 @@
 
 		width-mm = <135>;
 		height-mm = <216>;
-		/*
-		 * Keep early boot/KMS in landscape for this tablet panel orientation
-		 * (matching the camera-top side used by userspace).
-		 */
-		rotation = <90>;
-
 		bpc = <8>;
 		bus-format = <0x100a>; /* MEDIA_BUS_FMT_RGB888_1X24 — avoids vop3_output_rb_swap which incorrectly applies DSP_RB_SWAP on RK3562 (VOP2 not VOP3) */
 
@@ -403,6 +397,38 @@
 
 &i2c0 {
 	status = "okay";
+
+	husb320: husb320@21 {
+		compatible = "hynetek,husb320";
+		reg = <0x21>;
+		interrupt-parent = <&gpio0>;
+		interrupts = <RK_PA7 IRQ_TYPE_LEVEL_LOW>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&husb320_int>;
+		vbus-supply = <&otg_switch>;
+		status = "okay";
+
+
+		connector {
+			compatible = "usb-c-connector";
+			label = "USB-C";
+			data-role = "dual";
+			power-role = "dual";
+			try-power-role = "sink";
+			typec-power-opmode = "1.5A";
+			ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			port@0 {
+				reg = <0>;
+				c20e_usbc_role_sw: endpoint {
+					remote-endpoint = <&c20e_dwc3_role_switch>;
+				};
+			};
+		};
+
+		};
+	};
 
 	rk817: pmic@20 {
 		compatible = "rockchip,rk817";
@@ -775,6 +801,12 @@
 		};
 	};
 
+	usb {
+		husb320_int: husb320-int {
+			rockchip,pins = <0 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
 	vcc_sd {
 		vcc_sd_h: vcc-sd-h {
 			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -939,10 +971,32 @@
 	phy-names = "usb2-phy";
 	snps,dis_u2_susphy_quirk;
 	snps,usb2-lpm-disable;
-	extcon = <&u2phy>;
+	usb-role-switch;
+	port {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		c20e_dwc3_role_switch: endpoint@0 {
+			reg = <0>;
+			remote-endpoint = <&c20e_usbc_role_sw>;
+		};
+	};
 };
 
 &video_phy {
+	status = "okay";
+};
+
+/*
+ * DesignWare hardware watchdog, disabled at SoC level upstream. Enabled
+ * here so systemd (RuntimeWatchdogSec= in build_rootfs.sh) has a
+ * /dev/watchdog0 to arm. This is the only mechanism that can recover the
+ * board from the intermittent hard lock in the DRM/Phosh path
+ * (c20e-analysis/20260918-graphical-lock/), because a true lockup stops
+ * the kernel's own software detectors from running too. The driver does
+ * not arm the timer at probe unless firmware left it running, so this is
+ * inert until userspace opens the device.
+ */
+&wdt {
 	status = "okay";
 };
 
