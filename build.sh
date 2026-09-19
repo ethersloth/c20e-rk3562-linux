@@ -439,6 +439,19 @@ build_uboot() {
         fi
     fi
 
+    # rkbin needs the same treatment. boot_merger and trust_merger write their
+    # output (FlashData.bin, FlashBoot.bin, UsbHead.bin) back into
+    # src/rkbin/tools/, so a root-owned rkbin tree fails the U-Boot packaging
+    # step with "err=13" (EACCES) after the compile has already succeeded.
+    if [ "${EUID}" -ne 0 ] && [ -d "${SRC_DIR}/rkbin" ]; then
+        local rkbin_foreign=""
+        rkbin_foreign=$(find "${SRC_DIR}/rkbin" -maxdepth 2 \( ! -uid "$(id -u)" -o ! -gid "$(id -g)" \) -print -quit 2>/dev/null || true)
+        if [ -n "${rkbin_foreign}" ]; then
+            echo "[*] Repairing rkbin tree ownership..."
+            sudo chown -R "$(id -u):$(id -g)" "${SRC_DIR}/rkbin"
+        fi
+    fi
+
     apply_local_uboot_patches
     
     export KCFLAGS="-Wno-error"
