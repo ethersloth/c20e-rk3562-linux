@@ -723,6 +723,26 @@ build_kernel() {
         WERROR=0 \
         INSTALL_MOD_PATH="${OUT_DIR}/modules_staging"
     
+    # Out-of-tree Seekwave Wi-Fi + Bluetooth (the "V5.9r2 hybrid").
+    #
+    # The in-tree driver is deliberately not built (see the Seekwave block
+    # above), so without these there is NO Wi-Fi at all. Module vermagic is tied
+    # to the kernel build, so they are rebuilt here on every kernel build rather
+    # than left to a one-off prepare script -- which is exactly how the working
+    # driver got silently reverted before.
+    if [ "${RKDEBIAN_INTREE_SEEKWAVE:-0}" != "1" ]; then
+        if [ -x "${ROOT_DIR}/rebuild-c20e-hybrid-seekwave.sh" ]; then
+            echo "[*] Building out-of-tree Seekwave Wi-Fi/Bluetooth modules..."
+            if ! "${ROOT_DIR}/rebuild-c20e-hybrid-seekwave.sh"; then
+                echo "[-] Error: Seekwave module build failed; the image would have no Wi-Fi."
+                exit 1
+            fi
+        else
+            echo "[-] Error: rebuild-c20e-hybrid-seekwave.sh missing; the image would have no Wi-Fi."
+            exit 1
+        fi
+    fi
+
     echo "[+] Kernel build complete."
     ensure_sdk_compat_layout
 }

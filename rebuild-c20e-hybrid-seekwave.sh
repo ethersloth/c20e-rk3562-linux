@@ -74,13 +74,34 @@ make -j"$JOBS" -C "$KERNEL" M="$LEGACY" ARCH=arm64 CROSS_COMPILE="$CROSS" \
 WIFI_KO="$LEGACY/skw.ko"
 [[ -f "$WIFI_KO" ]] || die "skw.ko was not produced"
 
-echo "[4/4] Verify vermagic and stage"
-for ko in "$BSP_KO" "$WIFI_KO"; do
+echo "[4/5] Build the Bluetooth upper module against the same BSP symbols"
+# Recipe from the (retired) prepare-c20e-v5.9r3 script. Built against the
+# Module.symvers just regenerated above, so it matches the skw_sdio_lite that
+# will actually be loaded -- which the original v5.9r3 attempt did not.
+BT_SRC="$MODERN/drivers/swtbt4l"
+PLATFORM_HEADER="$MODERN/include/linux/platform_data/skw_platform_data.h"
+BT_KO=""
+if [[ -d "$BT_SRC" && -f "$PLATFORM_HEADER" ]]; then
+    make -C "$KERNEL" M="$BT_SRC" ARCH=arm64 CROSS_COMPILE="$CROSS" clean
+    if make -j"$JOBS" -C "$KERNEL" M="$BT_SRC" ARCH=arm64 CROSS_COMPILE="$CROSS" \
+        CONFIG_SKW_BT=m \
+        skw_extra_flags="-I$MODERN/include/linux -I$MODERN/include/linux/platform_data -include linux/types.h -include linux/dma-mapping.h -include linux/scatterlist.h -include $PLATFORM_HEADER -DCONFIG_SEEKWAVE_PLD_RELEASE" \
+        skw_extra_symbols="$MODERN/Module.symvers" \
+        KCFLAGS='-Wno-error' modules; then
+        [[ -f "$BT_SRC/skwbt.ko" ]] && BT_KO="$BT_SRC/skwbt.ko"
+    fi
+    [[ -n "$BT_KO" ]] || echo "[!] Bluetooth module build failed; continuing without it."
+else
+    echo "[!] Bluetooth source not present; skipping."
+fi
+
+echo "[5/5] Verify vermagic and stage"
+for ko in "$BSP_KO" "$WIFI_KO" ${BT_KO:+"$BT_KO"}; do
     vm="$(modinfo -F vermagic "$ko" | awk '{print $1}')"
     [[ "$vm" == "$KREL" ]] || die "$(basename "$ko") vermagic '$vm' != kernel '$KREL'"
     if aarch64-linux-gnu-nm -u "$ko" | awk '{print $2}' | grep -Eq '^(skw_|sv6160)' ; then
-        # Unresolved Seekwave symbols in the upper are expected: they resolve
-        # against skw_sdio_lite at load time. Only report them.
+        # Unresolved Seekwave symbols in the upper modules are expected: they
+        # resolve against skw_sdio_lite at load time. Only report them.
         echo "[*] $(basename "$ko") has Seekwave symbol imports (resolved by skw_sdio_lite at load)"
     fi
 done
@@ -88,10 +109,22 @@ done
 rm -rf "$STAGE"; mkdir -p "$STAGE"
 install -m 0644 "$BSP_KO"  "$STAGE/skw_sdio_lite.ko"
 install -m 0644 "$WIFI_KO" "$STAGE/skw.ko"
+# Load order matters: the SDIO layer must come up before the upper modules,
+# which import its symbols.
 printf 'skw_sdio_lite\nskw\n' > "$STAGE/c20e-seekwave.conf"
+if [[ -n "$BT_KO" ]]; then
+    install -m 0644 "$BT_KO" "$STAGE/skwbt.ko"
+    # Bluetooth loads cleanly against this hybrid (the earlier "skwbt corrupts
+    # kernel memory" verdict came from a kernel running the legacy in-tree
+    # driver instead). It registers and creates /dev/BT*, but no HCI controller
+    # appears yet, so BlueZ has nothing to attach to -- bring-up is unfinished.
+    printf 'options skwbt firmware_dir=seekwave\n' > "$STAGE/c20e-skwbt.conf"
+    echo 'skwbt' >> "$STAGE/c20e-seekwave.conf"
+fi
 
 echo
-echo "[+] Hybrid Seekwave modules built for kernel $KREL"
+echo "[+] Seekwave modules built for kernel $KREL"
 sha256sum "$STAGE"/*.ko
 echo "[+] Staged in: $STAGE"
-echo "[+] Install with: sudo ./install-c20e-hybrid-seekwave.sh /dev/sdX"
+echo "[+] build.sh installs these into the rootfs automatically."
+echo "[+] To patch an existing card: sudo ./install-c20e-hybrid-seekwave.sh /dev/sdX"

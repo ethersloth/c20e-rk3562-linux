@@ -383,13 +383,22 @@ echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 locale-gen
 update-locale LANG=en_US.UTF-8
 
-# Add default user
+# Build-time placeholder account.
+#
+# This is NOT a login account. The image ships it locked with no password so
+# there are no default credentials; the real account is created interactively by
+# c20e-firstboot on the first serial connection. It exists only because the rest
+# of this script installs ~116 user-level files (Phosh helper scripts, .desktop
+# entries, configs) under its home, and c20e-firstboot copies that content over
+# to the account you create.
 groupadd -f render
 if ! id "chaos" &>/dev/null; then
     useradd -m -s /bin/bash chaos
-    echo "chaos:chaos" | chpasswd
 fi
 usermod -aG sudo,video,audio,netdev,render,input chaos
+# Locked: no password is set, and the account cannot be logged into.
+passwd -l chaos >/dev/null 2>&1 || true
+usermod -L chaos >/dev/null 2>&1 || true
 install -d -m 0755 /etc/sudoers.d
 cat > /etc/sudoers.d/10-chaos-nopasswd << 'SUDOERS_CHAOS'
 chaos ALL=(ALL) NOPASSWD: ALL
@@ -416,9 +425,15 @@ enable_if_installable upower.service
 systemctl disable ModemManager.service 2>/dev/null || true
 systemctl mask ModemManager.service 2>/dev/null || true
 # Select display manager: LightDM for Phosh.
+#
+# LightDM is deliberately left DISABLED here and the default target stays
+# multi-user. There is no usable account until c20e-firstboot runs, and
+# autologin would otherwise target the locked placeholder. c20e-firstboot
+# enables lightdm and switches to graphical.target once the real account exists.
 rm -f /etc/systemd/system/display-manager.service
 systemctl disable sddm 2>/dev/null || true
-systemctl enable lightdm
+systemctl disable lightdm 2>/dev/null || true
+systemctl set-default multi-user.target
 enable_if_installable packagekit.service
 
 # Enable compressed RAM swap to improve responsiveness on 4GB systems.
@@ -569,6 +584,40 @@ else
     echo "[!] Warning: kernel modules not found at ${MODULES_DIR}"
 fi
 
+# 4b. Install the out-of-tree Seekwave Wi-Fi + Bluetooth modules.
+#
+# The in-tree Seekwave driver is not built (see build.sh), so these ARE the
+# Wi-Fi driver -- without them the image has no networking at all. build.sh
+# stages them in out/c20e-seekwave on every kernel build.
+SEEKWAVE_STAGE="${OUT_DIR}/c20e-seekwave"
+if [ -d "${SEEKWAVE_STAGE}" ] && compgen -G "${SEEKWAVE_STAGE}/*.ko" > /dev/null; then
+    KREL_DIR="$(ls "${ROOTFS_MNT}/lib/modules" 2>/dev/null | head -n1)"
+    if [ -n "${KREL_DIR}" ]; then
+        echo "[*] Installing Seekwave Wi-Fi/Bluetooth modules for ${KREL_DIR}..."
+        install -d "${ROOTFS_MNT}/lib/modules/${KREL_DIR}/updates/c20e-seekwave"
+        for ko in "${SEEKWAVE_STAGE}"/*.ko; do
+            install -m 0644 "${ko}" \
+                "${ROOTFS_MNT}/lib/modules/${KREL_DIR}/updates/c20e-seekwave/$(basename "${ko}")"
+        done
+        install -d "${ROOTFS_MNT}/etc/modules-load.d" "${ROOTFS_MNT}/etc/modprobe.d"
+        [ -f "${SEEKWAVE_STAGE}/c20e-seekwave.conf" ] && \
+            install -m 0644 "${SEEKWAVE_STAGE}/c20e-seekwave.conf" \
+                "${ROOTFS_MNT}/etc/modules-load.d/c20e-seekwave.conf"
+        [ -f "${SEEKWAVE_STAGE}/c20e-skwbt.conf" ] && \
+            install -m 0644 "${SEEKWAVE_STAGE}/c20e-skwbt.conf" \
+                "${ROOTFS_MNT}/etc/modprobe.d/c20e-skwbt.conf"
+        chroot "${ROOTFS_MNT}" depmod "${KREL_DIR}" >/dev/null 2>&1 || true
+        ls -la "${ROOTFS_MNT}/lib/modules/${KREL_DIR}/updates/c20e-seekwave/"
+    else
+        echo "[-] Error: cannot determine kernel release under /lib/modules."
+        exit 1
+    fi
+else
+    echo "[-] Error: Seekwave modules missing from ${SEEKWAVE_STAGE}; image would have no Wi-Fi."
+    echo "    Run ./build.sh extboot first, or set RKDEBIAN_INTREE_SEEKWAVE=1 to use the legacy driver."
+    exit 1
+fi
+
 # 5. Install GPU/MPP packages
 echo "[*] Installing GPU and MPP packages..."
 if [ -d "${ROOT_DIR}/debs" ]; then
@@ -716,10 +765,16 @@ if [ -n "${BCM_CLM}" ]; then
     cp -f "${BCM_CLM}" "${ROOTFS_MNT}/vendor/etc/firmware/bcmdhd_clm.blob"
 fi
 
-# Keep the incompatible Seekwave Bluetooth upper module disabled. Loading the
-# modern skwbt against the V5.9r2 hybrid stack corrupts kernel memory.
-mkdir -p "${ROOTFS_MNT}/etc/modules-load.d/"
-echo "# skwbt disabled: incompatible with the V5.9r2 hybrid stack" > "${ROOTFS_MNT}/etc/modules-load.d/skwbt.conf"
+# skwbt loading is handled by /etc/modules-load.d/c20e-seekwave.conf, written
+# alongside the modules in section 4b.
+#
+# The older "skwbt corrupts kernel memory, keep it disabled" verdict does not
+# hold: it was reached on a kernel where build.sh force-enabled the LEGACY
+# in-tree Seekwave driver, so the hybrid stack it was supposedly tested against
+# was never actually loaded, and the module had been built against a
+# Module.symvers that did not match the running SDIO layer. Rebuilt against the
+# real hybrid it loads cleanly with no corruption. Remove this stale override.
+rm -f "${ROOTFS_MNT}/etc/modules-load.d/skwbt.conf"
 
 # 7. Add Mali GPU udev rules
 echo "[*] Adding Mali GPU udev rules..."
@@ -1060,14 +1115,27 @@ for y in range(H):
 write_png(sys.argv[1], W, H, rows)
 PYGEN
 
-# splash.png — custom boot logo from repository root
-if [ ! -f "${ROOT_DIR}/splash.png" ]; then
-    echo "[-] Error: missing ${ROOT_DIR}/splash.png (required for Plymouth logo)."
+# Boot logo and desktop background. Prefers new_boot_screen.png (the ethersloth
+# artwork) and falls back to splash.png, so the build still works in a checkout
+# that only has the original image. Override with RKDEBIAN_SPLASH=<path>.
+RKDEBIAN_SPLASH="${RKDEBIAN_SPLASH:-}"
+if [ -z "${RKDEBIAN_SPLASH}" ]; then
+    if [ -f "${ROOT_DIR}/new_boot_screen.png" ]; then
+        RKDEBIAN_SPLASH="${ROOT_DIR}/new_boot_screen.png"
+    else
+        RKDEBIAN_SPLASH="${ROOT_DIR}/splash.png"
+    fi
+fi
+if [ ! -f "${RKDEBIAN_SPLASH}" ]; then
+    echo "[-] Error: missing splash image ${RKDEBIAN_SPLASH}."
     exit 1
 fi
-install -m 0644 "${ROOT_DIR}/splash.png" "${THEME_DIR}/splash.png"
+echo "[*] Boot logo / background image: $(basename "${RKDEBIAN_SPLASH}")"
+# Installed under the fixed name splash.png so the framebuffer logo script and
+# the gsettings override below do not need to know which source was picked.
+install -m 0644 "${RKDEBIAN_SPLASH}" "${THEME_DIR}/splash.png"
 mkdir -p "${ROOTFS_MNT}/usr/share/backgrounds/rkdebian"
-install -m 0644 "${ROOT_DIR}/splash.png" \
+install -m 0644 "${RKDEBIAN_SPLASH}" \
     "${ROOTFS_MNT}/usr/share/backgrounds/rkdebian/splash.png"
 mkdir -p "${ROOTFS_MNT}/usr/share/glib-2.0/schemas"
 cat > "${ROOTFS_MNT}/usr/share/glib-2.0/schemas/90-rkdebian-background.gschema.override" << 'RKDEBIAN_BACKGROUND'
@@ -1371,12 +1439,15 @@ minimum-vt=1
 [Seat:*]
 type=local
 user-session=phosh
-autologin-user=chaos
 autologin-session=phosh
 autologin-user-timeout=0
-# No session-wrapper: phosh is a Wayland session and /etc/X11/Xsession pulls
-# Xorg into the path. The greeter (lightdm-gtk-greeter) is an X client too, so
-# autologin above is what keeps X out of the picture entirely. That matters
+# autologin-user is intentionally absent: the account does not exist until
+# c20e-firstboot creates it, and that script inserts the line. LightDM ships
+# disabled, so no greeter can appear before then.
+#
+# No session-wrapper either: phosh is a Wayland session and /etc/X11/Xsession
+# pulls Xorg into the path. The greeter (lightdm-gtk-greeter) is an X client
+# too, so autologin is what keeps X out of the picture entirely. That matters
 # because the shipped libmali is the wayland-gbm variant with no X11 support;
 # letting an X server load it hard-locks the board.
 
@@ -1407,6 +1478,226 @@ printf '%s\n' '/usr/sbin/lightdm' > "${ROOTFS_MNT}/etc/X11/default-display-manag
 ln -sfn /lib/systemd/system/lightdm.service "${ROOTFS_MNT}/etc/systemd/system/display-manager.service"
 # Avoid a tty1 text login flicker between boot logo and GUI.
 ln -sfn /dev/null "${ROOTFS_MNT}/etc/systemd/system/getty@tty1.service"
+
+###############################################################################
+# USB CDC-ACM debug console (/dev/ttyGS0 on device, /dev/ttyACM* on the host)
+#
+# This is the console used to talk to the board, and it is what the first-boot
+# wizard runs on. It was previously only installed by install-c20e-usb-debug.sh,
+# so a clean build had no serial console at all.
+###############################################################################
+echo "[*] Installing USB debug console gadget..."
+cat > "${ROOTFS_MNT}/usr/local/sbin/c20e-usb-debug" << 'C20E_USB_DEBUG'
+#!/bin/bash
+set -eu
+
+LOG=/var/log/c20e-usb-debug.log
+exec >>"$LOG" 2>&1
+echo "=== C20e USB debug startup $(date -Is) ==="
+
+mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+mountpoint -q /sys/kernel/config || mount -t configfs configfs /sys/kernel/config
+
+if [ -w /sys/devices/platform/ff740000.usb2-phy/otg_mode ]; then
+    echo peripheral > /sys/devices/platform/ff740000.usb2-phy/otg_mode
+fi
+if [ -w /sys/kernel/debug/usb/fe500000.usb/mode ]; then
+    echo device > /sys/kernel/debug/usb/fe500000.usb/mode
+fi
+
+G=/sys/kernel/config/usb_gadget/c20e
+if [ -d "$G" ] && [ -e "$G/UDC" ]; then
+    printf '' > "$G/UDC" 2>/dev/null || true
+fi
+
+mkdir -p "$G"
+echo 0x1d6b > "$G/idVendor"
+echo 0x0104 > "$G/idProduct"
+
+mkdir -p "$G/strings/0x409"
+echo C20EDEBUG001 > "$G/strings/0x409/serialnumber"
+echo Aiprotablet > "$G/strings/0x409/manufacturer"
+echo "C20e USB Debug Console" > "$G/strings/0x409/product"
+
+mkdir -p "$G/configs/c.1/strings/0x409"
+echo "C20e Debug ACM" > "$G/configs/c.1/strings/0x409/configuration"
+
+mkdir -p "$G/functions/acm.usb0"
+ln -s "$G/functions/acm.usb0" "$G/configs/c.1/acm.usb0" 2>/dev/null || true
+
+UDC=""
+for i in $(seq 1 50); do
+    UDC="$(ls /sys/class/udc 2>/dev/null | head -n1 || true)"
+    [ -n "$UDC" ] && break
+    sleep 0.1
+done
+if [ -z "$UDC" ]; then
+    echo "ERROR: no USB Device Controller found in /sys/class/udc"
+    exit 1
+fi
+
+echo "$UDC" > "$G/UDC"
+echo "Bound C20e debug gadget to UDC: $UDC"
+[ -e /dev/ttyGS0 ] && echo "ttyGS0 is available" || \
+    echo "WARNING: /dev/ttyGS0 not present immediately after UDC bind"
+C20E_USB_DEBUG
+chmod 0755 "${ROOTFS_MNT}/usr/local/sbin/c20e-usb-debug"
+
+cat > "${ROOTFS_MNT}/etc/systemd/system/c20e-usb-debug.service" << 'C20E_USB_DEBUG_UNIT'
+[Unit]
+Description=C20e USB CDC ACM debug console
+After=systemd-modules-load.service local-fs.target
+Before=getty.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/c20e-usb-debug
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+C20E_USB_DEBUG_UNIT
+
+###############################################################################
+# First-boot account setup, on the USB serial console
+#
+# The wizard must be the FIRST thing on that tty. Masking
+# serial-getty@ttyGS0.service is what guarantees that: previously the getty won
+# the race and you had to log in as the placeholder account before the wizard
+# appeared. The wizard unmasks and enables the getty when it is done.
+###############################################################################
+echo "[*] Installing first-boot setup wizard..."
+install -d "${ROOTFS_MNT}/var/lib/c20e"
+cat > "${ROOTFS_MNT}/usr/local/sbin/c20e-firstboot" << 'C20E_FIRSTBOOT'
+#!/bin/bash
+set -euo pipefail
+MARK=/var/lib/c20e/firstboot-complete
+PRIMARY=/var/lib/c20e/primary-user
+PLACEHOLDER=chaos
+[ -e "$MARK" ] && exit 0
+exec 9>/run/c20e-firstboot.lock
+flock -n 9 || exit 0
+
+clear
+echo "==============================================="
+echo " C20e first boot setup"
+echo "==============================================="
+echo
+echo "No account exists yet. Create one now."
+echo
+
+while :; do
+    read -r -p "Username: " U
+    case "$U" in
+        ""|root|"$PLACEHOLDER"|*[!a-z0-9_-]*)
+            echo "  Use lowercase letters, numbers, _ or -, and not root/$PLACEHOLDER." ;;
+        *)
+            if id "$U" >/dev/null 2>&1; then echo "  That account already exists."; else break; fi ;;
+    esac
+done
+
+while :; do
+    read -r -p "Hostname [c20e]: " H
+    H="${H:-c20e}"
+    case "$H" in
+        *[!A-Za-z0-9-]*|-*|*-) echo "  Letters, numbers and hyphens only." ;;
+        *) break ;;
+    esac
+done
+
+useradd -m -s /bin/bash "$U"
+echo
+echo "Set a password for '$U':"
+while ! passwd "$U"; do
+    echo "  Password setup failed; try again."
+done
+
+for G in sudo adm audio video render input plugdev netdev dialout; do
+    getent group "$G" >/dev/null 2>&1 && usermod -aG "$G" "$U"
+done
+
+# Carry the desktop customisation installed at build time (Phosh helper
+# scripts, .desktop entries, configs) over to the real account, then repoint
+# any absolute paths that referenced the placeholder home.
+if [ -d "/home/$PLACEHOLDER" ]; then
+    (cd "/home/$PLACEHOLDER" && tar cf - .) | (cd "/home/$U" && tar xf - 2>/dev/null) || true
+    grep -rlI "/home/$PLACEHOLDER" "/home/$U" 2>/dev/null | while read -r f; do
+        sed -i "s#/home/$PLACEHOLDER#/home/$U#g" "$f" || true
+    done
+    chown -R "$U:$U" "/home/$U"
+fi
+
+printf '%s\n' "$U" >"$PRIMARY"
+printf '%s\n' "$H" >/etc/hostname
+hostnamectl set-hostname "$H" 2>/dev/null || true
+mkdir -p "/home/$U/update"; chown -R "$U:$U" "/home/$U/update"
+
+# Point autologin at the new account. Do NOT drop autologin: the LightDM GTK
+# greeter is an X client, and an X server loading the wayland-gbm libmali
+# hard-locks this board.
+if [ -f /etc/lightdm/lightdm.conf ]; then
+    sed -i '/^[[:space:]]*autologin-user=/d' /etc/lightdm/lightdm.conf
+    sed -i "/^\[Seat:\*\]/a autologin-user=$U" /etc/lightdm/lightdm.conf
+fi
+
+# Repoint services that defaulted to the placeholder account.
+[ -f /usr/local/sbin/rk-powerkey-longpress.py ] && \
+    sed -i "s/RK_POWERKEY_USER\", \"$PLACEHOLDER\"/RK_POWERKEY_USER\", \"$U\"/" /usr/local/sbin/rk-powerkey-longpress.py || true
+[ -f /usr/local/sbin/rk-audio-resume.sh ] && \
+    sed -i "s/RK_AUDIO_USER:-$PLACEHOLDER/RK_AUDIO_USER:-$U/g" /usr/local/sbin/rk-audio-resume.sh || true
+[ -f /usr/local/sbin/rk-apply-update.sh ] && \
+    sed -i "s#/home/$PLACEHOLDER/update#/home/$U/update#g" /usr/local/sbin/rk-apply-update.sh || true
+
+rm -f "/etc/sudoers.d/10-${PLACEHOLDER}-nopasswd"
+passwd -l "$PLACEHOLDER" >/dev/null 2>&1 || true
+usermod -L "$PLACEHOLDER" >/dev/null 2>&1 || true
+passwd -l root >/dev/null 2>&1 || true
+
+touch "$MARK"
+systemctl disable c20e-firstboot.service >/dev/null 2>&1 || true
+# Hand the serial console back to a normal login prompt.
+systemctl unmask serial-getty@ttyGS0.service >/dev/null 2>&1 || true
+systemctl enable serial-getty@ttyGS0.service >/dev/null 2>&1 || true
+systemctl set-default graphical.target >/dev/null 2>&1 || true
+systemctl enable lightdm.service >/dev/null 2>&1 || true
+sync
+
+echo
+echo "Setup complete for '$U' on host '$H'."
+echo "Rebooting into the desktop..."
+sleep 3
+systemctl reboot
+C20E_FIRSTBOOT
+chmod 0755 "${ROOTFS_MNT}/usr/local/sbin/c20e-firstboot"
+
+cat > "${ROOTFS_MNT}/etc/systemd/system/c20e-firstboot.service" << 'C20E_FIRSTBOOT_UNIT'
+[Unit]
+Description=C20e first-boot account setup over USB serial
+Requires=c20e-usb-debug.service
+After=local-fs.target systemd-user-sessions.service c20e-usb-debug.service
+Before=serial-getty@ttyGS0.service
+Conflicts=serial-getty@ttyGS0.service
+ConditionPathExists=!/var/lib/c20e/firstboot-complete
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/c20e-firstboot
+StandardInput=tty-force
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/ttyGS0
+TTYReset=yes
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+C20E_FIRSTBOOT_UNIT
+
+chroot "${ROOTFS_MNT}" systemctl enable c20e-usb-debug.service >/dev/null 2>&1 || true
+chroot "${ROOTFS_MNT}" systemctl enable c20e-firstboot.service >/dev/null 2>&1 || true
+# Masked, not merely disabled: a disabled getty can still be pulled in as a
+# dependency and steal the tty before the wizard gets it.
+chroot "${ROOTFS_MNT}" systemctl mask serial-getty@ttyGS0.service >/dev/null 2>&1 || true
 
 # Plasma Discover can fail to launch on this Wayland + Mali stack when Qt's
 # default GL path cannot initialize EGL. Provide a software-rendered wrapper
@@ -3006,10 +3297,15 @@ mkdir -p "${ROOTFS_MNT}/etc/systemd/system/timers.target.wants"
 rm -f "${ROOTFS_MNT}/etc/systemd/system/multi-user.target.wants/rk-bluetooth-recover.service"
 rm -f "${ROOTFS_MNT}/etc/systemd/system/timers.target.wants/rk-bluetooth-recover.timer"
 
-# Do not let D-Bus activation or bluetooth.service load skwbt indirectly.
-echo "[*] Disabling incompatible Seekwave Bluetooth service path..."
+# Bluetooth: skwbt loads cleanly against the hybrid stack, so bluetoothd is
+# enabled again. Note bring-up is incomplete -- the driver registers and creates
+# /dev/BTCMD, /dev/BTDATA, /dev/BTBOOT and /dev/BTAUDIO, but no HCI controller
+# appears, so bluetoothd starts and finds no adapter. Harmless, and it means the
+# stack is in place for whoever finishes the chip-side BT service start (the
+# Bluetooth analogue of skw_start_wifi_service).
+echo "[*] Enabling Bluetooth service (adapter bring-up still incomplete)..."
 rm -f "${ROOTFS_MNT}/etc/systemd/system/bluetooth.service.d/rk-skwbt.conf"
-chroot "${ROOTFS_MNT}" systemctl disable bluetooth.service 2>/dev/null || true
+chroot "${ROOTFS_MNT}" systemctl enable bluetooth.service 2>/dev/null || true
 
 # Arm the DesignWare hardware watchdog (&wdt, enabled in the board DTS) via
 # systemd's built-in support. PID1 pets /dev/watchdog0 on its own timer and
@@ -4651,10 +4947,13 @@ STATE_DIR=/var/lib/rk-session-failsafe
 ARMED_FILE="${STATE_DIR}/armed"
 [ -f "${ARMED_FILE}" ] || exit 0
 
+# The real account is created by c20e-firstboot, which records its name here.
+PRIMARY_USER="$(cat /var/lib/c20e/primary-user 2>/dev/null || echo chaos)"
+
 if [ -f /etc/lightdm/lightdm.conf ] && grep -q '^autologin-session=phosh$' /etc/lightdm/lightdm.conf; then
-    if loginctl list-sessions --no-legend 2>/dev/null | awk '$3=="chaos"{found=1} END{exit(found?0:1)}'; then
-        if pgrep -u chaos -f '/usr/libexec/phosh' >/dev/null 2>&1 || \
-           pgrep -u chaos -x phoc >/dev/null 2>&1; then
+    if loginctl list-sessions --no-legend 2>/dev/null | awk -v u="$PRIMARY_USER" '$3==u{found=1} END{exit(found?0:1)}'; then
+        if pgrep -u "$PRIMARY_USER" -f '/usr/libexec/phosh' >/dev/null 2>&1 || \
+           pgrep -u "$PRIMARY_USER" -x phoc >/dev/null 2>&1; then
             rm -f "${ARMED_FILE}"
             logger -t rk-session-failsafe "Phosh session detected; disarmed watchdog without rollback"
             exit 0
@@ -4663,14 +4962,14 @@ if [ -f /etc/lightdm/lightdm.conf ] && grep -q '^autologin-session=phosh$' /etc/
 fi
 
 install -d /etc/lightdm /etc/X11 /etc/systemd/system
-cat > /etc/lightdm/lightdm.conf << 'LIGHTDM_CONF'
+cat > /etc/lightdm/lightdm.conf << LIGHTDM_CONF
 [LightDM]
 minimum-vt=1
 
 [Seat:*]
 type=local
 user-session=phosh
-autologin-user=chaos
+autologin-user=${PRIMARY_USER}
 autologin-session=phosh
 autologin-user-timeout=0
 # Deliberately no session-wrapper; see the matching block earlier in this
