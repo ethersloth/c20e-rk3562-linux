@@ -38,6 +38,11 @@ RKDEBIAN_UI_SESSION="${RKDEBIAN_UI_SESSION:-phosh}"
 RKDEBIAN_GPU_STACK="${RKDEBIAN_GPU_STACK:-mali}"
 RKDEBIAN_CPU_GOVERNOR="${RKDEBIAN_CPU_GOVERNOR:-performance}"
 RKDEBIAN_FORCE_CLEAN_ROOTFS="${RKDEBIAN_FORCE_CLEAN_ROOTFS:-0}"
+# Off by default: it fights c20e-usb-debug for the USB port and leaves it
+# cycling, which blocks the first-boot wizard. See the longer note in
+# build_rootfs.sh. Stated here too so the build profile line below is accurate
+# rather than printing an empty value.
+RKDEBIAN_ENABLE_USB_ROLE_MANAGER="${RKDEBIAN_ENABLE_USB_ROLE_MANAGER:-0}"
 
 CROSS_COMPILE="aarch64-linux-gnu-"
 CPU_THREADS=$(nproc)

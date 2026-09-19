@@ -27,7 +27,21 @@ RKDEBIAN_UI_SESSION="${RKDEBIAN_UI_SESSION:-phosh}"
 RKDEBIAN_MALI_GBM_PROVIDER="${RKDEBIAN_MALI_GBM_PROVIDER:-vendor}"
 RKDEBIAN_PREINSTALL_FREETUBE="${RKDEBIAN_PREINSTALL_FREETUBE:-1}"
 RKDEBIAN_MINIMIZE_IMAGE="${RKDEBIAN_MINIMIZE_IMAGE:-0}"
-RKDEBIAN_ENABLE_USB_ROLE_MANAGER="${RKDEBIAN_ENABLE_USB_ROLE_MANAGER:-1}"
+# Default OFF. usb-mode-switch.sh "auto" calls set_mode host unconditionally at
+# startup, which tears down the gadget c20e-usb-debug.service just bound, and
+# its poll loop then oscillates host <-> peripheral roughly every 9s: the port
+# is reset so often that enumeration never completes, so the battery never
+# reports "Charging" and the loop never reaches a stable branch. The visible
+# result is endless xhci register/deregister on screen and a /dev/ttyACM0 that
+# keeps vanishing, so the first-boot wizard can never be completed.
+#
+# Every prepare-c20e-*.sh script disabled this on the live card, which is why
+# the problem only appeared on the first clean rebuild that used this default.
+# The board now also does role switching in-kernel (HUSB320 usb-c-connector ->
+# usbdrd_dwc3 via usb-role-switch in the board DTS), so the userspace poller is
+# redundant as well as harmful. Re-enable with --enable-usb-role-manager if you
+# specifically need the charger/accessory heuristics.
+RKDEBIAN_ENABLE_USB_ROLE_MANAGER="${RKDEBIAN_ENABLE_USB_ROLE_MANAGER:-0}"
 
 case "${RKDEBIAN_DISPLAY_SERVER}" in
     auto|wayland|x11) ;;
@@ -1552,6 +1566,12 @@ cat > "${ROOTFS_MNT}/etc/systemd/system/c20e-usb-debug.service" << 'C20E_USB_DEB
 Description=C20e USB CDC ACM debug console
 After=systemd-modules-load.service local-fs.target
 Before=getty.target
+# The debug console owns the USB port outright. usb-role-manager.service flips
+# the dwc3 role to host on startup and then polls, which deregisters the gadget
+# bound below and leaves the port cycling forever. Conflicts= in THIS unit (not
+# in the role manager) is what makes the debug console win, because starting
+# this unit stops the other one rather than the reverse.
+Conflicts=usb-role-manager.service
 
 [Service]
 Type=oneshot
