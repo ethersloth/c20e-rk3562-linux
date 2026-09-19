@@ -565,6 +565,22 @@ build_kernel() {
     if [ -d "${ROOT_DIR}/overlay" ]; then
         cp -r "${ROOT_DIR}/overlay/." .
 
+        # The HUSB320 Type-C driver is not upstream and is not in the Rockchip
+        # vendor tree either. It was previously only ever present in
+        # src/kernel/, which is gitignored, so a fresh clone built a kernel
+        # with no Type-C support at all while the working tree kept building
+        # fine -- the failure was invisible until the board misbehaved.
+        # The board DTS references it by compatible, so if it is missing the
+        # connector node is inert and usb-role-switch does nothing.
+        # Fail loudly rather than shipping that silently.
+        for f in drivers/usb/typec/husb320.c drivers/usb/typec/Kconfig drivers/usb/typec/Makefile; do
+            [ -s "$f" ] || { echo "[-] Missing ${f} after overlay copy."; exit 1; }
+        done
+        grep -q 'husb320.o' drivers/usb/typec/Makefile \
+            || { echo "[-] drivers/usb/typec/Makefile does not build husb320.o."; exit 1; }
+        grep -q 'TYPEC_HUSB320' drivers/usb/typec/Kconfig \
+            || { echo "[-] drivers/usb/typec/Kconfig has no TYPEC_HUSB320 symbol."; exit 1; }
+
         if [ "${RKDEBIAN_GPU_STACK}" = "panfrost" ]; then
             local panfrost_dts="arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts"
             local rockchip_dts_makefile="arch/arm64/boot/dts/rockchip/Makefile"

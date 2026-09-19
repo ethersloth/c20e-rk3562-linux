@@ -527,9 +527,22 @@ CONFIG_USB_CONFIGFS_ACM=y
 CONFIG_USB_CONFIGFS_MASS_STORAGE=y
 CONFIG_USB_CONFIGFS_F_FS=y
 CONFIG_USB_CONFIGFS_F_UVC=y
+CONFIG_TYPEC=y
 CONFIG_TYPEC_TCPM=y
 CONFIG_TYPEC_TCPCI=y
 CONFIG_TYPEC_HUSB311=y
+# The C20e's actual Type-C controller, on i2c0 at 0x21 (see the husb320 node
+# in the board DTS). The driver is NOT upstream: it ships in
+# overlay/drivers/usb/typec/ and is copied into the kernel tree by the
+# overlay step in build.sh.
+#
+# This symbol was previously set only in src/kernel/.config, which is
+# gitignored, so the working kernel had Type-C support but a fresh clone
+# would silently build without it. USB_ROLE_SWITCH is required for the
+# usb-role-switch / port endpoint wiring between this connector and
+# usbdrd_dwc3 to have any effect.
+CONFIG_TYPEC_HUSB320=y
+CONFIG_USB_ROLE_SWITCH=y
 CONFIG_TYPEC_FUSB302=y
 CONFIG_TYPEC_DP_ALTMODE=y
 CONFIG_MMC=y
