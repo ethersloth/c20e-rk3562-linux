@@ -1345,12 +1345,35 @@ type=local
 user-session=phosh
 autologin-user=chaos
 autologin-session=phosh
-session-wrapper=/etc/X11/Xsession
+autologin-user-timeout=0
+# No session-wrapper: phosh is a Wayland session and /etc/X11/Xsession pulls
+# Xorg into the path. The greeter (lightdm-gtk-greeter) is an X client too, so
+# autologin above is what keeps X out of the picture entirely. That matters
+# because the shipped libmali is the wayland-gbm variant with no X11 support;
+# letting an X server load it hard-locks the board.
 
 [XDMCPServer]
 
 [VNCServer]
 LIGHTDM_CONF
+
+# Phosh's compositor starts Xwayland lazily, which loads the Mali blob into an
+# X server and hard-locks this board (observed: phoc logs "Restarting Xwayland
+# (lazy)" and the Mali arm_release_ver banner, then the system dies with no
+# trace). Phosh itself is fine without it; X11 apps will not run.
+# Drop this override, or install the libmali x11-gbm variant instead, if X11
+# application support is needed.
+if [ -f "${ROOTFS_MNT}/usr/share/phosh/phoc.ini" ]; then
+    echo "[*] Disabling Xwayland in phoc..."
+    sed -i 's/^#\[core\]/[core]/; s/^#xwayland=false/xwayland=false/' \
+        "${ROOTFS_MNT}/usr/share/phosh/phoc.ini"
+    if ! grep -q '^xwayland=false' "${ROOTFS_MNT}/usr/share/phosh/phoc.ini"; then
+        printf '[core]\nxwayland=false\n' | \
+            cat - "${ROOTFS_MNT}/usr/share/phosh/phoc.ini" > "${ROOTFS_MNT}/usr/share/phosh/phoc.ini.new"
+        mv "${ROOTFS_MNT}/usr/share/phosh/phoc.ini.new" "${ROOTFS_MNT}/usr/share/phosh/phoc.ini"
+    fi
+    grep -A1 '^\[core\]' "${ROOTFS_MNT}/usr/share/phosh/phoc.ini" | head -2
+fi
 mkdir -p "${ROOTFS_MNT}/etc/X11" "${ROOTFS_MNT}/etc/systemd/system"
 printf '%s\n' '/usr/sbin/lightdm' > "${ROOTFS_MNT}/etc/X11/default-display-manager"
 ln -sfn /lib/systemd/system/lightdm.service "${ROOTFS_MNT}/etc/systemd/system/display-manager.service"
@@ -4621,7 +4644,9 @@ type=local
 user-session=phosh
 autologin-user=chaos
 autologin-session=phosh
-session-wrapper=/etc/X11/Xsession
+autologin-user-timeout=0
+# Deliberately no session-wrapper; see the matching block earlier in this
+# script. An X server loading the wayland-gbm libmali hard-locks this board.
 
 [XDMCPServer]
 
