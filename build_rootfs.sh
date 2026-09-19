@@ -954,6 +954,34 @@ sed -i '/^MOZ_DISABLE_RDD_SANDBOX=/d;/^MOZ_X11_EGL=/d;/^MOZ_WEBRENDER=/d' \
     "${ROOTFS_MNT}/etc/environment" || true
 echo "MOZ_DISABLE_RDD_SANDBOX=1" >> "${ROOTFS_MNT}/etc/environment"
 
+# Force GTK apps to render in software.
+#
+# A GTK client rendering through the Mali GPU and presenting buffers to the
+# compositor hard-locks this board: no panic, no oops, no pstore record, only
+# the hardware watchdog recovers it. Reproduced deterministically by launching
+# gnome-control-center (any panel), and it matches the long-standing reports of
+# the desktop dying "right after opening an app".
+#
+# Isolated by A/B on a single variable, same panel each time:
+#   default GTK renderer (GL via Mali) -> hard lock
+#   GSK_RENDERER=cairo                 -> ran the full test, machine fine
+#   GDK_DISABLE=dmabuf (GL kept)       -> still hard locked
+#
+# So it is client-side GL itself, not just dmabuf buffer sharing. The
+# compositor keeps using the GPU (phoc is stable for 90s under load, and
+# eglinfo reports Mali-G52), only application rendering drops to software.
+# Costs app smoothness; without it the desktop is unusable.
+#
+# Remove this once client GL rendering is fixed in the Mali stack. Test by
+# unsetting it and launching gnome-control-center; if the board survives, the
+# workaround is no longer needed.
+mkdir -p "${ROOTFS_MNT}/etc/environment.d"
+cat > "${ROOTFS_MNT}/etc/environment.d/90-rk-gsk-software.conf" << 'GSK_ENV'
+GSK_RENDERER=cairo
+GSK_ENV
+sed -i '/^GSK_RENDERER=/d' "${ROOTFS_MNT}/etc/environment" || true
+echo "GSK_RENDERER=cairo" >> "${ROOTFS_MNT}/etc/environment"
+
 # Auto-install h264ify on first Firefox run to keep YouTube on H.264 streams.
 mkdir -p "${ROOTFS_MNT}/usr/lib/firefox-esr/distribution"
 cat > "${ROOTFS_MNT}/usr/lib/firefox-esr/distribution/policies.json" << 'FIREFOX_POLICIES'
