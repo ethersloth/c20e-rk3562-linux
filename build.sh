@@ -475,7 +475,49 @@ build_uboot() {
     echo "[*] Using RK3562 loader: ${spl_loader}"
     cp "${spl_loader}" "${OUT_DIR}/idbloader.img"
     cp uboot.img "${OUT_DIR}/u-boot.itb"
-    
+
+    # Use the C20e factory bootchain, not the one just built.
+    #
+    # rk3562_spl_loader_*.bin is the USB maskrom DOWNLOAD loader: its magic is
+    # "LDR " (a Rockchip loader container). SD/eMMC boot requires an idblock,
+    # magic "RKNS", read by the BootROM from sector 64. Writing the loader there
+    # produces a board that does not boot and prints nothing at all, because
+    # nothing ever executes -- no console output, no USB, indistinguishable from
+    # dead hardware.
+    #
+    # This is why deploy-c20e-sd.sh only ever replaces Image and rk3562.dtb and
+    # reports "Factory bootchain was NOT modified": the working card carried the
+    # factory bootloader, and build.sh could not reproduce it. Flashing a full
+    # image therefore bricked boot until these blobs were restored.
+    #
+    # bootloader/ holds that chain, carved out of c20e-backup/emmc-first-16MiB.bin
+    # (idblock at 32K, U-Boot FIT at 8M -- the same offsets genimage uses). The
+    # FIT is U-Boot 2017.09-g14cd03b177 (Mar 08 2025), matching the
+    # androidboot.fwver the working system reported.
+    #
+    # Set RKDEBIAN_BUILD_UBOOT=1 to ship the freshly built loader instead. That
+    # is for U-Boot work only; it will not boot this board as-is.
+    local fac_idb="${ROOT_DIR}/bootloader/c20e-factory-idbloader.img"
+    local fac_uboot="${ROOT_DIR}/bootloader/c20e-factory-uboot.itb"
+    if [ "${RKDEBIAN_BUILD_UBOOT:-0}" = "1" ]; then
+        echo "[!] RKDEBIAN_BUILD_UBOOT=1: shipping the freshly built loader."
+        echo "[!] This does NOT boot the C20e; expect a black screen."
+    elif [ -f "${fac_idb}" ] && [ -f "${fac_uboot}" ]; then
+        echo "[*] Installing C20e factory bootchain (idblock + U-Boot FIT)..."
+        cp -f "${fac_idb}"   "${OUT_DIR}/idbloader.img"
+        cp -f "${fac_uboot}" "${OUT_DIR}/u-boot.itb"
+        # Sanity-check the magics; a wrong idbloader is invisible at boot.
+        if ! head -c4 "${OUT_DIR}/idbloader.img" | grep -q "RKNS"; then
+            echo "[-] Error: idbloader.img is not an RKNS idblock; it will not boot."
+            exit 1
+        fi
+    else
+        echo "[-] Error: factory bootchain missing from ${ROOT_DIR}/bootloader/."
+        echo "    The built loader is a USB download image and will not boot from SD."
+        echo "    Extract it with: ./extract-c20e-factory-bootloader.sh"
+        exit 1
+    fi
+
     echo "[+] U-Boot build complete."
     ensure_sdk_compat_layout
 }
