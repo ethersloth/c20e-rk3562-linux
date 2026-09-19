@@ -1408,9 +1408,13 @@ FSTAB
 echo "[*] Configuring display manager autologin (${RKDEBIAN_UI_SESSION})..."
 rm -rf "${ROOTFS_MNT}/etc/sddm.conf.d"
 mkdir -p "${ROOTFS_MNT}/etc/lightdm"
-# Reused rootfs trees can retain a text-mode default target from prior
-# experiments or recovery boots. Force graphical boot so LightDM is started.
-ln -sf /lib/systemd/system/graphical.target "${ROOTFS_MNT}/etc/systemd/system/default.target"
+# Boot to multi-user, NOT graphical. There is no account until c20e-firstboot
+# runs, so starting LightDM here would mean a display manager with nothing to
+# log in as. c20e-firstboot switches the default to graphical.target and enables
+# lightdm once the real account exists. (This line previously forced graphical
+# unconditionally and silently undid that, because it runs after the
+# set-default multi-user.target earlier in this script.)
+ln -sf /lib/systemd/system/multi-user.target "${ROOTFS_MNT}/etc/systemd/system/default.target"
 # Drop stale gaming-session services from reused rootfs trees; they can keep
 # waking up in the background even on desktop-oriented images.
 rm -f "${ROOTFS_MNT}/etc/systemd/system/emulationstation.service" \
