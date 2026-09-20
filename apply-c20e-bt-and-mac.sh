@@ -30,7 +30,8 @@ trap cleanup EXIT
 [[ $EUID -eq 0 ]] || die "Run with sudo."
 [[ -b "${DEV}4" ]] || die "no ${DEV}4 -- is the card in and is $DEV right?"
 [[ "$(lsblk -dnro TRAN "$DEV" 2>/dev/null)" == "usb" ]] || die "$DEV is not reported as USB."
-for f in c20e-bt-bringup.sh c20e-bt-bringup.service c20e-skw-mac.conf; do
+for f in c20e-bt-bringup.sh c20e-bt-bringup.service c20e-skw-mac.conf \
+         c20e-nm-no-mac-randomization.conf; do
     [[ -f "$REPO/overlay/$f" ]] || die "missing overlay/$f"
 done
 for m in skw_sdio_lite.ko skw.ko skwbt.ko; do
@@ -79,6 +80,11 @@ ln -sf /etc/systemd/system/c20e-bt-bringup.service \
 echo "[*] installing stable Wi-Fi MAC"
 install -m 0644 "$REPO/overlay/c20e-skw-mac.conf" "$MNT/etc/modprobe.d/c20e-skw-mac.conf"
 
+echo "[*] disabling NetworkManager MAC randomization"
+mkdir -p "$MNT/etc/NetworkManager/conf.d"
+install -m 0644 "$REPO/overlay/c20e-nm-no-mac-randomization.conf" \
+    "$MNT/etc/NetworkManager/conf.d/99-c20e-no-mac-randomization.conf"
+
 # depmod must run against the card's kernel, not the host's.
 if command -v depmod >/dev/null; then
     depmod -b "$MNT" "$KREL" 2>/dev/null && echo "[+] depmod done" || echo "[!] depmod failed (modules are in updates/, usually still fine)"
@@ -90,6 +96,7 @@ echo "[*] verification:"
 echo "    btseekwave in installed module: $(strings "$MODDIR/skw_sdio_lite.ko" | grep -c btseekwave)"
 echo "    bringup service:                $([[ -e "$MNT/etc/systemd/system/multi-user.target.wants/c20e-bt-bringup.service" ]] && echo enabled || echo MISSING)"
 echo "    mac option:                     $(grep -o 'mac=.*' "$MNT/etc/modprobe.d/c20e-skw-mac.conf")"
+echo "    nm mac-rand off:                $([[ -f "$MNT/etc/NetworkManager/conf.d/99-c20e-no-mac-randomization.conf" ]] && echo yes || echo MISSING)"
 echo "    skwbt auto-load:                $(grep -qx 'skwbt' "$LOADCONF" 2>/dev/null && echo 'STILL PRESENT (bad)' || echo 'removed (good)')"
 
 umount "$MNT"
