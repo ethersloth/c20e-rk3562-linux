@@ -1810,6 +1810,18 @@ config VIDEO_S5K4H5YB
 	  This is a Video4Linux2 sensor driver for the Samsung
 	  S5K4H5YB camera.
 
+config VIDEO_GC02M1
+	tristate "GalaxyCore GC02M1 sensor support"
+	depends on I2C && PM && VIDEO_DEV
+	depends on MEDIA_CAMERA_SUPPORT
+	select MEDIA_CONTROLLER
+	select VIDEO_V4L2_SUBDEV_API
+	select V4L2_FWNODE
+	help
+	  This is a Video4Linux2 sensor driver for the GalaxyCore GC02M1
+	  camera, the front sensor on the C20e tablet (i2c 4-0037, behind
+	  csi2-dphy4). Not upstream: the driver ships in overlay/drivers/.
+
 config VIDEO_S5K5E8
 	tristate "Samsung S5K5E8 sensor support"
 	depends on I2C && PM && VIDEO_DEV

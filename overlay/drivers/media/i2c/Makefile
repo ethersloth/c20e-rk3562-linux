@@ -224,6 +224,7 @@ obj-$(CONFIG_VIDEO_S5K3L8XX) += s5k3l8xx.o
 obj-$(CONFIG_VIDEO_S5K4H5YB) += s5k4h5yb.o
 obj-$(CONFIG_VIDEO_S5K4ECGX) += s5k4ecgx.o
 obj-$(CONFIG_VIDEO_S5K5BAF) += s5k5baf.o
+obj-$(CONFIG_VIDEO_GC02M1) += gc02m1.o
 obj-$(CONFIG_VIDEO_S5K5E8) += s5k5e8.o
 obj-$(CONFIG_VIDEO_S5K6A3) += s5k6a3.o
 obj-$(CONFIG_VIDEO_S5K6AA) += s5k6aa.o

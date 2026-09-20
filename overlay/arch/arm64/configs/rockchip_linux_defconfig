@@ -372,6 +372,12 @@ CONFIG_VIDEO_DW9763=y
 CONFIG_VIDEO_FP5510=y
 CONFIG_VIDEO_GC5035=y
 CONFIG_VIDEO_S5K4H5YB=y
+# C20e front camera. The DTS declares gc02m1@37 on i2c4 behind csi2-dphy4,
+# but without this symbol the driver is never built, media1
+# (rkcif-mipi-lvds2) comes up with NO sensor entity at all, and rkcif
+# retries forever -- which is the "get remote terminal sensor failed -19"
+# spam that floods the console on every boot.
+CONFIG_VIDEO_GC02M1=y
 CONFIG_VIDEO_S5K5E8=y
 CONFIG_VIDEO_GC8034=y
 CONFIG_VIDEO_IMX415=y
