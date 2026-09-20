@@ -1,0 +1,66 @@
+--- a/drivers/seekwaveplatform_lite/sdio/skw_sdio_rx.c
++++ b/drivers/seekwaveplatform_lite/sdio/skw_sdio_rx.c
+@@ -3036,6 +3036,7 @@
+ 	struct platform_device *pdev;
+ 	char	pdev_name[32];
+ 	struct sdio_port *port;
++	int bt_data_port, bt_cmd_port, bt_audio_port;
+ 	int ret = 0;
+ 	struct skw_sdio_data_t *skw_sdio = skw_sdio_get_data();
+ 
+@@ -3058,6 +3059,15 @@
+ 		ucom_pdata.data_port = BT_DATA_PORT;
+ 	}
+ 
++	/*
++	 * Remember all three ports. The code below walks ucom_pdata.data_port
++	 * through cmd_port and audio_port to allocate each buffer, so by the
++	 * end it no longer holds the BT data port.
++	 */
++	bt_data_port  = ucom_pdata.data_port;
++	bt_cmd_port   = ucom_pdata.cmd_port;
++	bt_audio_port = ucom_pdata.audio_port;
++
+ 	memcpy(ucom_pdata.chipid, skw_sdio->chip_id, SKW_CHIP_ID_LENGTH);
+ 	ret = platform_device_add_data(pdev, &ucom_pdata, sizeof(ucom_pdata));
+ 	if(ret) {
+@@ -3111,14 +3121,37 @@
+ 	} else {
+ 		skw_sdio_info("alloc %s TX buffer success\n", ucom_pdata.port_name);
+ 	}
+-	port = &sdio_ports[ucom_pdata.data_port];
+ 	ret = platform_device_add(pdev);
+ 	if(ret) {
+ 		dev_err(&func->dev, "failt to register platform device\n");
+ 		platform_device_put(pdev);
+ 		return ret;
+ 	}
+-	port->pdev = pdev;
++
++	/*
++	 * Attach the platform device to the DATA, COMMAND and AUDIO ports.
++	 *
++	 * Upstream only did `port->pdev = pdev` here, and by this point `port`
++	 * pointed at the AUDIO port, because the allocation code above walks
++	 * ucom_pdata.data_port through each port in turn. The BT data and
++	 * command ports were therefore left with pdev == NULL.
++	 *
++	 * The receive path gates delivery on exactly that field:
++	 *
++	 *     if (header->len && port->pdev)      (skw_sdio_rx.c)
++	 *
++	 * so every packet the controller sent back on the command port was
++	 * silently discarded. The visible symptom is that HCI never completes:
++	 *
++	 *     btseekwave_send_hci_command cp response timeout, ret:0
++	 *     btseekwave_download_nv, read local version err
++	 *
++	 * and `hciconfig hci0 up` hangs forever, because hdev->setup waits on a
++	 * reply that was thrown away rather than never sent.
++	 */
++	sdio_ports[bt_data_port].pdev  = pdev;
++	sdio_ports[bt_cmd_port].pdev   = pdev;
++	sdio_ports[bt_audio_port].pdev = pdev;
+ 
+ 	return ret;
+ }

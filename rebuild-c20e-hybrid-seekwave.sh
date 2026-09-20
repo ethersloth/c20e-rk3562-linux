@@ -52,6 +52,22 @@ cp -a "$OLD_SRC" "$LEGACY"
 cp -a "$MODERN/include/linux/platform_data/skw_platform_data.h" "$LEGACY/skw_platform_data.h"
 cp -a "$OLD_CFG" "$LEGACY/skw6160_config.h"
 
+# c20e-thirdparty/ is gitignored, so fixes to the vendor BSP must live in the
+# repo as patches and be re-applied here, or a fresh clone silently loses them.
+PATCHDIR="$REPO/overlay/seekwave-patches"
+if [[ -d "$PATCHDIR" ]]; then
+    for p in "$PATCHDIR"/*.patch; do
+        [[ -f "$p" ]] || continue
+        if (cd "$MODERN" && patch -p1 --dry-run -R -s -f < "$p" >/dev/null 2>&1); then
+            echo "[*] already applied: $(basename "$p")"
+        elif (cd "$MODERN" && patch -p1 -s -f < "$p"); then
+            echo "[+] applied: $(basename "$p")"
+        else
+            die "failed to apply $(basename "$p") to the Seekwave BSP"
+        fi
+    done
+fi
+
 echo "[2/4] Build the MODERN Seekwave BSP (provides skw_sdio_lite + Module.symvers)"
 # -DCONFIG_BT_SEEKWAVE is required for Bluetooth to work at all.
 #
