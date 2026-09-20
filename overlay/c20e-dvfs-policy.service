@@ -1,0 +1,13 @@
+[Unit]
+Description=C20e DVFS policy (pin DDR frequency)
+# Must be in place before the display starts driving DDR bandwidth.
+After=sysinit.target
+Before=display-manager.service lightdm.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/c20e-dvfs-policy
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

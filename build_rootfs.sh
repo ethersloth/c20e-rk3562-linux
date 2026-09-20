@@ -4460,6 +4460,30 @@ if [ -f "${ROOT_DIR}/overlay/usb-mode-switch.sh" ] && [ -f "${ROOT_DIR}/overlay/
     fi
 fi
 
+# 10a. DDR frequency pin.
+#
+# This is not optional on this board. The dmc devfreq governor scales DRAM
+# while the driver cannot read the VOP2 scanout bandwidth ("failed to get vop
+# bandwidth to dmc rate"), and the result is memory corruption as soon as the
+# graphical session runs: corrupted PCs, SP/PC alignment exceptions and oopses
+# in the idle task. slub_debug=FZPU stays silent because the damage is below
+# the allocator. Boots to multi-user.target were clean while boots to
+# graphical.target panicked within 30s; pinning the governor produced the first
+# graphical session with zero oopses.
+if [ -f "${ROOT_DIR}/overlay/c20e-dvfs-policy.sh" ] && \
+   [ -f "${ROOT_DIR}/overlay/c20e-dvfs-policy.service" ]; then
+    echo "[*] Installing DDR frequency pin..."
+    cp "${ROOT_DIR}/overlay/c20e-dvfs-policy.sh" "${ROOTFS_MNT}/usr/local/sbin/c20e-dvfs-policy"
+    chmod 0755 "${ROOTFS_MNT}/usr/local/sbin/c20e-dvfs-policy"
+    cp "${ROOT_DIR}/overlay/c20e-dvfs-policy.service" \
+       "${ROOTFS_MNT}/etc/systemd/system/c20e-dvfs-policy.service"
+    chmod 0644 "${ROOTFS_MNT}/etc/systemd/system/c20e-dvfs-policy.service"
+    chroot "${ROOTFS_MNT}" systemctl enable c20e-dvfs-policy.service
+else
+    echo "[-] overlay/c20e-dvfs-policy.{sh,service} missing; the board will corrupt memory under the GUI."
+    exit 1
+fi
+
 # 10b. Front camera ISP setup service (s5k5e8 → rkisp → /dev/video23)
 if [ -f "${ROOT_DIR}/overlay/camera-isp-setup.sh" ] && \
    [ -f "${ROOT_DIR}/overlay/camera-isp-setup.service" ]; then
