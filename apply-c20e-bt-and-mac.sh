@@ -80,6 +80,14 @@ ln -sf /etc/systemd/system/c20e-bt-bringup.service \
 echo "[*] installing stable Wi-Fi MAC"
 install -m 0644 "$REPO/overlay/c20e-skw-mac.conf" "$MNT/etc/modprobe.d/c20e-skw-mac.conf"
 
+echo "[*] installing Bluetooth NV firmware"
+mkdir -p "$MNT/lib/firmware/seekwave"
+install -m 0644 "$REPO/overlay/firmware/seekwave/sv6160.nvbin" \
+    "$MNT/lib/firmware/seekwave/sv6160.nvbin"
+# firmware_dir=seekwave is what makes skwbt look under lib/firmware/seekwave/.
+install -m 0644 "$STAGE/c20e-skwbt.conf" "$MNT/etc/modprobe.d/c20e-skwbt.conf" 2>/dev/null \
+    || printf 'options skwbt firmware_dir=seekwave\n' > "$MNT/etc/modprobe.d/c20e-skwbt.conf"
+
 echo "[*] disabling NetworkManager MAC randomization"
 mkdir -p "$MNT/etc/NetworkManager/conf.d"
 install -m 0644 "$REPO/overlay/c20e-nm-no-mac-randomization.conf" \
@@ -115,6 +123,7 @@ echo "[*] verification:"
 echo "    btseekwave in installed module: $(strings "$MODDIR/skw_sdio_lite.ko" | grep -c btseekwave)"
 echo "    bringup service:                $([[ -e "$MNT/etc/systemd/system/multi-user.target.wants/c20e-bt-bringup.service" ]] && echo enabled || echo MISSING)"
 echo "    mac option:                     $(grep -o 'mac=.*' "$MNT/etc/modprobe.d/c20e-skw-mac.conf")"
+echo "    bt nv firmware:                 $([[ -f "$MNT/lib/firmware/seekwave/sv6160.nvbin" ]] && echo yes || echo MISSING)"
 echo "    nm mac-rand off:                $([[ -f "$MNT/etc/NetworkManager/conf.d/99-c20e-no-mac-randomization.conf" ]] && echo yes || echo MISSING)"
 echo "    skwbt auto-load:                $(grep -qx 'skwbt' "$LOADCONF" 2>/dev/null && echo 'STILL PRESENT (bad)' || echo 'removed (good)')"
 

@@ -4484,6 +4484,21 @@ else
     exit 1
 fi
 
+# 10a2. Bluetooth NV firmware.
+#
+# skwbt requests seekwave/sv6160.nvbin. Without it the controller answers HCI
+# (chip version 0x17) and then NV load fails, and the vendor error path oopses
+# in close_sdio_port -> complete(). Bluetooth cannot come up without this file.
+if [ -f "${ROOT_DIR}/overlay/firmware/seekwave/sv6160.nvbin" ]; then
+    echo "[*] Installing Bluetooth NV firmware..."
+    install -d "${ROOTFS_MNT}/lib/firmware/seekwave"
+    install -m 0644 "${ROOT_DIR}/overlay/firmware/seekwave/sv6160.nvbin" \
+        "${ROOTFS_MNT}/lib/firmware/seekwave/sv6160.nvbin"
+else
+    echo "[-] overlay/firmware/seekwave/sv6160.nvbin missing; Bluetooth will not work."
+    exit 1
+fi
+
 # 10b. Front camera ISP setup service (s5k5e8 → rkisp → /dev/video23)
 if [ -f "${ROOT_DIR}/overlay/camera-isp-setup.sh" ] && \
    [ -f "${ROOT_DIR}/overlay/camera-isp-setup.service" ]; then
