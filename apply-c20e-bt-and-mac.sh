@@ -85,6 +85,25 @@ mkdir -p "$MNT/etc/NetworkManager/conf.d"
 install -m 0644 "$REPO/overlay/c20e-nm-no-mac-randomization.conf" \
     "$MNT/etc/NetworkManager/conf.d/99-c20e-no-mac-randomization.conf"
 
+# A saved NM profile can be pinned to the MAC of the device it was created on.
+# These profiles were written while the driver was inventing a new random MAC
+# every boot, so they are bound to an address that no longer exists -- the
+# profile then matches no device and never auto-connects, leaving wlan0 sitting
+# in "disconnected" forever. Strip the binding rather than deleting the profile,
+# so the SSID and PSK survive.
+NMDIR="$MNT/etc/NetworkManager/system-connections"
+if [[ -d "$NMDIR" ]]; then
+    for c in "$NMDIR"/*.nmconnection "$NMDIR"/*; do
+        [[ -f "$c" ]] || continue
+        if grep -qE '^(mac-address|cloned-mac-address)=' "$c"; then
+            cp -a "$c" "$c.before-bt"
+            sed -i -E '/^(mac-address|cloned-mac-address)=/d' "$c"
+            echo "[+] unpinned MAC binding in $(basename "$c")"
+        fi
+    done
+    echo "[*] saved Wi-Fi profiles: $(ls "$NMDIR" 2>/dev/null | grep -c nmconnection || echo 0)"
+fi
+
 # depmod must run against the card's kernel, not the host's.
 if command -v depmod >/dev/null; then
     depmod -b "$MNT" "$KREL" 2>/dev/null && echo "[+] depmod done" || echo "[!] depmod failed (modules are in updates/, usually still fine)"
