@@ -4531,14 +4531,14 @@ fi
 # photographs. What it needs is the ISP input link enabled: rkisp-isp-subdev
 # pad0 is MUST_CONNECT, and at boot nothing connects it, so /dev/video22
 # returns zero bytes with no error whatsoever.
-if [ -f "${ROOT_DIR}/overlay/c20e-camera-rear.sh" ] && \
-   [ -f "${ROOT_DIR}/overlay/c20e-camera-rear.service" ]; then
+if [ -f "${ROOT_DIR}/overlay/c20e-camera.sh" ] && \
+   [ -f "${ROOT_DIR}/overlay/c20e-camera.service" ]; then
     echo "[*] Installing rear camera pipeline setup..."
-    install -m 0755 "${ROOT_DIR}/overlay/c20e-camera-rear.sh" \
-        "${ROOTFS_MNT}/usr/local/sbin/c20e-camera-rear"
-    install -m 0644 "${ROOT_DIR}/overlay/c20e-camera-rear.service" \
-        "${ROOTFS_MNT}/etc/systemd/system/c20e-camera-rear.service"
-    chroot "${ROOTFS_MNT}" systemctl enable c20e-camera-rear.service
+    install -m 0755 "${ROOT_DIR}/overlay/c20e-camera.sh" \
+        "${ROOTFS_MNT}/usr/local/sbin/c20e-camera"
+    install -m 0644 "${ROOT_DIR}/overlay/c20e-camera.service" \
+        "${ROOTFS_MNT}/etc/systemd/system/c20e-camera.service"
+    chroot "${ROOTFS_MNT}" systemctl enable c20e-camera.service
 fi
 
 if [ -f "${ROOT_DIR}/tools/setup_isp_rear.sh" ]; then

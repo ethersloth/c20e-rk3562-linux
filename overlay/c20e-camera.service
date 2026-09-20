@@ -1,11 +1,11 @@
 [Unit]
-Description=C20e rear camera (OV5648) pipeline setup
+Description=C20e camera pipeline setup (rear OV5648 by default)
 After=systemd-udev-settle.service
 Wants=systemd-udev-settle.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/c20e-camera-rear
+ExecStart=/usr/local/sbin/c20e-camera rear
 RemainAfterExit=yes
 # A camera problem must never hold up the boot.
 TimeoutStartSec=30
