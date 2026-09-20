@@ -53,9 +53,32 @@ cp -a "$MODERN/include/linux/platform_data/skw_platform_data.h" "$LEGACY/skw_pla
 cp -a "$OLD_CFG" "$LEGACY/skw6160_config.h"
 
 echo "[2/4] Build the MODERN Seekwave BSP (provides skw_sdio_lite + Module.symvers)"
+# -DCONFIG_BT_SEEKWAVE is required for Bluetooth to work at all.
+#
+# skw_sdio_main.c guards the call that creates the platform device:
+#
+#     #ifdef CONFIG_BT_SEEKWAVE
+#         skw_sdio_bind_btseekwave_driver(skw_sdio->sdio_func[FUNC_1]);
+#     #endif
+#
+# skwbt.ko registers a platform DRIVER named "btseekwave", but a platform
+# driver with no matching device never probes, so hci_register_dev() is never
+# reached and /sys/class/bluetooth stays empty. Without this define the chip
+# side comes up perfectly -- `echo start > /proc/skwsdio/bt_service` reports
+# "LOOPCHECK channel received: BTREADY" and "boot bt sucessfully" -- while the
+# host never gains a controller, which looks like Bluetooth being broken
+# rather than a missing build flag.
+#
+# CONFIG_SKW_BT stays =n here: that selects the skwbt module itself, which is
+# built separately in step 4 from $MODERN/drivers/swtbt4l.
+#
+# The define goes in KCFLAGS, NOT skw_extra_flags. The BSP's own top-level
+# Makefile does `skw_extra_flags := -I$(src)/include/linux ...`, and a
+# command-line assignment would override that and drop the include paths,
+# breaking the build.
 make -C "$KERNEL" M="$MODERN" ARCH=arm64 CROSS_COMPILE="$CROSS" clean
 make -j"$JOBS" -C "$KERNEL" M="$MODERN" ARCH=arm64 CROSS_COMPILE="$CROSS" \
-    KCFLAGS="-Wno-error=int-in-bool-context" \
+    KCFLAGS="-Wno-error=int-in-bool-context -DCONFIG_BT_SEEKWAVE" \
     CONFIG_SEEKWAVE_BSP_DRIVERS=m CONFIG_SKW_NO_CONFIG=y CONFIG_SKW_SDIOHAL=m \
     CONFIG_WLAN_VENDOR_SWT6621S=m CONFIG_SKW_BT=n CONFIG_SWT6621S_LOG_DEBUG=y modules
 
