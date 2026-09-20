@@ -137,12 +137,19 @@ install -m 0644 "$WIFI_KO" "$STAGE/skw.ko"
 printf 'skw_sdio_lite\nskw\n' > "$STAGE/c20e-seekwave.conf"
 if [[ -n "$BT_KO" ]]; then
     install -m 0644 "$BT_KO" "$STAGE/skwbt.ko"
-    # Bluetooth loads cleanly against this hybrid (the earlier "skwbt corrupts
-    # kernel memory" verdict came from a kernel running the legacy in-tree
-    # driver instead). It registers and creates /dev/BT*, but no HCI controller
-    # appears yet, so BlueZ has nothing to attach to -- bring-up is unfinished.
+    # skwbt is deliberately NOT added to c20e-seekwave.conf.
+    #
+    # Auto-loading it at boot makes its probe run before the chip's BT
+    # firmware service has been started, so the probe's HCI Read Local
+    # Version times out ("btseekwave_download_nv, read local version err")
+    # and hci_register_dev() is never reached. Worse, that failed probe
+    # leaves the BT port claimed, after which writing to
+    # /proc/skwsdio/bt_service BLOCKS -- which hung the boot and took
+    # org.bluez, power profiles and part of the Phosh session with it.
+    #
+    # c20e-bt-bringup.service starts the chip side first and loads skwbt
+    # afterwards, which is the only order that reaches hci0.
     printf 'options skwbt firmware_dir=seekwave\n' > "$STAGE/c20e-skwbt.conf"
-    echo 'skwbt' >> "$STAGE/c20e-seekwave.conf"
 fi
 
 echo

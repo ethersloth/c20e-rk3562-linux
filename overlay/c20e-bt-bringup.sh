@@ -1,50 +1,58 @@
 #!/bin/bash
 # Bring up Bluetooth on the C20e.
 #
-# Two things have to happen in the right order, and the driver cannot do it
-# alone:
+# Ordering is the whole problem. skwbt's probe immediately issues HCI Read
+# Local Version, and the Seekwave chip does not answer HCI until its BT
+# firmware service has been started:
 #
-#  1. The BT firmware service must be started on the Seekwave chip. Until it
-#     is, the chip does not answer HCI commands at all.
-#  2. skwbt's platform driver must probe AFTER that. Its probe immediately
-#     calls btseekwave_download_nv(), which issues HCI Read Local Version; if
-#     the service is not running that times out:
+#   btseekwave_send_hci_command cp response timeout, ret:0
+#   btseekwave_download_nv, read local version err
 #
-#       btseekwave_send_hci_command cp response timeout, ret:0
-#       btseekwave_download_nv, read local version err
+# so hci_register_dev() is never reached and no hci0 appears. Worse, once
+# that failed probe has claimed the BT port, writing to
+# /proc/skwsdio/bt_service BLOCKS -- which, in a oneshot ordered
+# Before=bluetooth.service, hangs the boot and takes org.bluez, power
+# profiles and parts of the Phosh session down with it.
 #
-#     and hci_register_dev() is never reached, so no hci0 appears.
+# So: make sure skwbt is NOT loaded, start the chip side, then load skwbt so
+# its probe runs against an awake chip. /etc/modules-load.d must not
+# auto-load skwbt or the early probe happens before this script can run.
 #
-# At boot the platform device is created during skw_sdio probe, long before
-# anything in userspace can start the service, so the probe always loses the
-# race. Starting the service and then reloading skwbt re-runs probe with the
-# chip awake.
-#
-# Reloading skwbt is safe for networking: it is an independent module with no
-# users, and Wi-Fi lives in skw/skw_sdio_lite which are left alone.
+# Every step is bounded and this script always exits 0. Bluetooth failing is
+# an inconvenience; hanging the boot is not acceptable.
 set -u
 LOG=/var/log/c20e-bt-bringup.log
 exec >>"$LOG" 2>&1
 echo "=== c20e bt bringup $(date -Is) ==="
 
 PROC=/proc/skwsdio/bt_service
-[ -w "$PROC" ] || { echo "no $PROC -- is skw_sdio_lite loaded?"; exit 0; }
+[ -e "$PROC" ] || { echo "no $PROC -- is skw_sdio_lite loaded?"; exit 0; }
+
+# Drop any early probe that already claimed the port, or the write below hangs.
+if lsmod | grep -q '^skwbt'; then
+    echo "skwbt was already loaded (early probe); removing it first"
+    timeout 10 modprobe -r skwbt || echo "  rmmod skwbt failed/timed out"
+    sleep 0.5
+fi
 
 echo "bt_service before: $(cat "$PROC" 2>/dev/null)"
-echo start > "$PROC" || { echo "failed to start bt service"; exit 1; }
+# Bounded: this is the call that hung the boot.
+if timeout 15 sh -c "echo start > $PROC"; then
+    echo "start written"
+else
+    echo "writing start FAILED or timed out; giving up (boot continues)"
+    exit 0
+fi
 
-# Wait for the chip to report BTREADY rather than sleeping a fixed time.
-for i in $(seq 1 20); do
+for _ in $(seq 1 20); do
     [ "$(cat "$PROC" 2>/dev/null)" = "START" ] && break
     sleep 0.25
 done
 echo "bt_service after:  $(cat "$PROC" 2>/dev/null)"
 
-modprobe -r skwbt 2>/dev/null
-sleep 0.5
-modprobe skwbt || { echo "modprobe skwbt failed"; exit 1; }
+timeout 20 modprobe skwbt || { echo "modprobe skwbt failed/timed out"; exit 0; }
 
-for i in $(seq 1 20); do
+for _ in $(seq 1 20); do
     [ -n "$(ls /sys/class/bluetooth/ 2>/dev/null)" ] && break
     sleep 0.25
 done

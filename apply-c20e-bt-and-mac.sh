@@ -57,6 +57,17 @@ for m in skw_sdio_lite.ko skw.ko skwbt.ko; do
     echo "    $m"
 done
 
+# skwbt must NOT auto-load, or its probe runs before the chip BT service is
+# started; that probe fails AND leaves the port claimed, after which the
+# bring-up service's write to /proc/skwsdio/bt_service blocks and hangs the
+# boot. Strip it from the load list; the bring-up service loads it later.
+LOADCONF="$MNT/etc/modules-load.d/c20e-seekwave.conf"
+if [[ -f "$LOADCONF" ]] && grep -qx 'skwbt' "$LOADCONF"; then
+    cp -a "$LOADCONF" "$LOADCONF.before-bt"
+    sed -i '/^skwbt$/d' "$LOADCONF"
+    echo "[+] removed skwbt from modules-load.d (bring-up service loads it instead)"
+fi
+
 echo "[*] installing Bluetooth bring-up service"
 install -m 0755 "$REPO/overlay/c20e-bt-bringup.sh" "$MNT/usr/local/sbin/c20e-bt-bringup"
 install -m 0644 "$REPO/overlay/c20e-bt-bringup.service" \
@@ -79,6 +90,7 @@ echo "[*] verification:"
 echo "    btseekwave in installed module: $(strings "$MODDIR/skw_sdio_lite.ko" | grep -c btseekwave)"
 echo "    bringup service:                $([[ -e "$MNT/etc/systemd/system/multi-user.target.wants/c20e-bt-bringup.service" ]] && echo enabled || echo MISSING)"
 echo "    mac option:                     $(grep -o 'mac=.*' "$MNT/etc/modprobe.d/c20e-skw-mac.conf")"
+echo "    skwbt auto-load:                $(grep -qx 'skwbt' "$LOADCONF" 2>/dev/null && echo 'STILL PRESENT (bad)' || echo 'removed (good)')"
 
 umount "$MNT"
 echo

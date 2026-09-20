@@ -1,13 +1,17 @@
 [Unit]
-Description=C20e Bluetooth bring-up (start chip BT service, then reload skwbt)
+Description=C20e Bluetooth bring-up (start chip BT service, then load skwbt)
 After=systemd-modules-load.service
 Before=bluetooth.service
-Wants=bluetooth.service
 
 [Service]
 Type=oneshot
 ExecStart=/usr/local/sbin/c20e-bt-bringup
 RemainAfterExit=yes
+# Hard ceiling. An earlier version of this hung on a blocking write to
+# /proc/skwsdio/bt_service and took org.bluez and the Phosh session with it.
+TimeoutStartSec=90
+# Never let a Bluetooth problem fail the boot transaction.
+SuccessExitStatus=0 1
 
 [Install]
 WantedBy=multi-user.target
