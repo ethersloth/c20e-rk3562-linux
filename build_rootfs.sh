@@ -4515,7 +4515,30 @@ if [ -f "${ROOT_DIR}/overlay/camera-isp-setup.sh" ] && \
     cp "${ROOT_DIR}/overlay/camera-isp-setup.sh" "${ROOTFS_MNT}/usr/local/bin/camera-isp-setup.sh"
     chmod +x "${ROOTFS_MNT}/usr/local/bin/camera-isp-setup.sh"
     cp "${ROOT_DIR}/overlay/camera-isp-setup.service" "${ROOTFS_MNT}/etc/systemd/system/camera-isp-setup.service"
-    chroot "${ROOTFS_MNT}" systemctl enable camera-isp-setup.service
+    # Installed but NOT enabled: it drives s5k5e8, which this board does not
+    # have. The C20e front camera is a GC02M1 (i2c 4-0037, csi2-dphy4), and its
+    # driver is not built yet, so media1/rkcif-mipi-lvds2 has no sensor entity
+    # at all and this service can only fail. The pipeline topology it sets up
+    # is otherwise correct for the front slot, so repoint it at gc02m1 rather
+    # than rewriting it once that driver exists.
+    chroot "${ROOTFS_MNT}" systemctl disable camera-isp-setup.service >/dev/null 2>&1 || true
+fi
+
+# 10b2. Rear camera (OV5648) pipeline.
+#
+# The rear camera needs no driver or DTS work -- verified on hardware with the
+# sensor's own test pattern (clean vertical colour bars) and with real
+# photographs. What it needs is the ISP input link enabled: rkisp-isp-subdev
+# pad0 is MUST_CONNECT, and at boot nothing connects it, so /dev/video22
+# returns zero bytes with no error whatsoever.
+if [ -f "${ROOT_DIR}/overlay/c20e-camera-rear.sh" ] && \
+   [ -f "${ROOT_DIR}/overlay/c20e-camera-rear.service" ]; then
+    echo "[*] Installing rear camera pipeline setup..."
+    install -m 0755 "${ROOT_DIR}/overlay/c20e-camera-rear.sh" \
+        "${ROOTFS_MNT}/usr/local/sbin/c20e-camera-rear"
+    install -m 0644 "${ROOT_DIR}/overlay/c20e-camera-rear.service" \
+        "${ROOTFS_MNT}/etc/systemd/system/c20e-camera-rear.service"
+    chroot "${ROOTFS_MNT}" systemctl enable c20e-camera-rear.service
 fi
 
 if [ -f "${ROOT_DIR}/tools/setup_isp_rear.sh" ]; then

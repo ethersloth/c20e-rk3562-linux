@@ -1,7 +1,12 @@
 [Unit]
 Description=Front camera ISP pipeline setup (s5k5e8 → rkisp → /dev/video23)
-After=systemd-udevd.service sys-subsystem-media.device
-Wants=sys-subsystem-media.device
+After=systemd-udevd.service
+# NOT "Wants=sys-subsystem-media.device". There is no /sys/subsystem/media for
+# udev to create a device unit from, so that job never completes and systemd
+# waits out the full default timeout on EVERY boot:
+#   Job sys-subsystem-media.device/start timed out.
+#   Timed out waiting for device sys-subsystem-media.device
+# That alone accounted for ~90s of a 2m09s userspace boot.
 
 [Service]
 Type=oneshot
