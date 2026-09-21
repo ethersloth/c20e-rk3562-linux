@@ -133,6 +133,7 @@ read-log)
     command -v mcopy >/dev/null || die "mtools (mcopy) not installed"
     rkdeveloptool rl $BOOT_START 524288 "$TMP/p3" >/dev/null || die "read failed"
     O="$REPO/out/fedora-log-$(date +%Y%m%d-%H%M%S)"; mkdir -p "$O"
+    cp --sparse=always "$TMP/p3" "$O/p3.vfat"      # raw partition, for when extraction is not enough
     for f in j.txt k.txt s.txt; do
         MTOOLS_SKIP_CHECK=1 mcopy -n -i "$TMP/p3" "::/$f" "$O/$f" 2>/dev/null || echo "  (no $f -- logger never ran or not yet 30 s in)"
     done
