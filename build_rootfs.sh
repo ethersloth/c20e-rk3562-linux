@@ -4556,6 +4556,24 @@ fi
 # photographs. What it needs is the ISP input link enabled: rkisp-isp-subdev
 # pad0 is MUST_CONNECT, and at boot nothing connects it, so /dev/video22
 # returns zero bytes with no error whatsoever.
+# ISP gain feeder, built against the VENDOR ISP ABI (isp32, 11145-byte params).
+# Without it the ISP output is nearly black: there is no 3A on this board.
+# NOTE: this must be compiled natively or with a cross-toolchain that has libc
+# headers. Fedora's aarch64-linux-gnu-gcc is a bare cross-compiler and fails on
+# stdio.h, which is exactly how /usr/local/bin/rkisp1-awb came to be missing.
+if [ -f "${ROOT_DIR}/tools/rkisp32_gain.c" ]; then
+    if aarch64-linux-gnu-gcc -O2 -I"${ROOT_DIR}/src/kernel/include/uapi" \
+            -o "${ROOTFS_MNT}/usr/local/bin/c20e-isp-gain" \
+            "${ROOT_DIR}/tools/rkisp32_gain.c" 2>/dev/null; then
+        echo "[*] c20e-isp-gain compiled"
+    else
+        echo "[!] c20e-isp-gain NOT built (cross-compiler lacks libc headers)."
+        echo "    Build it on the device:  gcc -O2 -o /usr/local/bin/c20e-isp-gain rkisp32_gain.c"
+        cp "${ROOT_DIR}/tools/rkisp32_gain.c" "${ROOTFS_MNT}/usr/local/src/" 2>/dev/null || \
+          { mkdir -p "${ROOTFS_MNT}/usr/local/src"; cp "${ROOT_DIR}/tools/rkisp32_gain.c" "${ROOTFS_MNT}/usr/local/src/"; }
+    fi
+fi
+
 if [ -f "${ROOT_DIR}/overlay/c20e-camera.sh" ] && \
    [ -f "${ROOT_DIR}/overlay/c20e-camera.service" ]; then
     echo "[*] Installing rear camera pipeline setup..."

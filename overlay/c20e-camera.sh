@@ -33,11 +33,22 @@
 # default; change its ExecStart to "front" to swap). Switching at runtime is
 # fine for the raw nodes, which never go through the ISP.
 #
-# Known limitation: ISP digital gain is driven by Rockchip's proprietary rkaiq
-# 3A, which we do not have, so ISP output is dark and there is no auto-exposure
-# or auto-white-balance. The path is correct but starved: ISP luma tracks sensor
-# gain linearly. Set gain/exposure manually via the sensor subdev, or capture
-# raw and process in userspace.
+# ISP gain: there is no 3A (Rockchip's rkaiq is proprietary and we do not have
+# it), so ISP digital gain must be fed manually or the output is nearly black.
+# c20e-isp-gain does that. Measured on this board, ISP luma vs gain (Q8,
+# 256=1.0x), dim indoor scene:
+#
+#   no feeder   Y=4.9      1024 (4x)  Y=74    <- well exposed
+#   256 (1x)    Y=5.0      2048 (8x)  Y=240   <- blown
+#   512 (2x)    Y=19       3072       Y=254   <- saturated
+#
+# 4096 overflows the field and yields Y=0. ISP_GAIN below defaults to 1024.
+#
+# This needs the VENDOR ABI. The board runs CONFIG_VIDEO_ROCKCHIP_ISP with
+# isp_ver=ISP_V32_L, so params are struct isp32_isp_params_cfg (11145 bytes)
+# from <linux/rk-isp32-config.h>. tools/rkisp1_awb.c targets MAINLINE rkisp1
+# (struct rkisp1_params_cfg, 3048 bytes) and does nothing here at all: feeding
+# it 8x on every channel moved luma from 4.99 to 5.13.
 set -u
 
 CAM="${1:-rear}"
@@ -113,6 +124,14 @@ for s in /dev/v4l-subdev*; do
     [ -n "${emax:-}" ] && v4l2-ctl -d "$s" --set-ctrl=exposure="${SENSOR_EXPOSURE:-$emax}" 2>/dev/null
     v4l2-ctl -d "$s" --set-ctrl=test_pattern=0 2>/dev/null
 done
+
+# Start the ISP gain feeder; without it the ISP output is nearly black.
+ISP_GAIN=${ISP_GAIN:-1024}
+if [ "$ISP_GAIN" != "0" ] && command -v c20e-isp-gain >/dev/null 2>&1; then
+    pkill -f "c20e-isp-gain" 2>/dev/null
+    setsid c20e-isp-gain "$ISP_GAIN" >/var/log/c20e-isp-gain.log 2>&1 &
+    log "ISP gain feeder started at $ISP_GAIN (Q8, 256=1.0x)"
+fi
 
 log "$CAM camera ready on $ISP_NODE (NV12 ${W}x${H})"
 log "raw Bayer: rear=/dev/video0  front=/dev/video11"
