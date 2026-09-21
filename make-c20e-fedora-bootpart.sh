@@ -9,7 +9,17 @@
 #                cannot take the USB console down with it
 #   fedora       the normal graphical boot
 #
-# Usage: ./make-c20e-fedora-bootpart.sh [text|graphical]   (default entry; text)
+# Entries (only the default is reachable: the U-Boot menu is on the internal
+# UART). Once Fedora has SSH, change the default from Fedora itself --
+# `mount LABEL=C20EBOOT /mnt` and edit /mnt/extlinux/extlinux.conf -- instead
+# of a loader-mode write-boot.
+#   fedora-text        text mode, c20e units forced on (systemd.wants)
+#   fedora-text-nogpu  same, Panfrost never probed (initcall_blacklist) -- for
+#                      telling GPU faults from display-controller faults
+#   fedora-log         text mode + FAT boot logger (no console, no network)
+#   fedora             the desktop
+#
+# Usage: ./make-c20e-fedora-bootpart.sh [text|nogpu|log|graphical]   (default: text)
 set -Eeuo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
@@ -19,7 +29,8 @@ DEFAULT="${1:-text}"
 BOOT_SECTORS=524288            # p3 size, as written by install-c20e-fedora-emmc.sh
 
 die(){ echo "ERROR: $*" >&2; exit 1; }
-case "$DEFAULT" in text) DEF=fedora-text ;; graphical) DEF=fedora ;; *) die "default must be text|graphical" ;; esac
+case "$DEFAULT" in text) DEF=fedora-text ;; graphical) DEF=fedora ;; log) DEF=fedora-log ;; nogpu) DEF=fedora-text-nogpu ;;
+    *) die "default must be text|graphical|log|nogpu" ;; esac
 for f in manifest boot/Image boot/rk3562.dtb; do [[ -f "$SRC/$f" ]] || die "missing $SRC/$f (run prepare-c20e-fedora.sh)"; done
 command -v mcopy >/dev/null || die "mtools (mcopy) not installed"
 # shellcheck disable=SC1091
@@ -67,7 +78,19 @@ timeout 30
 menu title C20e Fedora
 
 label fedora-text
-  menu label Fedora (text mode, diagnostic)
+  menu label Fedora (text mode)
+  kernel /Image
+  fdt /rk3562.dtb
+  append $BASE $WANTS_MIN systemd.unit=multi-user.target systemd.show_status=1 plymouth.enable=0
+
+label fedora-text-nogpu
+  menu label Fedora (text mode, Panfrost not loaded)
+  kernel /Image
+  fdt /rk3562.dtb
+  append $BASE $WANTS_MIN systemd.unit=multi-user.target systemd.show_status=1 plymouth.enable=0 initcall_blacklist=panfrost_driver_init
+
+label fedora-log
+  menu label Fedora (text mode, boot log to this partition)
   kernel /Image
   fdt /rk3562.dtb
   append $BASE $WANTS_MIN $DIAG
@@ -98,7 +121,7 @@ mmd -i "$OUT" ::/c20e ::/c20e/firmware
 mcopy -i "$OUT" "$REPO/tools/c20e-fedora-live-fixup.sh" "$REPO/overlay/c20e.preset" ::/c20e/
 mcopy -i "$OUT" "$REPO"/overlay/firmware/*.bin ::/c20e/firmware/
 cp "$T/extlinux.conf" "$SRC/boot/extlinux/extlinux.conf"   # keep boot/ in step with the image
-L=$(grep -m1 'init=' "$T/extlinux.conf" | sed 's/^ *append //' | tr -d '\n' | wc -c)
-[[ $L -le 1000 ]] || die "diagnostic append line is $L bytes; U-Boot's limit is 1023 (keep margin)"
-echo "[bootpart] $OUT  (default: $DEF, diag cmdline $L bytes)"
+L=$(grep 'append' "$T/extlinux.conf" | sed 's/^ *append //' | awk '{ if (length($0) > m) m = length($0) } END { print m }')
+[[ $L -le 1000 ]] || die "longest append line is $L bytes; U-Boot's limit is 1023 (keep margin)"
+echo "[bootpart] $OUT  (default: $DEF, longest append $L bytes)"
 mdir -i "$OUT" ::/ ::/extlinux | grep -vE '^$|Volume|Directory|files'
