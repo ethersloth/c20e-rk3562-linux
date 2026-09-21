@@ -4485,13 +4485,16 @@ fi
 # 10a. DDR frequency pin.
 #
 # This is not optional on this board. The dmc devfreq governor scales DRAM
-# while the driver cannot read the VOP2 scanout bandwidth ("failed to get vop
-# bandwidth to dmc rate"), and the result is memory corruption as soon as the
-# graphical session runs: corrupted PCs, SP/PC alignment exceptions and oopses
-# in the idle task. slub_debug=FZPU stays silent because the damage is below
-# the allocator. Boots to multi-user.target were clean while boots to
+# between 528MHz and 920MHz and the board corrupts memory once the graphical
+# session is scanning out: corrupted PCs, SP/PC alignment exceptions and oopses
+# in the idle task, with slub_debug=FZPU silent because the damage is below the
+# allocator. Boots to multi-user.target were clean while boots to
 # graphical.target panicked within 30s; pinning the governor produced the first
-# graphical session with zero oopses.
+# graphical session with zero oopses, and it has since run for hours.
+#
+# The mechanism is NOT established. Do not blame the "failed to get vop
+# bandwidth to dmc rate" boot messages -- those properties are RK3399-only and
+# every RK3562 board logs them. See overlay/c20e-dvfs-policy.sh.
 if [ -f "${ROOT_DIR}/overlay/c20e-dvfs-policy.sh" ] && \
    [ -f "${ROOT_DIR}/overlay/c20e-dvfs-policy.service" ]; then
     echo "[*] Installing DDR frequency pin..."
