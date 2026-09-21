@@ -5,4 +5,5 @@ enable c20e-dvfs-policy.service
 enable c20e-usb-debug.service
 enable c20e-bt-bringup.service
 enable c20e-camera.service
+enable c20e-audio-init.service
 enable serial-getty@.service ttyGS0

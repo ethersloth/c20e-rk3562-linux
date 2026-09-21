@@ -94,7 +94,7 @@ else
 fi
 
 # ------------------------------------------------------------------ services
-for pair in "c20e-bt-bringup:sbin" "c20e-dvfs-policy:sbin" "c20e-camera:sbin" "c20e-usb-debug:sbin"; do
+for pair in "c20e-bt-bringup:sbin" "c20e-dvfs-policy:sbin" "c20e-camera:sbin" "c20e-usb-debug:sbin" "c20e-audio-init:sbin"; do
     name="${pair%%:*}"
     install -m0755 "$REPO/overlay/$name.sh"      "$ROOT/usr/local/sbin/$name"
     install -m0644 "$REPO/overlay/$name.service" "$ROOT/etc/systemd/system/$name.service"

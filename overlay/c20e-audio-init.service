@@ -1,0 +1,12 @@
+[Unit]
+Description=C20e RK817 audio routing (speaker path)
+After=systemd-modules-load.service sound.target alsa-restore.service
+Wants=sound.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/c20e-audio-init
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

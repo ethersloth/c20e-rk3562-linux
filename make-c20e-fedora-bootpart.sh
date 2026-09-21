@@ -118,7 +118,8 @@ mcopy -i "$OUT" "$T/extlinux.conf" ::/extlinux/extlinux.conf
 # handled Fedora's first-boot preset and the Wi-Fi firmware (see
 # tools/c20e-fedora-live-fixup.sh). Placed last; only Linux reads it.
 mmd -i "$OUT" ::/c20e ::/c20e/firmware
-mcopy -i "$OUT" "$REPO/tools/c20e-fedora-live-fixup.sh" "$REPO/overlay/c20e.preset" ::/c20e/
+mcopy -i "$OUT" "$REPO/tools/c20e-fedora-live-fixup.sh" "$REPO/overlay/c20e.preset" \
+    "$REPO/overlay/c20e-audio-init.sh" "$REPO/overlay/c20e-audio-init.service" ::/c20e/
 mcopy -i "$OUT" "$REPO"/overlay/firmware/*.bin ::/c20e/firmware/
 cp "$T/extlinux.conf" "$SRC/boot/extlinux/extlinux.conf"   # keep boot/ in step with the image
 L=$(grep 'append' "$T/extlinux.conf" | sed 's/^ *append //' | awk '{ if (length($0) > m) m = length($0) } END { print m }')
