@@ -55,6 +55,19 @@ command -v rkdeveloptool >/dev/null || die "rkdeveloptool not installed"
 rkdeveloptool ld 2>/dev/null | grep -q 'Vid=0x2207' || die "no Rockchip device in loader/maskrom mode (hold Volume Up at power-on)"
 
 readback(){ rkdeveloptool rl $SECTOR $N "$1" >/dev/null || die "read failed"; [[ $(stat -c%s "$1") -eq $((N*512)) ]] || die "short read"; }
+# One large `rkdeveloptool rl` returns correct data only for the first 16 MiB;
+# the rest reads back as 0xcc filler (seen 2026-09-21 on a 256 MiB read). So
+# every large read goes in 8 MiB chunks, each checked for length.
+rl_big(){  # START COUNT FILE
+    local start=$1 count=$2 out=$3 off=0 n
+    : > "$out"
+    while (( off < count )); do
+        n=$(( count - off < 16384 ? count - off : 16384 ))
+        rkdeveloptool rl $((start + off)) $n "$TMP/chunk" >/dev/null || die "read failed at sector $((start + off))"
+        [[ $(stat -c%s "$TMP/chunk") -eq $((n*512)) ]] || die "short read at sector $((start + off))"
+        cat "$TMP/chunk" >> "$out"; off=$((off + n))
+    done
+}
 is_ours(){ cmp -s -n "$BYTES" "$IDB" "$1"; }
 is_zero(){ cmp -s "$1" <(head -c "$(stat -c%s "$1")" /dev/zero); }
 
@@ -111,7 +124,7 @@ unhide-boot)
     say "eMMC boot partition restored" ;;
 dump)
     D="$REPO/out/emmc-head-dump.bin"; mkdir -p "$REPO/out"
-    rkdeveloptool rl 0 40960 "$D" >/dev/null || die "read failed"
+    rl_big 0 40960 "$D"
     [[ $(stat -c%s "$D") -eq $((40960*512)) ]] || die "short read"
     chown "${SUDO_USER:-root}:" "$D" 2>/dev/null || true
     say "dumped eMMC sectors 0..40959 to $D (read-only)" ;;
@@ -126,12 +139,12 @@ write-boot)
     say "writing $F to eMMC p3 (256 MiB)..."
     rkdeveloptool wl $BOOT_START "$F" >/dev/null || die "write failed"
     say "verifying by read-back..."
-    rkdeveloptool rl $BOOT_START 524288 "$TMP/rb" >/dev/null || die "read-back failed"
+    rl_big $BOOT_START 524288 "$TMP/rb"
     cmp -s "$F" "$TMP/rb" || die "read-back MISMATCH"
     say "eMMC boot partition written and verified" ;;
 read-log)
     command -v mcopy >/dev/null || die "mtools (mcopy) not installed"
-    rkdeveloptool rl $BOOT_START 524288 "$TMP/p3" >/dev/null || die "read failed"
+    rl_big $BOOT_START 524288 "$TMP/p3"
     O="$REPO/out/fedora-log-$(date +%Y%m%d-%H%M%S)"; mkdir -p "$O"
     cp --sparse=always "$TMP/p3" "$O/p3.vfat"      # raw partition, for when extraction is not enough
     for f in j.txt k.txt s.txt; do
