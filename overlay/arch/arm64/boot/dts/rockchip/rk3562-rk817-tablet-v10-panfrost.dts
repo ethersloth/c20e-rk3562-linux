@@ -655,18 +655,38 @@
 
 		battery {
 			compatible = "rk817,battery";
-			ocv_table = <3400 3656 3689 3717 3742 3760 3773
-				     3785 3800 3817 3838 3872 3917 3956
-				     3987 4041 4086 4135 4187 4242 4308>;
+			/*
+			 * Fuel-gauge calibration taken from the C20e's own Android
+			 * device tree (see c20e-factory-hardware-details.txt).
+			 *
+			 * What was here before described a DIFFERENT cell -- almost
+			 * certainly the Doogee U10's, inherited from upstream:
+			 *
+			 *   design_capacity     4510 -> 5408 mAh   (was 17% low)
+			 *   design_qmax         4900 -> 5948
+			 *   bat_res              120 -> 159 mOhm
+			 *   zero_algorithm_vol  3400 -> 3950 mV
+			 *   power_off_thresd    3450 -> 3400 mV
+			 *   ocv_table           full curve replaced
+			 *
+			 * The readings were self-consistent (kernel and UPower agreed
+			 * exactly), which is why this looked fine -- they were just
+			 * consistently wrong. The OCV table is the voltage -> state of
+			 * charge curve, so the WRONG curve means a wrong percentage at
+			 * every point, not a constant offset.
+			 */
+			ocv_table = <3400 3676 3692 3717 3740 3755 3769
+				     3783 3797 3814 3834 3859 3895 3939
+				     3971 4019 4075 4119 4169 4222 4279>;
 			ntc_degree_from = <1 21>;
-			design_capacity = <4510>;
-			design_qmax = <4900>;
-			bat_res = <120>;
+			design_capacity = <5408>;
+			design_qmax = <5948>;
+			bat_res = <159>;
 			sleep_enter_current = <150>;
 			sleep_exit_current = <180>;
 			sleep_filter_current = <100>;
-			power_off_thresd = <3450>;
-			zero_algorithm_vol = <3400>;
+			power_off_thresd = <3400>;
+			zero_algorithm_vol = <3950>;
 			max_soc_offset = <60>;
 			monitor_sec = <5>;
 			sample_res = <10>;
@@ -679,9 +699,10 @@
 			min_input_voltage = <4500>;
 			max_input_current = <1750>;
 			max_chrg_current = <2000>;
-			max_chrg_voltage = <4350>;
+			/* 4300mV per the factory DTS. 4350 over-charges this cell by 50mV. */
+			max_chrg_voltage = <4300>;
 			chrg_term_mode = <0>;
-			chrg_finish_cur = <100>;
+			chrg_finish_cur = <300>;
 			virtual_power = <0>;
 			dc_det_adc = <0>;
 			power_dc2otg = <0>;
