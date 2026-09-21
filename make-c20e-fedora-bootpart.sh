@@ -91,6 +91,12 @@ done
 mmd -i "$OUT" ::/extlinux
 mcopy -i "$OUT" "$SRC/boot/Image" "$SRC/boot/rk3562.dtb" ::/
 mcopy -i "$OUT" "$T/extlinux.conf" ::/extlinux/extlinux.conf
+# /c20e: live repair kit for a Fedora root prepared before the BSP installer
+# handled Fedora's first-boot preset and the Wi-Fi firmware (see
+# tools/c20e-fedora-live-fixup.sh). Placed last; only Linux reads it.
+mmd -i "$OUT" ::/c20e ::/c20e/firmware
+mcopy -i "$OUT" "$REPO/tools/c20e-fedora-live-fixup.sh" "$REPO/overlay/c20e.preset" ::/c20e/
+mcopy -i "$OUT" "$REPO"/overlay/firmware/*.bin ::/c20e/firmware/
 cp "$T/extlinux.conf" "$SRC/boot/extlinux/extlinux.conf"   # keep boot/ in step with the image
 L=$(grep -m1 'init=' "$T/extlinux.conf" | sed 's/^ *append //' | tr -d '\n' | wc -c)
 [[ $L -le 1000 ]] || die "diagnostic append line is $L bytes; U-Boot's limit is 1023 (keep margin)"

@@ -74,6 +74,14 @@ printf 'skw_sdio_lite\nskw\n' > "$ROOT/etc/modules-load.d/c20e-seekwave.conf"
 printf 'options skwbt firmware_dir=seekwave\n' > "$ROOT/etc/modprobe.d/c20e-skwbt.conf"
 install -m0644 "$REPO/overlay/c20e-skw-mac.conf" "$ROOT/etc/modprobe.d/c20e-skw-mac.conf"
 install -m0644 "$REPO/overlay/firmware/seekwave/sv6160.nvbin" "$ROOT/lib/firmware/seekwave/sv6160.nvbin"
+# Wi-Fi firmware. skw_sdio's boot loader requests SWT6621_DRAM_SDIO.bin (and
+# the IRAM image); without them it logs "request image fail" and there is no
+# wlan0 at all. The Debian build copies all of overlay/firmware/; this
+# installer originally copied only the BT nvbin, so the first Fedora image had
+# no Wi-Fi (2026-09-21).
+for fw in "$REPO"/overlay/firmware/*.bin; do
+    install -m0644 "$fw" "$ROOT/lib/firmware/$(basename "$fw")"
+done
 say "installed BT NV firmware + module policy"
 
 if [[ -d "$ROOT/etc/NetworkManager" ]] || [[ -e "$ROOT/usr/sbin/NetworkManager" ]]; then
@@ -109,14 +117,7 @@ say "enabled login getty on ttyGS0 (USB serial console)"
 # removed all four c20e units and the ttyGS0 getty, so the first Fedora boot on
 # the eMMC had no DDR pin (GUI hang) and no USB console. Harmless on Debian.
 install -d "$ROOT/etc/systemd/system-preset"
-cat > "$ROOT/etc/systemd/system-preset/10-c20e.preset" <<'EOF'
-# C20e board support -- see install-c20e-board-support.sh
-enable c20e-dvfs-policy.service
-enable c20e-usb-debug.service
-enable c20e-bt-bringup.service
-enable c20e-camera.service
-enable serial-getty@.service ttyGS0
-EOF
+install -m0644 "$REPO/overlay/c20e.preset" "$ROOT/etc/systemd/system-preset/10-c20e.preset"
 say "installed systemd preset (keeps c20e units enabled across first-boot preset-all)"
 
 # --------------------------------------------------------------- ISP gain
@@ -140,6 +141,7 @@ sync
 echo
 say "verification:"
 printf '    seekwave modules : %s\n' "$(ls "$ROOT/lib/modules/$KREL/updates/c20e-seekwave" 2>/dev/null | tr '\n' ' ')"
+printf '    wifi firmware    : %s\n' "$([[ -f "$ROOT/lib/firmware/SWT6621_DRAM_SDIO.bin" && -f "$ROOT/lib/firmware/SWT6621_IRAM_SDIO.bin" ]] && echo yes || echo MISSING)"
 printf '    bt nv firmware   : %s\n' "$([[ -f "$ROOT/lib/firmware/seekwave/sv6160.nvbin" ]] && echo yes || echo MISSING)"
 printf '    isp gain binary  : %s\n' "$([[ -x "$ROOT/usr/local/bin/c20e-isp-gain" ]] && echo yes || echo 'not built (source shipped)')"
 printf '    enabled units    : %s\n' "$(ls "$ROOT/etc/systemd/system/multi-user.target.wants" 2>/dev/null | grep -c c20e) c20e units"

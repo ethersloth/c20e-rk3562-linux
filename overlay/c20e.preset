@@ -1,0 +1,8 @@
+# C20e board support. Fedora's systemd runs a FULL preset-all on first boot,
+# which disables every unit its own preset lists do not name -- without this
+# file that silently disabled all of these (2026-09-21).
+enable c20e-dvfs-policy.service
+enable c20e-usb-debug.service
+enable c20e-bt-bringup.service
+enable c20e-camera.service
+enable serial-getty@.service ttyGS0
