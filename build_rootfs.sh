@@ -2554,14 +2554,28 @@ Type=simple
 ExecStart=%h/.local/bin/rkcam-webcam.sh
 # Refresh portal camera inventory after source appears (works around race)
 ExecStartPost=/bin/sh -c 'sleep 1; systemctl --user restart xdg-desktop-portal.service xdg-desktop-portal-gnome.service || true'
-Restart=always
-RestartSec=2
+# Bounded restarts. This unit restarting forever also restarts the desktop
+# portals forever, via ExecStartPost above.
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=3
 
 [Install]
 WantedBy=default.target
 RKCAM_WEBCAM_UNIT
-ln -sfn /home/chaos/.config/systemd/user/rkcam-webcam.service \
-    "${ROOTFS_MNT}/home/chaos/.config/systemd/user/default.target.wants/rkcam-webcam.service"
+# NOT auto-enabled. The pipeline hardcodes /dev/video23 (rkisp_selfpath) at
+# UYVY 1280x720, which does not match how the ISP is actually configured on
+# this board, so gst-launch exits immediately. With Restart=always/RestartSec=2
+# that became an endless loop: ~38 restarts every 3 minutes, and because
+# ExecStartPost restarts xdg-desktop-portal on every attempt, it restarted the
+# desktop portals with it. Each cycle also re-enumerated V4L2, which powers the
+# dw9714 focus motor up and down -- 1701 power toggles and 853 "cmd not
+# supported" lines in 70 minutes of idle.
+#
+# Enable it by hand once the pipeline matches reality:
+#   systemctl --user enable --now rkcam-webcam.service
+# ln -sfn ... default.target.wants/rkcam-webcam.service
 
 chroot "${ROOTFS_MNT}" chown -R chaos:chaos \
     /home/chaos/.local/bin/rkcam-webcam.sh \
@@ -4568,10 +4582,17 @@ BindsTo=rkcam-webcam.service
 
 [Service]
 Type=simple
+# Refuse to run if the binary was not compiled. Without this the unit fails
+# with status=203/EXEC and, with Restart=on-failure/RestartSec=1, restarts
+# forever -- re-enumerating V4L2 each time and power-cycling the dw9714 focus
+# motor roughly every 5 seconds.
+ConditionPathExists=/usr/local/bin/rkisp1-awb
 ExecStartPre=/bin/sleep 0.5
 ExecStart=/usr/local/bin/rkisp1-awb 512 256 256 640
 Restart=on-failure
-RestartSec=1
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=3
 
 [Install]
 WantedBy=rkcam-webcam.service
