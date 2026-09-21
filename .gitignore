@@ -65,3 +65,6 @@ darkos-updates2/
 # Stale session and handoff docs
 docs/camera-bringup-handoff-*.md
 docs/superpowers/plans/
+
+# eMMC backups: multi-GB device images, never commit.
+emmc_image_backup/
