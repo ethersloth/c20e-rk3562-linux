@@ -52,6 +52,12 @@ trap cleanup EXIT
 grep -qx 'CONFIG_DRM_PANFROST=y' "$KSRC/.config" \
     || die "the kernel in $KSRC is not a Panfrost build (rebuild with --gpu-stack panfrost)"
 grep -qx 'CONFIG_BTRFS_FS=y' "$KSRC/.config" || die "kernel lacks btrfs; Fedora's root is btrfs"
+# Without the all-clocks patch the first GPU open freezes the SoC (see
+# overlay/drivers/gpu/drm/panfrost/panfrost_device.c). Refuse to build without it.
+grep -q 'enabled all %d DT clocks' "$KSRC/drivers/gpu/drm/panfrost/panfrost_device.c" \
+    || die "kernel tree lacks the Panfrost all-clocks fix; rebuild with ./build.sh extboot --gpu-stack panfrost"
+[[ "$KSRC/arch/arm64/boot/Image" -nt "$KSRC/drivers/gpu/drm/panfrost/panfrost_device.c" ]] \
+    || die "kernel Image is older than the Panfrost fix; rebuild the kernel"
 KDTB="$KSRC/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dtb"
 [[ -f "$KDTB" ]] || die "missing $KDTB"
 KREL="$(make -s -C "$KSRC" ARCH=arm64 kernelrelease)"
@@ -126,7 +132,6 @@ sync; umount "$MNT"; losetup -d "$LOOP"; LOOP=""
 # ---- boot partition contents -------------------------------------------
 cp "$KSRC/arch/arm64/boot/Image" "$OUT/boot/Image"
 cp "$KDTB" "$OUT/boot/rk3562.dtb"
-cat > "$OUT/boot/extlinux/extlinux.conf" <<EOF
 # C20e Fedora KDE Plasma Mobile -- boots the C20e kernel ($KREL, Panfrost)
 # against Fedora's btrfs root. No initramfs: root is resolved by PARTUUID,
 # and btrfs is built into the kernel.
@@ -149,6 +154,11 @@ ROOT_SECTORS=$SIZE
 KERNEL=$KREL
 ROOT_SHA256=$(sha256sum "$ROOTIMG.zst" | cut -d' ' -f1)
 EOF
+
+# Boot menu + the 256 MiB FAT boot-partition image, from the same generator the
+# rockusb/SSH repair path uses, so they cannot drift apart. Default: desktop.
+# (It needs the manifest above for the root PARTUUID and kernel version.)
+"$REPO/make-c20e-fedora-bootpart.sh" graphical
 chown -R "${SUDO_USER:-root}:" "$OUT" 2>/dev/null || true
 
 echo

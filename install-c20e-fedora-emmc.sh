@@ -5,11 +5,14 @@
 # THIS ERASES ANDROID. Restore image: emmc_image_backup/ on the laptop
 # (c20e-emmc-preinstall.img.zst + c20e-emmc-gpt.sfdisk).
 #
-# Why this is recoverable if it goes wrong: the RK3562 BootROM checks the SD
-# card BEFORE the eMMC. Proven the hard way -- a card with a bad bootloader
-# made the tablet completely dead, Android included, until it was removed. So
-# with the Debian SD card inserted the tablet always boots Debian, whatever is
-# on the eMMC. To boot Fedora, remove the card. If Fedora fails, put it back.
+# Recovery if it goes wrong -- NOT via the SD card. An earlier version of this
+# comment promised "the BootROM checks the SD card first, so the Debian SD
+# always boots". That was WRONG (2026-09-21): with Fedora on the eMMC the
+# tablet booted it even with the SD card inserted. The way back in, with the
+# case closed, is U-Boot's USB loader mode: hold Volume Up at power-on with
+# the USB cable to a laptop, then use c20e-emmc-bootloader-rockusb.sh
+# (inspect / dump / write-boot / read-log / hide-boot / disable). The
+# Android backup restores the same way. Test that path works BEFORE erasing.
 #
 # Layout written (mirrors the SD card layout, which is known to boot):
 #   sector 64      idbloader   (upstream bootloader, as on the SD card)
@@ -145,6 +148,6 @@ fi
 
 echo
 say "SUCCESS. Fedora is on the internal eMMC."
-say "To boot it: power off, REMOVE the SD card, power on."
-say "To get back to Debian: power off, insert the SD card, power on."
+say "To boot it: power off, remove the SD card, power on."
+say "Recovery: hold Volume Up at power-on (USB to laptop) -> c20e-emmc-bootloader-rockusb.sh"
 say "USB serial console (/dev/ttyACM0 on the laptop) autologins as root for bring-up."
