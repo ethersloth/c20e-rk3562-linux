@@ -4776,12 +4776,26 @@ choose_governor() {
 }
 
 read_profile() {
-    if ! command -v powerprofilesctl >/dev/null 2>&1; then
-        echo "balanced"
-        return 0
+    # Ask power-profiles-daemon over D-Bus with busctl, NOT powerprofilesctl.
+    #
+    # powerprofilesctl is a Python script: every call starts a fresh interpreter.
+    # Measured on this Cortex-A53, one "powerprofilesctl get" costs 1099ms of CPU,
+    # and this loop runs every 2s -- so the sync script alone spent ~55% of its
+    # time answering "has the profile changed?". Under load that showed up as
+    # powerprofilesctl at 82% CPU in top while Firefox was decoding video, and
+    # was enough to make 720p YouTube visibly choppy on a saturated CPU.
+    #
+    # busctl is a small C binary and returns the same value in ~51ms.
+    profile=""
+    if command -v busctl >/dev/null 2>&1; then
+        profile="$(busctl get-property org.freedesktop.UPower.PowerProfiles \
+                    /org/freedesktop/UPower/PowerProfiles \
+                    org.freedesktop.UPower.PowerProfiles ActiveProfile 2>/dev/null \
+                    | sed -n 's/^s "\(.*\)"$/\1/p')"
     fi
-
-    profile="$(powerprofilesctl get 2>/dev/null || true)"
+    if [ -z "${profile}" ] && command -v powerprofilesctl >/dev/null 2>&1; then
+        profile="$(powerprofilesctl get 2>/dev/null || true)"
+    fi
     case "${profile}" in
         power-saver|balanced|performance) echo "${profile}" ;;
         *) echo "balanced" ;;
