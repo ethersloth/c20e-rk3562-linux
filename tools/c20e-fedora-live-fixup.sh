@@ -15,7 +15,7 @@ set -euo pipefail
 D="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 [[ $EUID -eq 0 ]] || { echo "run as root" >&2; exit 1; }
 
-for u in c20e-audio-init; do
+for u in c20e-audio-init c20e-accel-enable; do
     [[ -f "$D/$u.sh" ]] || continue
     install -m0755 "$D/$u.sh" "/usr/local/sbin/$u"
     install -m0644 "$D/$u.service" "/etc/systemd/system/$u.service"
@@ -31,6 +31,8 @@ restorecon -R /usr/lib/firmware /etc/systemd/system-preset 2>/dev/null || true
 systemctl enable c20e-dvfs-policy.service c20e-usb-debug.service \
     c20e-bt-bringup.service c20e-camera.service serial-getty@ttyGS0.service
 [[ -f /etc/systemd/system/c20e-audio-init.service ]] && systemctl enable c20e-audio-init.service
+[[ -f /etc/systemd/system/c20e-accel-enable.service ]] && systemctl enable c20e-accel-enable.service
+[[ -f "$D/61-c20e-accel.rules" ]] && install -m0644 "$D/61-c20e-accel.rules" /etc/udev/rules.d/61-c20e-accel.rules
 echo "[fixup] preset installed; c20e units + ttyGS0 getty enabled"
 
 # Do NOT try to reload the Seekwave modules here: `modprobe -r skw

@@ -1,0 +1,12 @@
+[Unit]
+Description=C20e accelerometer start (DA223 via Rockchip sensor framework)
+Before=iio-sensor-proxy.service
+ConditionPathExists=/usr/bin/python3
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/c20e-accel-enable
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

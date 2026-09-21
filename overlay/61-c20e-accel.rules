@@ -1,0 +1,11 @@
+# Expose the C20e accelerometer (Rockchip vendor input device "gsensor",
+# DA223) to iio-sensor-proxy, which handles input-device accelerometers tagged
+# ID_INPUT_ACCELEROMETER. Raw axes: ~16384 counts per g (+-2g, 14-bit).
+#
+# ACCEL_MOUNT_MATRIX, measured on the tablet 2026-09-21: held landscape with
+# the picture upright, gravity sat on the chip's +X (16306, -981, -584), and
+# with the identity matrix iio-sensor-proxy said "left-up", so KWin rotated
+# the (natively portrait, 800x1280) panel upside down. Negating X gives
+# "right-up" and the correct rotation; portrait then followed correctly too.
+# Z was not calibrated (only orientation was checked, not flat/tilt).
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="gsensor", ENV{ID_INPUT_ACCELEROMETER}="1", ENV{ACCEL_MOUNT_MATRIX}="-1, 0, 0; 0, 1, 0; 0, 0, 1"

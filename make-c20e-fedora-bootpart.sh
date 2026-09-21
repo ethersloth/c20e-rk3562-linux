@@ -119,7 +119,9 @@ mcopy -i "$OUT" "$T/extlinux.conf" ::/extlinux/extlinux.conf
 # tools/c20e-fedora-live-fixup.sh). Placed last; only Linux reads it.
 mmd -i "$OUT" ::/c20e ::/c20e/firmware
 mcopy -i "$OUT" "$REPO/tools/c20e-fedora-live-fixup.sh" "$REPO/overlay/c20e.preset" \
-    "$REPO/overlay/c20e-audio-init.sh" "$REPO/overlay/c20e-audio-init.service" ::/c20e/
+    "$REPO/overlay/c20e-audio-init.sh" "$REPO/overlay/c20e-audio-init.service" \
+    "$REPO/overlay/c20e-accel-enable.sh" "$REPO/overlay/c20e-accel-enable.service" \
+    "$REPO/overlay/61-c20e-accel.rules" ::/c20e/
 mcopy -i "$OUT" "$REPO"/overlay/firmware/*.bin ::/c20e/firmware/
 cp "$T/extlinux.conf" "$SRC/boot/extlinux/extlinux.conf"   # keep boot/ in step with the image
 L=$(grep 'append' "$T/extlinux.conf" | sed 's/^ *append //' | awk '{ if (length($0) > m) m = length($0) } END { print m }')

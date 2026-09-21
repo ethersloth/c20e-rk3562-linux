@@ -94,7 +94,7 @@ else
 fi
 
 # ------------------------------------------------------------------ services
-for pair in "c20e-bt-bringup:sbin" "c20e-dvfs-policy:sbin" "c20e-camera:sbin" "c20e-usb-debug:sbin" "c20e-audio-init:sbin"; do
+for pair in "c20e-bt-bringup:sbin" "c20e-dvfs-policy:sbin" "c20e-camera:sbin" "c20e-usb-debug:sbin" "c20e-audio-init:sbin" "c20e-accel-enable:sbin"; do
     name="${pair%%:*}"
     install -m0755 "$REPO/overlay/$name.sh"      "$ROOT/usr/local/sbin/$name"
     install -m0644 "$REPO/overlay/$name.service" "$ROOT/etc/systemd/system/$name.service"
@@ -110,6 +110,11 @@ install -d "$ROOT/etc/systemd/system/getty.target.wants"
 ln -sf /usr/lib/systemd/system/serial-getty@.service \
     "$ROOT/etc/systemd/system/getty.target.wants/serial-getty@ttyGS0.service"
 say "enabled login getty on ttyGS0 (USB serial console)"
+
+# Accelerometer -> iio-sensor-proxy (auto-rotation). See overlay/61-c20e-accel.rules.
+install -d "$ROOT/etc/udev/rules.d"
+install -m0644 "$REPO/overlay/61-c20e-accel.rules" "$ROOT/etc/udev/rules.d/61-c20e-accel.rules"
+say "installed accelerometer udev rule (auto-rotation)"
 
 # Presets, so the enable links SURVIVE a first boot. Fedora's systemd does a
 # FULL `preset-all` on first boot (machine-id "uninitialized"), which DISABLES
