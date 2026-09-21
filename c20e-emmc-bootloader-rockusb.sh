@@ -17,13 +17,23 @@
 # the eMMC and boots the SD card. Partitions (boot, Fedora root) are untouched.
 # `restore` writes the idbloader back, making the eMMC bootable again.
 #
-# Usage: sudo ./c20e-emmc-bootloader-rockusb.sh disable|restore|check
+# Blanking the idbloader alone was NOT enough (2026-09-21): the tablet still
+# booted the eMMC's Fedora. U-Boot's distro boot scans every mmc device for a
+# partition flagged bootable holding extlinux/extlinux.conf, so whichever
+# U-Boot runs can still pick the eMMC's boot partition. `hide-boot` zeroes the
+# first 8 sectors (FAT boot sector, FSInfo, backup boot sector) of the eMMC
+# boot partition after saving them, so no U-Boot can find extlinux.conf there;
+# `unhide-boot` writes them back. `inspect` is read-only.
+#
+# Usage: sudo ./c20e-emmc-bootloader-rockusb.sh disable|restore|check|inspect|hide-boot|unhide-boot
 set -Eeuo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
 IDB="$REPO/bootloader/upstream-idbloader.img"
 SAVE="$REPO/out/emmc-idbloader-readback.bin"
 SECTOR=64
+BOOT_START=32768          # eMMC p3 (vfat boot), as written by install-c20e-fedora-emmc.sh
+BOOT_SAVE="$REPO/out/emmc-p3-head-readback.bin"
 BYTES=$(stat -c%s "$IDB")
 N=$(( (BYTES + 511) / 512 ))
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
@@ -60,5 +70,35 @@ restore)
     rkdeveloptool wl $SECTOR "$IDB" >/dev/null || die "write failed"
     readback "$TMP/after"; is_ours "$TMP/after" || die "read-back mismatch after restore!"
     say "eMMC idbloader restored and verified; eMMC is bootable again" ;;
-*) die "usage: $0 disable|restore|check" ;;
+inspect)
+    # Rockchip BootROMs search for backup idblocks at 512 KiB steps. Android's
+    # factory loader may have left copies that our shorter idbloader and the
+    # GPT rewrite never overwrote.
+    for k in 0 1 2 3 4; do
+        s=$((64 + 1024*k))
+        rkdeveloptool rl $s 1 "$TMP/s" >/dev/null || die "read failed"
+        if is_zero "$TMP/s"; then d="blank"; else d="DATA  first bytes: $(head -c8 "$TMP/s" | od -An -tx1 | tr -s ' ')"; fi
+        echo "  sector $s (idblock copy $k): $d"
+    done
+    rkdeveloptool rl 16384 1 "$TMP/s" >/dev/null
+    echo "  sector 16384 (u-boot.itb): $(head -c4 "$TMP/s" | od -An -tx1 | tr -s ' ')   (d0 0d fe ed = FIT)"
+    rkdeveloptool rl $BOOT_START 1 "$TMP/s" >/dev/null
+    echo "  sector $BOOT_START (boot p3): OEM '$(dd if="$TMP/s" bs=1 skip=3 count=8 status=none | tr -c '[:print:]' .)' fstype '$(dd if="$TMP/s" bs=1 skip=82 count=8 status=none | tr -c '[:print:]' .)'" ;;
+hide-boot)
+    rkdeveloptool rl $BOOT_START 8 "$TMP/cur" >/dev/null || die "read failed"
+    if is_zero "$TMP/cur"; then say "eMMC boot partition already hidden"; exit 0; fi
+    [[ "$(dd if="$TMP/cur" bs=1 skip=82 count=5 status=none)" == "FAT32" ]] \
+        || die "sector $BOOT_START is not a FAT32 boot sector; refusing"
+    mkdir -p "$(dirname "$BOOT_SAVE")"; cp "$TMP/cur" "$BOOT_SAVE"; chown "${SUDO_USER:-root}:" "$BOOT_SAVE" 2>/dev/null || true
+    say "saved eMMC boot-partition head to $BOOT_SAVE"
+    head -c 4096 /dev/zero > "$TMP/zero"
+    rkdeveloptool wl $BOOT_START "$TMP/zero" >/dev/null || die "write failed"
+    rkdeveloptool rl $BOOT_START 8 "$TMP/after" >/dev/null; is_zero "$TMP/after" || die "read-back not blank!"
+    say "eMMC boot partition hidden (no FAT signature); U-Boot can only boot the SD card now" ;;
+unhide-boot)
+    [[ -f "$BOOT_SAVE" && $(stat -c%s "$BOOT_SAVE") -eq 4096 ]] || die "no saved $BOOT_SAVE"
+    rkdeveloptool wl $BOOT_START "$BOOT_SAVE" >/dev/null || die "write failed"
+    rkdeveloptool rl $BOOT_START 8 "$TMP/after" >/dev/null; cmp -s "$BOOT_SAVE" "$TMP/after" || die "read-back mismatch!"
+    say "eMMC boot partition restored" ;;
+*) die "usage: $0 disable|restore|check|inspect|hide-boot|unhide-boot" ;;
 esac
