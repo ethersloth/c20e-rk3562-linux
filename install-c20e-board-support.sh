@@ -127,11 +127,18 @@ if [[ -f "$REPO/tools/rkisp32_gain.c" ]]; then
          -o "$ROOT/usr/local/bin/c20e-isp-gain" "$REPO/tools/rkisp32_gain.c" 2>/dev/null; then
         say "compiled c20e-isp-gain"
     else
-        install -d "$ROOT/usr/local/src"
+        # Ship the source AND the Rockchip vendor ISP uapi headers it needs:
+        # distro kernel-headers are mainline and lack rk-isp32-config.h and its
+        # chain, so a plain on-device gcc fails without them.
+        install -d "$ROOT/usr/local/src" "$ROOT/usr/local/include/linux"
         install -m0644 "$REPO/tools/rkisp32_gain.c" "$ROOT/usr/local/src/rkisp32_gain.c"
+        for h in rk-isp32-config.h rk-isp3-config.h rk-isp21-config.h rk-isp2-config.h \
+                 rk-camera-module.h rk-video-format.h; do
+            install -m0644 "$REPO/src/kernel/include/uapi/linux/$h" "$ROOT/usr/local/include/linux/$h"
+        done
         say "WARNING: could not cross-compile c20e-isp-gain (bare cross-compiler?)."
-        say "         source left at /usr/local/src/rkisp32_gain.c -- build it on the device:"
-        say "         gcc -O2 -o /usr/local/bin/c20e-isp-gain /usr/local/src/rkisp32_gain.c"
+        say "         source + vendor headers shipped -- build on the device (needs gcc, v4l-utils):"
+        say "         gcc -O2 -I/usr/local/include -o /usr/local/bin/c20e-isp-gain /usr/local/src/rkisp32_gain.c"
     fi
 fi
 
@@ -147,4 +154,5 @@ printf '    isp gain binary  : %s\n' "$([[ -x "$ROOT/usr/local/bin/c20e-isp-gain
 printf '    enabled units    : %s\n' "$(ls "$ROOT/etc/systemd/system/multi-user.target.wants" 2>/dev/null | grep -c c20e) c20e units"
 printf '    skwbt auto-load  : %s\n' "$(grep -qx skwbt "$ROOT/etc/modules-load.d/c20e-seekwave.conf" && echo 'PRESENT (bad)' || echo 'absent (good)')"
 echo
-say "done. The rootfs still needs: systemd, v4l-utils, kmod (and NetworkManager for Wi-Fi)."
+say "done. The rootfs still needs: systemd, v4l-utils (media-ctl, v4l2-ctl: the camera"
+say "     service fails without them), kmod, alsa-utils, NetworkManager, and gcc to build the ISP gain tool."

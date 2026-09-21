@@ -133,6 +133,11 @@ if [ "$ISP_GAIN" != "0" ] && command -v c20e-isp-gain >/dev/null 2>&1; then
     log "ISP gain feeder started at $ISP_GAIN (Q8, 256=1.0x)"
 fi
 
-log "$CAM camera ready on $ISP_NODE (NV12 ${W}x${H})"
+# Report what the video node actually negotiates. The ISP output pad is set to
+# ${W}x${H} above, but the node keeps its own format (2592x1944 NV12 for the
+# rear on 2026-09-21, verified with the sensor's colour-bar test pattern), so
+# echoing W/H here was misleading.
+ACT="$(v4l2-ctl -d "$ISP_NODE" --get-fmt-video 2>/dev/null | awk -F': *' '/Width\/Height/{print $2}' | tr -d ' ' | tr '/' 'x')"
+log "$CAM camera ready on $ISP_NODE (NV12 ${ACT:-${W}x${H}})"
 log "raw Bayer: rear=/dev/video0  front=/dev/video11"
 exit 0
