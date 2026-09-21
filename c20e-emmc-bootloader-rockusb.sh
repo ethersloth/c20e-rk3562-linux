@@ -28,7 +28,10 @@
 # `dump` (read-only) copies sectors 0..40959 (20 MiB: GPT, every idblock copy,
 # u-boot, start of the boot partition) to out/emmc-head-dump.bin for analysis.
 #
-# Usage: sudo ./c20e-emmc-bootloader-rockusb.sh disable|restore|check|inspect|dump|hide-boot|unhide-boot
+# `write-boot FILE` writes a complete 256 MiB FAT32 boot-partition image (from
+# make-c20e-fedora-bootpart.sh) to eMMC p3 and verifies it by full read-back.
+#
+# Usage: sudo ./c20e-emmc-bootloader-rockusb.sh disable|restore|check|inspect|dump|hide-boot|unhide-boot|write-boot FILE
 set -Eeuo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
@@ -109,5 +112,19 @@ dump)
     [[ $(stat -c%s "$D") -eq $((40960*512)) ]] || die "short read"
     chown "${SUDO_USER:-root}:" "$D" 2>/dev/null || true
     say "dumped eMMC sectors 0..40959 to $D (read-only)" ;;
-*) die "usage: $0 disable|restore|check|inspect|dump|hide-boot|unhide-boot" ;;
+write-boot)
+    F="${2:-}"; [[ -f "$F" ]] || die "usage: $0 write-boot FILE"
+    [[ $(stat -c%s "$F") -eq $((524288*512)) ]] || die "$F is not exactly 256 MiB (the p3 size)"
+    [[ "$(dd if="$F" bs=1 skip=82 count=5 status=none)" == "FAT32" ]] || die "$F is not a FAT32 image"
+    # Refuse unless p3 is where we expect it (FAT32 there, or blanked by hide-boot).
+    rkdeveloptool rl $BOOT_START 8 "$TMP/cur" >/dev/null || die "read failed"
+    is_zero "$TMP/cur" || [[ "$(dd if="$TMP/cur" bs=1 skip=82 count=5 status=none)" == "FAT32" ]] \
+        || die "eMMC sector $BOOT_START is neither FAT32 nor blank; refusing"
+    say "writing $F to eMMC p3 (256 MiB)..."
+    rkdeveloptool wl $BOOT_START "$F" >/dev/null || die "write failed"
+    say "verifying by read-back..."
+    rkdeveloptool rl $BOOT_START 524288 "$TMP/rb" >/dev/null || die "read-back failed"
+    cmp -s "$F" "$TMP/rb" || die "read-back MISMATCH"
+    say "eMMC boot partition written and verified" ;;
+*) die "usage: $0 disable|restore|check|inspect|dump|hide-boot|unhide-boot|write-boot FILE" ;;
 esac
