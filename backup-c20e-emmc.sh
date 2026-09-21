@@ -10,8 +10,11 @@
 # The end sector is read from the live partition table, not hard-coded, and
 # the read is done in whole SECTORS. An earlier version computed a byte count
 # as END*512/1024/1024 MiB; 11746304*512 bytes is 5735.5 MiB, integer division
-# floored it to 5735, and the final 512 KiB of `super` -- where Android keeps
-# the BACKUP copy of its dynamic-partition metadata -- was silently never read.
+# floored it to 5735, and the final 512 KiB before userdata was silently never
+# read. (That region turned out to be unused, all zeros: Android's liblp keeps
+# BOTH primary and backup dynamic-partition metadata near the START of `super`,
+# not the end. So that particular truncation was harmless -- but a backup whose
+# size is not checked cannot be trusted, which is why this one is.)
 set -euo pipefail
 
 DEV=/dev/mmcblk2
