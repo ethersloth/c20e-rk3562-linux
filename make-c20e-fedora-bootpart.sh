@@ -29,16 +29,20 @@ BASE="earlycon=uart8250,mmio32,0xff210000 console=ttyS0,1500000n8 console=tty1 r
 # Boot logger for the text entry, no rootfs change needed: PID 1 starts as bash,
 # forks a logger, then execs systemd (still PID 1, so the boot is otherwise
 # normal). Every 30 s the logger mounts this FAT partition (label C20EBOOT) at
-# /mnt and rewrites j.txt (journal), k.txt (dmesg) and s.txt (jobs, failed
+# /mnt and overwrites j.txt (journal), k.txt (dmesg) and s.txt (jobs, failed
 # units, USB gadget/role state, process list), so they are current even if the
-# boot hangs. Read them back in loader mode with
+# boot hangs; each ends at an ==END== line. The files are PRE-ALLOCATED here,
+# before the kernel, and overwritten in place (dd conv=notrunc), because
+# rockusb in this U-Boot cannot read eMMC sectors >= 65536 (32 MiB; reads
+# return 0xcc) -- a freshly allocated file lands after the 43 MB Image, out of
+# reach. Read them back in loader mode with
 #     sudo ./c20e-emmc-bootloader-rockusb.sh read-log
 # Constraints, all enforced below:
 #   - U-Boot (cmd/pxe.c) refuses an append line of 1024+ bytes ("bootarg
 #     overflow") -- CONFIG_SYS_CBSIZE is 1024 on rk3562
 #   - U-Boot's cli_simple_process_macros expands $, and eats \ and ' -- so none
 #   - the kernel strips only the outer pair of double quotes -- so none inside
-LOGGER='while sleep 30;do mount -o sync LABEL=C20EBOOT /mnt 2>/dev/null;cd /mnt||continue;journalctl -b -o short-monotonic>j.txt 2>&1;dmesg>k.txt;{ systemctl list-jobs;systemctl --failed;ls /sys/class/udc /dev/ttyGS0;cat /sys/kernel/debug/usb/fe500000.usb/mode /sys/class/usb_role/*/role /var/log/c20e-usb-debug.log;ps -eo pid,stat,etime,args;}>s.txt 2>&1;cd /;sync;done'
+LOGGER='while sleep 30;do mount -o sync LABEL=C20EBOOT /mnt 2>/dev/null;cd /mnt||continue;{ journalctl -b -o short-monotonic 2>&1|tail -c 4000000;echo ==END==;}|dd of=j.txt conv=notrunc status=none;{ dmesg|tail -c 1900000;echo ==END==;}|dd of=k.txt conv=notrunc status=none;{ systemctl list-jobs;systemctl --failed;ls /sys/class/udc /dev/ttyGS0;cat /sys/kernel/debug/usb/fe500000.usb/mode /sys/class/usb_role/*/role /var/log/c20e-usb-debug.log;ps -eo pid,stat,etime,args;echo ==END==;} 2>&1|tail -c 200000|dd of=s.txt conv=notrunc status=none;cd /;sync;done'
 DIAG="systemd.unit=multi-user.target systemd.show_status=1 plymouth.enable=0 init=/usr/bin/bash -- -c \"( $LOGGER )& exec /usr/lib/systemd/systemd\""
 case "$LOGGER" in *[\$\'\\\"]*) die "logger contains \$, ', \\ or a double quote; U-Boot/kernel would mangle it" ;; esac
 [[ "$DIAG" != *'$'* ]] || die "logger contains a dollar sign; U-Boot would expand it"
@@ -68,6 +72,11 @@ rm -f "$OUT"
 truncate -s $((BOOT_SECTORS*512)) "$OUT"
 mkfs.vfat -F 32 -n C20EBOOT "$OUT" >/dev/null
 export MTOOLS_SKIP_CHECK=1
+# Log files FIRST, so they take the first clusters (below eMMC sector 65536).
+for spec in j.txt:4194304 k.txt:2097152 s.txt:262144; do
+    head -c "${spec#*:}" /dev/zero | tr '\0' '\n' > "$T/${spec%%:*}"
+    mcopy -i "$OUT" "$T/${spec%%:*}" "::/${spec%%:*}"
+done
 mmd -i "$OUT" ::/extlinux
 mcopy -i "$OUT" "$SRC/boot/Image" "$SRC/boot/rk3562.dtb" ::/
 mcopy -i "$OUT" "$T/extlinux.conf" ::/extlinux/extlinux.conf

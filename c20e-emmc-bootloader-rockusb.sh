@@ -58,6 +58,11 @@ readback(){ rkdeveloptool rl $SECTOR $N "$1" >/dev/null || die "read failed"; [[
 # One large `rkdeveloptool rl` returns correct data only for the first 16 MiB;
 # the rest reads back as 0xcc filler (seen 2026-09-21 on a 256 MiB read). So
 # every large read goes in 8 MiB chunks, each checked for length.
+# UPDATE: chunking does not help -- the real limit is ABSOLUTE: every sector
+# >= 65536 (32 MiB) reads as 0xcc, whatever the request size. Writes there do
+# work (the tablet boots the kernel written past it). So read-back can only
+# verify below that line, and the boot logger's files are placed below it.
+RL_LIMIT=65536
 rl_big(){  # START COUNT FILE
     local start=$1 count=$2 out=$3 off=0 n
     : > "$out"
@@ -139,16 +144,20 @@ write-boot)
     say "writing $F to eMMC p3 (256 MiB)..."
     rkdeveloptool wl $BOOT_START "$F" >/dev/null || die "write failed"
     say "verifying by read-back..."
-    rl_big $BOOT_START 524288 "$TMP/rb"
-    cmp -s "$F" "$TMP/rb" || die "read-back MISMATCH"
-    say "eMMC boot partition written and verified" ;;
+    V=$(( RL_LIMIT - BOOT_START ))
+    rl_big $BOOT_START $V "$TMP/rb"
+    cmp -s -n $((V*512)) "$F" "$TMP/rb" || die "read-back MISMATCH"
+    say "eMMC boot partition written; first $((V/2048)) MiB verified (rockusb cannot read past eMMC sector $RL_LIMIT)" ;;
 read-log)
     command -v mcopy >/dev/null || die "mtools (mcopy) not installed"
-    rl_big $BOOT_START 524288 "$TMP/p3"
+    rl_big $BOOT_START $(( RL_LIMIT - BOOT_START )) "$TMP/p3"
+    truncate -s $((524288*512)) "$TMP/p3"          # rest unreadable; pad so mtools accepts it
     O="$REPO/out/fedora-log-$(date +%Y%m%d-%H%M%S)"; mkdir -p "$O"
     cp --sparse=always "$TMP/p3" "$O/p3.vfat"      # raw partition, for when extraction is not enough
     for f in j.txt k.txt s.txt; do
-        MTOOLS_SKIP_CHECK=1 mcopy -n -i "$TMP/p3" "::/$f" "$O/$f" 2>/dev/null || echo "  (no $f -- logger never ran or not yet 30 s in)"
+        MTOOLS_SKIP_CHECK=1 mcopy -n -i "$TMP/p3" "::/$f" "$TMP/raw" 2>/dev/null || { echo "  (no $f in the image)"; continue; }
+        if grep -q '^==END==' "$TMP/raw"; then sed '/^==END==/q' "$TMP/raw" > "$O/$f"
+        else echo "  ($f has no ==END== yet -- logger has not run)"; fi
     done
     chown -R "${SUDO_USER:-root}:" "$O" 2>/dev/null || true
     say "boot logs in $O:"; ls -l "$O" ;;
