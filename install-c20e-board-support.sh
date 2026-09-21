@@ -103,6 +103,22 @@ ln -sf /usr/lib/systemd/system/serial-getty@.service \
     "$ROOT/etc/systemd/system/getty.target.wants/serial-getty@ttyGS0.service"
 say "enabled login getty on ttyGS0 (USB serial console)"
 
+# Presets, so the enable links SURVIVE a first boot. Fedora's systemd does a
+# FULL `preset-all` on first boot (machine-id "uninitialized"), which DISABLES
+# every unit its preset lists do not mention: on 2026-09-21 that silently
+# removed all four c20e units and the ttyGS0 getty, so the first Fedora boot on
+# the eMMC had no DDR pin (GUI hang) and no USB console. Harmless on Debian.
+install -d "$ROOT/etc/systemd/system-preset"
+cat > "$ROOT/etc/systemd/system-preset/10-c20e.preset" <<'EOF'
+# C20e board support -- see install-c20e-board-support.sh
+enable c20e-dvfs-policy.service
+enable c20e-usb-debug.service
+enable c20e-bt-bringup.service
+enable c20e-camera.service
+enable serial-getty@.service ttyGS0
+EOF
+say "installed systemd preset (keeps c20e units enabled across first-boot preset-all)"
+
 # --------------------------------------------------------------- ISP gain
 # Without this the ISP output is nearly black; there is no 3A on this board.
 if [[ -f "$REPO/tools/rkisp32_gain.c" ]]; then

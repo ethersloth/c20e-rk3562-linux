@@ -25,7 +25,18 @@ command -v mcopy >/dev/null || die "mtools (mcopy) not installed"
 # shellcheck disable=SC1091
 . "$SRC/manifest"
 
-BASE="earlycon=uart8250,mmio32,0xff210000 console=ttyS0,1500000n8 console=tty1 root=PARTUUID=$FEDORA_ROOT_PARTUUID rootfstype=btrfs rootflags=subvol=root,compress=zstd:1 rw rootwait panic=10 enforcing=0 video=DSI-1:800x1280@60,rotate=90"
+# Fedora's systemd does a FULL preset on first boot (/etc/machine-id was
+# "uninitialized" in the image): every unit not in Fedora's preset lists is
+# DISABLED -- including the C20e services and the ttyGS0 USB console getty.
+# Verified from the boot journal 2026-09-21: none of them ran. systemd.wants=
+# starts them regardless of enablement, so a board that lost its enable links
+# still gets its DDR pin (without which the GUI corrupts memory) and USB
+# console. The permanent fix is the preset file install-c20e-board-support.sh
+# now installs. earlycon/ttyS0 dropped: that UART needs the case opened, and
+# U-Boot's 1023-byte append limit needs the room.
+WANTS_MIN="systemd.wants=c20e-dvfs-policy.service systemd.wants=c20e-usb-debug.service systemd.wants=serial-getty@ttyGS0.service"
+WANTS_ALL="$WANTS_MIN systemd.wants=c20e-bt-bringup.service systemd.wants=c20e-camera.service"
+BASE="console=tty1 root=PARTUUID=$FEDORA_ROOT_PARTUUID rootfstype=btrfs rootflags=subvol=root,compress=zstd:1 rw rootwait panic=10 enforcing=0 video=DSI-1:800x1280@60,rotate=90"
 # Boot logger for the text entry, no rootfs change needed: PID 1 starts as bash,
 # forks a logger, then execs systemd (still PID 1, so the boot is otherwise
 # normal). Every 30 s the logger mounts this FAT partition (label C20EBOOT) at
@@ -59,13 +70,13 @@ label fedora-text
   menu label Fedora (text mode, diagnostic)
   kernel /Image
   fdt /rk3562.dtb
-  append $BASE $DIAG
+  append $BASE $WANTS_MIN $DIAG
 
 label fedora
   menu label Fedora (desktop)
   kernel /Image
   fdt /rk3562.dtb
-  append $BASE
+  append $BASE $WANTS_ALL
 EOF
 
 rm -f "$OUT"
