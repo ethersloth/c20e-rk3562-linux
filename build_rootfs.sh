@@ -1025,31 +1025,39 @@ echo "MOZ_DISABLE_RDD_SANDBOX=1" >> "${ROOTFS_MNT}/etc/environment"
 
 # Force GTK apps to render in software.
 #
-# A GTK client rendering through the Mali GPU and presenting buffers to the
-# compositor hard-locks this board: no panic, no oops, no pstore record, only
-# the hardware watchdog recovers it. Reproduced deterministically by launching
-# gnome-control-center (any panel), and it matches the long-standing reports of
-# the desktop dying "right after opening an app".
+# GTK client rendering now runs on the Mali GPU. The GSK_RENDERER=cairo
+# workaround that used to live here has been REMOVED, and this note records why
+# it existed and why it no longer does.
 #
-# Isolated by A/B on a single variable, same panel each time:
+# It was added after an A/B that looked conclusive, same panel each time:
 #   default GTK renderer (GL via Mali) -> hard lock
-#   GSK_RENDERER=cairo                 -> ran the full test, machine fine
+#   GSK_RENDERER=cairo                 -> survived the full test
 #   GDK_DISABLE=dmabuf (GL kept)       -> still hard locked
+# and the conclusion drawn was "client-side GL itself is broken in the Mali
+# stack". The locks left no panic, no oops and no pstore record; only the
+# hardware watchdog recovered the board.
 #
-# So it is client-side GL itself, not just dmabuf buffer sharing. The
-# compositor keeps using the GPU (phoc is stable for 90s under load, and
-# eglinfo reports Mali-G52), only application rendering drops to software.
-# Costs app smoothness; without it the desktop is unusable.
+# That signature -- a hard lock leaving no trace whatsoever -- is the DDR
+# frequency-scaling fault (see c20e-dvfs-policy: the dmc governor was scaling
+# DRAM while unable to read the VOP2 scanout bandwidth). The A/B was correct
+# that GL *triggered* the lock; GL is simply the heaviest DDR bandwidth
+# consumer available, so it exposed an unstable memory subsystem first. It was
+# never a GL bug, which is why disabling dmabuf alone did not help.
 #
-# Remove this once client GL rendering is fixed in the Mali stack. Test by
-# unsetting it and launching gnome-control-center; if the board survives, the
-# workaround is no longer needed.
-mkdir -p "${ROOTFS_MNT}/etc/environment.d"
-cat > "${ROOTFS_MNT}/etc/environment.d/90-rk-gsk-software.conf" << 'GSK_ENV'
-GSK_RENDERER=cairo
-GSK_ENV
+# With the DDR governor pinned, the documented exit criterion in the old
+# comment was tested directly: unset the override, run gnome-control-center.
+# Result: gnome-control-center, nautilus and phoc all holding /dev/mali0,
+# phoc reporting "EGL vendor: ARM" and "Creating GLES2 renderer", 1h17m uptime,
+# 0 oopses, 0 kernel warnings, no failed units.
+#
+# Leaving cairo in place cost real performance: it forced the entire desktop --
+# the Phosh shell and every GTK4 app -- through the CPU while a working
+# Mali-G52 sat idle at its 300MHz minimum.
+#
+# If client GL ever regresses, the override is one file:
+#   echo GSK_RENDERER=cairo > /etc/environment.d/90-rk-gsk-software.conf
 sed -i '/^GSK_RENDERER=/d' "${ROOTFS_MNT}/etc/environment" || true
-echo "GSK_RENDERER=cairo" >> "${ROOTFS_MNT}/etc/environment"
+rm -f "${ROOTFS_MNT}/etc/environment.d/90-rk-gsk-software.conf"
 
 # Auto-install h264ify on first Firefox run to keep YouTube on H.264 streams.
 mkdir -p "${ROOTFS_MNT}/usr/lib/firefox-esr/distribution"
