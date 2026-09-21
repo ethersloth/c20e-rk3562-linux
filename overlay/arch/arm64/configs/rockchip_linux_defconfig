@@ -694,6 +694,62 @@ CONFIG_EFIVAR_FS=y
 CONFIG_JFFS2_FS=y
 CONFIG_UBIFS_FS=y
 CONFIG_UBIFS_FS_ADVANCED_COMPR=y
+# btrfs: Fedora's disk images use a btrfs root (subvolumes "root" and
+# "home", mounted compress=zstd:1). Without this the kernel cannot mount a
+# Fedora root at all. Built in, not modular: we boot without an initramfs.
+CONFIG_BTRFS_FS=y
+CONFIG_BTRFS_FS_POSIX_ACL=y
+CONFIG_CRYPTO_XXHASH=y
+CONFIG_CRYPTO_BLAKE2B=y
+CONFIG_CRYPTO_SHA256=y
+
+# --- Userspace expectations beyond the vendor defconfig ---
+#
+# The Rockchip vendor defconfig targets a minimal Buildroot-style userspace.
+# A full distro userspace (Debian, and Fedora in particular) expects more.
+# Each of these is additive and costs nothing when unused.
+#
+# OVERLAY_FS: flatpak and podman do not work without it. The Fedora KDE Mobile
+# spin ships much of its application set as flatpaks, so this is not optional
+# there.
+CONFIG_OVERLAY_FS=y
+# MEMCG: systemd resource control (MemoryMax=, MemoryHigh=, per-unit
+# accounting). Without it systemd runs but silently cannot enforce limits.
+CONFIG_MEMCG=y
+# BPF: systemd uses these for IPAddressAllow/Deny and BPF LSM. Their absence is
+# already visible on Debian as "unit configures an IP firewall, but the local
+# system does not support BPF/cgroup firewalling".
+CONFIG_BPF_SYSCALL=y
+CONFIG_CGROUP_BPF=y
+# AUTOFS: systemd .automount units. Absence shows as the boot-time
+# "Failed to find module 'autofs4'".
+CONFIG_AUTOFS_FS=y
+CONFIG_AUTOFS4_FS=y
+# FANOTIFY: used by filesystem monitors and some sandboxing.
+CONFIG_FANOTIFY=y
+CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
+# Socket diagnostics, so ss(8) and systemd's socket introspection work.
+CONFIG_UNIX_DIAG=y
+CONFIG_INET_DIAG=y
+CONFIG_NETLINK_DIAG=y
+CONFIG_PACKET_DIAG=y
+# device-mapper: needed for any encrypted or LVM root, and by some installers.
+CONFIG_BLK_DEV_DM=y
+CONFIG_DM_CRYPT=y
+# SELinux: Fedora enables it by default. Building support in does NOT enable
+# enforcement -- with no policy loaded it stays inactive, so this is safe for
+# the Debian rootfs too. BOOTPARAM lets selinux=0 disable it explicitly.
+# SECURITY_SELINUX depends on SECURITY_NETWORK -> SECURITY. The vendor
+# defconfig sets neither, so asking for SELINUX alone is silently dropped.
+CONFIG_SECURITY=y
+CONFIG_SECURITY_SELINUX=y
+CONFIG_SECURITY_SELINUX_BOOTPARAM=y
+CONFIG_SECURITY_SELINUX_DEVELOP=y
+CONFIG_SECURITY_NETWORK=y
+CONFIG_AUDIT=y
+# "selinux" must appear here or the module is built but never initialised.
+CONFIG_LSM="landlock,lockdown,yama,loadpin,safesetid,integrity,selinux,bpf"
+
 CONFIG_SQUASHFS=y
 CONFIG_SQUASHFS_LZO=y
 CONFIG_SQUASHFS_XZ=y

@@ -1,0 +1,18 @@
+[Unit]
+Description=C20e USB CDC ACM debug console
+After=systemd-modules-load.service local-fs.target
+Before=getty.target
+# The debug console owns the USB port outright. usb-role-manager.service flips
+# the dwc3 role to host on startup and then polls, which deregisters the gadget
+# bound below and leaves the port cycling forever. Conflicts= in THIS unit (not
+# in the role manager) is what makes the debug console win, because starting
+# this unit stops the other one rather than the reverse.
+Conflicts=usb-role-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/c20e-usb-debug
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
