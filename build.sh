@@ -737,6 +737,16 @@ build_kernel() {
             scripts/config --disable MALI_REAL_HW || true
             scripts/config --disable MALI_BIFROST_DEVFREQ || true
             scripts/config --disable MALI_BIFROST_GATOR_SUPPORT || true
+            # Rockchip's DRM_IGNORE_IOTCL_PERMIT skips every DRM ioctl
+            # permission check, which makes libdrm's drmIsMaster() return true
+            # for EVERY fd. KWin then "drops master" on a fresh non-master fd
+            # meant for Xwayland, the kernel's real check refuses (EACCES),
+            # Xwayland crashes, and every X client -- xrdb in the theme switch,
+            # kded6, powerdevil -- hangs forever on the dead X socket (Fedora
+            # setup wizard lock-up, 2026-09-21). Mesa uses render nodes and
+            # real DRM master, so the Panfrost stack does not need the bypass.
+            # Left alone for the Mali stack: libmali may rely on it (untested).
+            scripts/config --disable DRM_IGNORE_IOTCL_PERMIT || true
         else
             echo "[*] Applying mali kernel config overrides..."
             scripts/config --disable DRM_PANFROST || true
