@@ -10,7 +10,7 @@
 #    "request image fail" and wlan0 never appears
 # 2. the c20e systemd preset, and re-enables the units first-boot preset-all
 #    disabled (DDR pin, USB console, BT bring-up, camera, ttyGS0 getty)
-# 3. reloads the Seekwave modules so Wi-Fi comes up without a reboot
+# 3. tells you to reboot (unloading the Seekwave modules oopses the kernel)
 set -euo pipefail
 D="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 [[ $EUID -eq 0 ]] || { echo "run as root" >&2; exit 1; }
@@ -27,15 +27,9 @@ systemctl enable c20e-dvfs-policy.service c20e-usb-debug.service \
     c20e-bt-bringup.service c20e-camera.service serial-getty@ttyGS0.service
 echo "[fixup] preset installed; c20e units + ttyGS0 getty enabled"
 
-echo "[fixup] reloading Seekwave Wi-Fi modules..."
-modprobe -r skw skw_sdio_lite 2>/dev/null || true
-sleep 1
-modprobe skw_sdio_lite
-modprobe skw
-for i in $(seq 1 20); do [[ -e /sys/class/net/wlan0 ]] && break; sleep 1; done
-if [[ -e /sys/class/net/wlan0 ]]; then
-    echo "[fixup] wlan0 is up. Connect with:  nmcli dev wifi connect '<SSID>' --ask"
-else
-    echo "[fixup] wlan0 not present yet -- reboot (the firmware is installed now);"
-    echo "        dmesg | grep -iE 'skw|firmware' | tail shows why if it still fails"
-fi
+# Do NOT try to reload the Seekwave modules here: `modprobe -r skw
+# skw_sdio_lite` oopses the kernel (segfault + "Internal error: Oops", seen
+# 2026-09-21), and skw_sdio_lite then refuses to re-insert (EBUSY). The
+# firmware is only read at probe time, so a reboot is the way to pick it up.
+echo "[fixup] done. REBOOT now -- Wi-Fi loads its firmware at boot."
+echo "        (never modprobe -r skw/skw_sdio_lite: unloading them oopses the kernel)"
