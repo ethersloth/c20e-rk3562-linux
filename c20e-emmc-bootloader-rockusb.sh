@@ -25,7 +25,10 @@
 # boot partition after saving them, so no U-Boot can find extlinux.conf there;
 # `unhide-boot` writes them back. `inspect` is read-only.
 #
-# Usage: sudo ./c20e-emmc-bootloader-rockusb.sh disable|restore|check|inspect|hide-boot|unhide-boot
+# `dump` (read-only) copies sectors 0..40959 (20 MiB: GPT, every idblock copy,
+# u-boot, start of the boot partition) to out/emmc-head-dump.bin for analysis.
+#
+# Usage: sudo ./c20e-emmc-bootloader-rockusb.sh disable|restore|check|inspect|dump|hide-boot|unhide-boot
 set -Eeuo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
@@ -100,5 +103,11 @@ unhide-boot)
     rkdeveloptool wl $BOOT_START "$BOOT_SAVE" >/dev/null || die "write failed"
     rkdeveloptool rl $BOOT_START 8 "$TMP/after" >/dev/null; cmp -s "$BOOT_SAVE" "$TMP/after" || die "read-back mismatch!"
     say "eMMC boot partition restored" ;;
-*) die "usage: $0 disable|restore|check|inspect|hide-boot|unhide-boot" ;;
+dump)
+    D="$REPO/out/emmc-head-dump.bin"; mkdir -p "$REPO/out"
+    rkdeveloptool rl 0 40960 "$D" >/dev/null || die "read failed"
+    [[ $(stat -c%s "$D") -eq $((40960*512)) ]] || die "short read"
+    chown "${SUDO_USER:-root}:" "$D" 2>/dev/null || true
+    say "dumped eMMC sectors 0..40959 to $D (read-only)" ;;
+*) die "usage: $0 disable|restore|check|inspect|dump|hide-boot|unhide-boot" ;;
 esac
