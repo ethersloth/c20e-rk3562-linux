@@ -31,7 +31,10 @@
 # `write-boot FILE` writes a complete 256 MiB FAT32 boot-partition image (from
 # make-c20e-fedora-bootpart.sh) to eMMC p3 and verifies it by full read-back.
 #
-# Usage: sudo ./c20e-emmc-bootloader-rockusb.sh disable|restore|check|inspect|dump|hide-boot|unhide-boot|write-boot FILE
+# `read-log` (read-only) reads p3 back and extracts the boot logger's j.txt
+# (journal), k.txt (dmesg), s.txt (state) into out/fedora-log-<time>/.
+#
+# Usage: sudo ./c20e-emmc-bootloader-rockusb.sh disable|restore|check|inspect|dump|hide-boot|unhide-boot|write-boot FILE|read-log
 set -Eeuo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
@@ -126,5 +129,14 @@ write-boot)
     rkdeveloptool rl $BOOT_START 524288 "$TMP/rb" >/dev/null || die "read-back failed"
     cmp -s "$F" "$TMP/rb" || die "read-back MISMATCH"
     say "eMMC boot partition written and verified" ;;
-*) die "usage: $0 disable|restore|check|inspect|dump|hide-boot|unhide-boot|write-boot FILE" ;;
+read-log)
+    command -v mcopy >/dev/null || die "mtools (mcopy) not installed"
+    rkdeveloptool rl $BOOT_START 524288 "$TMP/p3" >/dev/null || die "read failed"
+    O="$REPO/out/fedora-log-$(date +%Y%m%d-%H%M%S)"; mkdir -p "$O"
+    for f in j.txt k.txt s.txt; do
+        MTOOLS_SKIP_CHECK=1 mcopy -n -i "$TMP/p3" "::/$f" "$O/$f" 2>/dev/null || echo "  (no $f -- logger never ran or not yet 30 s in)"
+    done
+    chown -R "${SUDO_USER:-root}:" "$O" 2>/dev/null || true
+    say "boot logs in $O:"; ls -l "$O" ;;
+*) die "usage: $0 disable|restore|check|inspect|dump|hide-boot|unhide-boot|write-boot FILE|read-log" ;;
 esac
