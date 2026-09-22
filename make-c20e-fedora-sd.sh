@@ -25,11 +25,15 @@
 # bootable bootloader (e.g. still Android). A tablet already running Fedora
 # from the eMMC keeps booting the eMMC.
 #
-# Output: out/fedora-sd/c20e-fedora-sd.img.zst (+ .sha256). The raw image is
-# deleted after compressing unless KEEP_RAW=1.
+# Output: out/fedora-sd/c20e-fedora-sd.img.xz (+ .sha256). xz rather than zstd
+# because flashing tools (balenaEtcher, GNOME Disks) write .img.xz directly and
+# Fedora ships its own images that way; size is about the same either way, as
+# most of the image is the already-zstd eMMC bundle. The raw image is deleted
+# after compressing unless KEEP_RAW=1.
 #
 # Usage: sudo ./make-c20e-fedora-sd.sh
-#   write: zstd -dc out/fedora-sd/c20e-fedora-sd.img.zst | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress
+#   write: xz -dc out/fedora-sd/c20e-fedora-sd.img.xz | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress
+#          (or open the .img.xz in balenaEtcher / GNOME Disks)
 #
 # Do NOT write with conv=sparse: it skips zero blocks, leaving the card's old
 # contents there -- on a reused Rockchip card that can include stale backup
@@ -57,7 +61,7 @@ cleanup(){
 trap cleanup EXIT
 
 [[ $EUID -eq 0 ]] || die "run with sudo"
-for t in btrfstune sfdisk zstd mcopy losetup; do command -v $t >/dev/null || die "missing tool: $t"; done
+for t in btrfstune sfdisk zstd xz mcopy losetup; do command -v $t >/dev/null || die "missing tool: $t"; done
 for f in manifest fedora-root.btrfs.zst boot/Image boot/rk3562.dtb boot-p3.vfat; do
     [[ -f "$BUNDLE/$f" ]] || die "missing $BUNDLE/$f -- run prepare-c20e-fedora.sh first"
 done
@@ -141,14 +145,15 @@ rm -rf "$WORK"
 cmp -s -n "$(stat -c%s "$REPO/bootloader/upstream-idbloader.img")" "$REPO/bootloader/upstream-idbloader.img" \
     <(dd if="$IMG" bs=512 skip=$IDB_SECTOR count=1053 status=none) || die "idbloader not at sector $IDB_SECTOR"
 [[ "$(dd if="$IMG" bs=1 skip=$(( ROOT_START*512 + 0x10040 )) count=8 status=none)" == "_BHRfS_M" ]] || die "no btrfs on p4"
-say "compressing (the embedded bundle is already zstd, so expect ~5 GB)..."
-zstd -T0 -3 -q -f "$IMG" -o "$IMG.zst"
-( cd "$OUT" && sha256sum "$(basename "$IMG").zst" > "$(basename "$IMG").zst.sha256" )
+say "compressing with xz (the embedded bundle is already zstd, so expect ~5 GB; takes a few minutes)..."
+xz -T0 -6 -k -f "$IMG"
+( cd "$OUT" && sha256sum "$(basename "$IMG").xz" > "$(basename "$IMG").xz.sha256" )
 [[ "${KEEP_RAW:-0}" == 1 ]] || rm -f "$IMG"
 chown -R "${SUDO_USER:-root}:" "$OUT" 2>/dev/null || true
 
 echo
-say "done: $IMG.zst ($(du -h "$IMG.zst" | cut -f1)), sha256 in $IMG.zst.sha256"
+say "done: $IMG.xz ($(du -h "$IMG.xz" | cut -f1)), sha256 in $IMG.xz.sha256"
 say "  root fs UUID $NEW_UUID, PARTUUID $SD_ROOT_PARTUUID, $ROOT_GIB GiB root partition"
 say "write it to a card (16 GB or larger) -- check the device name first with lsblk:"
-say "  zstd -dc $IMG.zst | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress"
+say "  xz -dc $IMG.xz | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress"
+say "  (or open the .img.xz in balenaEtcher / GNOME Disks)"
