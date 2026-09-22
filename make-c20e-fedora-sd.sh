@@ -25,8 +25,16 @@
 # bootable bootloader (e.g. still Android). A tablet already running Fedora
 # from the eMMC keeps booting the eMMC.
 #
-# Usage: sudo ./make-c20e-fedora-sd.sh          -> out/fedora-sd/c20e-fedora-sd.img
-#        then: sudo dd if=out/fedora-sd/c20e-fedora-sd.img of=/dev/sdX bs=4M conv=sparse,fsync status=progress
+# Output: out/fedora-sd/c20e-fedora-sd.img.zst (+ .sha256). The raw image is
+# deleted after compressing unless KEEP_RAW=1.
+#
+# Usage: sudo ./make-c20e-fedora-sd.sh
+#   write: zstd -dc out/fedora-sd/c20e-fedora-sd.img.zst | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress
+#
+# Do NOT write with conv=sparse: it skips zero blocks, leaving the card's old
+# contents there -- on a reused Rockchip card that can include stale backup
+# bootloader copies the BootROM searches for (the same trap as the eMMC's
+# factory idblocks at sectors 2112+).
 set -Eeuo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
@@ -133,10 +141,14 @@ rm -rf "$WORK"
 cmp -s -n "$(stat -c%s "$REPO/bootloader/upstream-idbloader.img")" "$REPO/bootloader/upstream-idbloader.img" \
     <(dd if="$IMG" bs=512 skip=$IDB_SECTOR count=1053 status=none) || die "idbloader not at sector $IDB_SECTOR"
 [[ "$(dd if="$IMG" bs=1 skip=$(( ROOT_START*512 + 0x10040 )) count=8 status=none)" == "_BHRfS_M" ]] || die "no btrfs on p4"
+say "compressing (the embedded bundle is already zstd, so expect ~5 GB)..."
+zstd -T0 -3 -q -f "$IMG" -o "$IMG.zst"
+( cd "$OUT" && sha256sum "$(basename "$IMG").zst" > "$(basename "$IMG").zst.sha256" )
+[[ "${KEEP_RAW:-0}" == 1 ]] || rm -f "$IMG"
 chown -R "${SUDO_USER:-root}:" "$OUT" 2>/dev/null || true
 
 echo
-say "done: $IMG"
+say "done: $IMG.zst ($(du -h "$IMG.zst" | cut -f1)), sha256 in $IMG.zst.sha256"
 say "  root fs UUID $NEW_UUID, PARTUUID $SD_ROOT_PARTUUID, $ROOT_GIB GiB root partition"
 say "write it to a card (16 GB or larger) -- check the device name first with lsblk:"
-say "  sudo dd if=$IMG of=/dev/sdX bs=4M conv=sparse,fsync status=progress"
+say "  zstd -dc $IMG.zst | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress"
