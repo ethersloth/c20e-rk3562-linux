@@ -35,6 +35,12 @@ for f in manifest boot/Image boot/rk3562.dtb; do [[ -f "$SRC/$f" ]] || die "miss
 command -v mcopy >/dev/null || die "mtools (mcopy) not installed"
 # shellcheck disable=SC1091
 . "$SRC/manifest"
+# Overrides for the SD installer image (make-c20e-fedora-sd.sh): its root is a
+# DIFFERENT partition (own PARTUUID) and its boot image goes elsewhere. When
+# either is set, the eMMC bundle's boot/extlinux is left alone.
+OVERRIDE=0
+[[ -n "${C20E_ROOT_PARTUUID:-}" ]] && { FEDORA_ROOT_PARTUUID="$C20E_ROOT_PARTUUID"; OVERRIDE=1; }
+[[ -n "${C20E_BOOTPART_OUT:-}" ]] && { OUT="$C20E_BOOTPART_OUT"; OVERRIDE=1; }
 
 # Fedora's systemd does a FULL preset on first boot (/etc/machine-id was
 # "uninitialized" in the image): every unit not in Fedora's preset lists is
@@ -123,7 +129,7 @@ mcopy -i "$OUT" "$REPO/tools/c20e-fedora-live-fixup.sh" "$REPO/overlay/c20e.pres
     "$REPO/overlay/c20e-accel-enable.sh" "$REPO/overlay/c20e-accel-enable.service" \
     "$REPO/overlay/61-c20e-accel.rules" "$REPO/overlay/c20e-usb-gadget-sleep" ::/c20e/
 mcopy -i "$OUT" "$REPO"/overlay/firmware/*.bin ::/c20e/firmware/
-cp "$T/extlinux.conf" "$SRC/boot/extlinux/extlinux.conf"   # keep boot/ in step with the image
+[[ $OVERRIDE -eq 1 ]] || cp "$T/extlinux.conf" "$SRC/boot/extlinux/extlinux.conf"   # keep boot/ in step with the image
 L=$(grep 'append' "$T/extlinux.conf" | sed 's/^ *append //' | awk '{ if (length($0) > m) m = length($0) } END { print m }')
 [[ $L -le 1000 ]] || die "longest append line is $L bytes; U-Boot's limit is 1023 (keep margin)"
 echo "[bootpart] $OUT  (default: $DEF, longest append $L bytes)"

@@ -1,0 +1,56 @@
+#!/bin/bash
+# "Install Fedora to internal storage" -- runs from the C20e Fedora SD card.
+#
+# Wraps install-c20e-fedora-emmc.sh (which does the real work and has its own
+# interlocks: must be booted from the SD card, target must be the ~58 GB eMMC,
+# nothing on it mounted, bundle checksum, typed ERASE-ANDROID) with a dry run
+# first, so the user sees exactly what will be written before anything is.
+BUNDLE=/usr/local/share/c20e-installer
+INSTALLER=$BUNDLE/install-c20e-fedora-emmc.sh
+
+pause(){ echo; read -r -p "Press Enter to close this window. " _; }
+trap pause EXIT
+
+clear
+cat <<'TXT'
+==============================================================
+  Install Fedora to the tablet's internal storage (eMMC)
+==============================================================
+
+This ERASES EVERYTHING on the internal storage -- Android and all
+of its data -- and replaces it with the Fedora on this SD card.
+
+Before you continue:
+  * Back up the internal storage first if you may want Android
+    back (see backup-c20e-emmc.sh in the rk3562deb repository).
+  * Keep the tablet on the charger. Writing takes 10-20 minutes.
+
+First, a DRY RUN: it shows what would be written and changes
+nothing.
+TXT
+echo
+read -r -p "Run the dry run now? [y/N] " a
+[[ "$a" == [yY]* ]] || { echo "Cancelled. Nothing was changed."; exit 0; }
+
+echo; echo "Your password is needed for administrator access."
+sudo "$INSTALLER" --dry-run "$BUNDLE" || { echo; echo "Dry run FAILED -- nothing was written."; exit 1; }
+
+echo
+echo "--------------------------------------------------------------"
+echo "The dry run passed. The real install asks you to type"
+echo "ERASE-ANDROID before it writes anything."
+read -r -p "Continue to the real install? [y/N] " a
+[[ "$a" == [yY]* ]] || { echo "Cancelled. Nothing was changed."; exit 0; }
+
+sudo "$INSTALLER" "$BUNDLE" || { echo; echo "Install FAILED. See the messages above."; exit 1; }
+
+cat <<'TXT'
+
+==============================================================
+  Done. To start Fedora from internal storage:
+    1. Power the tablet off.
+    2. REMOVE this SD card.
+    3. Power on.
+  Fedora's first-run setup starts on the new install.
+==============================================================
+TXT

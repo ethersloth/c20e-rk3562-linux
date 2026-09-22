@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Install Fedora to internal storage
+Comment=Write this SD card's Fedora to the tablet's eMMC (erases Android)
+Exec=qmlkonsole -e /usr/local/bin/c20e-install-to-emmc
+Icon=drive-harddisk
+Terminal=false
+Categories=System;
