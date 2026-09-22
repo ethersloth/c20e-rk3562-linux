@@ -36,6 +36,8 @@ systemctl enable c20e-dvfs-policy.service c20e-usb-debug.service \
 [[ -f "$D/c20e-usb-gadget-sleep" ]] && install -D -m0755 "$D/c20e-usb-gadget-sleep" /usr/lib/systemd/system-sleep/c20e-usb-gadget
 [[ -f "$D/99-c20e-usb0-nm-managed.rules" ]] && install -D -m0644 "$D/99-c20e-usb0-nm-managed.rules" /etc/udev/rules.d/99-c20e-usb0-nm-managed.rules
 [[ -f "$D/c20e-usb0.nmconnection" ]] && install -D -m0600 "$D/c20e-usb0.nmconnection" /etc/NetworkManager/system-connections/c20e-usb0.nmconnection
+[[ -f "$D/c20e-zram-generator.conf" ]] && install -D -m0644 "$D/c20e-zram-generator.conf" /etc/systemd/zram-generator.conf
+[[ -f "$D/c20e-zram-sysctl.conf" ]] && install -D -m0644 "$D/c20e-zram-sysctl.conf" /etc/sysctl.d/90-c20e-zram.conf
 [[ -f "$D/c20e-logind-power-key.conf" ]] && install -D -m0644 "$D/c20e-logind-power-key.conf" /etc/systemd/logind.conf.d/10-c20e-power-key.conf
 [[ -f "$D/61-c20e-accel.rules" ]] && install -m0644 "$D/61-c20e-accel.rules" /etc/udev/rules.d/61-c20e-accel.rules
 echo "[fixup] preset installed; c20e units + ttyGS0 getty enabled"

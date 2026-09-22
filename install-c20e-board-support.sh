@@ -121,6 +121,14 @@ fi
 install -D -m0644 "$REPO/overlay/99-c20e-usb0-nm-managed.rules" "$ROOT/etc/udev/rules.d/99-c20e-usb0-nm-managed.rules"
 say "installed udev rule so NetworkManager manages usb0"
 
+# Memory tuning for zram swap (see the file).
+install -D -m0644 "$REPO/overlay/c20e-zram-sysctl.conf" "$ROOT/etc/sysctl.d/90-c20e-zram.conf"
+say "installed zram memory tuning (swappiness 180, no swap readahead)"
+if [[ -d "$ROOT/usr/lib/systemd" ]]; then
+    install -D -m0644 "$REPO/overlay/c20e-zram-generator.conf" "$ROOT/etc/systemd/zram-generator.conf"
+    say "installed zram sizing (2x RAM; only consumes RAM as it fills)"
+fi
+
 # Power key: short press = suspend, long press = power off (see the file).
 install -D -m0644 "$REPO/overlay/c20e-logind-power-key.conf" "$ROOT/etc/systemd/logind.conf.d/10-c20e-power-key.conf"
 say "installed logind power-key policy (short press suspends)"

@@ -889,3 +889,10 @@ CONFIG_USB_F_NCM=y
 CONFIG_USB_CONFIGFS_ECM=y
 CONFIG_USB_CONFIGFS_RNDIS=y
 CONFIG_USB_CONFIGFS_NCM=y
+
+# Memory pressure information, so systemd-oomd can act before a low-memory
+# tablet thrashes (it was permanently inactive without PSI), and the pids
+# controller systemd uses for resource control.
+CONFIG_PSI=y
+# CONFIG_PSI_DEFAULT_DISABLED is not set
+CONFIG_CGROUP_PIDS=y
