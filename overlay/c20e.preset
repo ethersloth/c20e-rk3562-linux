@@ -7,4 +7,5 @@ enable c20e-bt-bringup.service
 enable c20e-camera.service
 enable c20e-audio-init.service
 enable c20e-accel-enable.service
+enable c20e-usb-role.service
 enable serial-getty@.service ttyGS0

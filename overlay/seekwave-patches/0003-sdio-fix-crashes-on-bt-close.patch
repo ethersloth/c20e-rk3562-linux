@@ -1,0 +1,54 @@
+--- a/drivers/seekwaveplatform_lite/sdio/skw_sdio.h	2026-09-22 11:36:54.897722373 -0500
++++ b/drivers/seekwaveplatform_lite/sdio/skw_sdio.h	2026-09-22 11:43:48.163101548 -0500
+@@ -248,6 +248,8 @@
+ 	int  length;
+ 	struct completion rx_done;
+ 	struct completion tx_done;
++	/* C20e: set once open_sdio_port() has run init_completion() on rx/tx_done */
++	int	done_inited;
+ 	struct mutex rx_mutex;
+ 	int	rx_packet;
+ 	int	rx_count;
+--- a/drivers/seekwaveplatform_lite/sdio/skw_sdio_rx.c	2026-09-22 11:36:54.898833946 -0500
++++ b/drivers/seekwaveplatform_lite/sdio/skw_sdio_rx.c	2026-09-22 11:43:48.161689669 -0500
+@@ -930,7 +930,13 @@
+ 			skw_port_log(portno,"%s port%d overflow:buf_size %d-%d, packet size %d (w,r)=(%d, %d)\n",
+ 					__func__, portno, buf_size, port->length, header->len,
+ 					port->rx_wp,  port->rx_rp);
+-		} else if(port->state && header->len) {
++		} else if(port->state && header->len && port->read_buffer) {
++			/*
++			 * C20e: port->read_buffer NULL check, as skw_sdio2_handle_packet()
++			 * already has. A BT port being closed can still receive packets
++			 * from the chip after its buffer is gone: memcpy to NULL from
++			 * skw_sdio_rx_thread on BT power-off (2026-09-22).
++			 */
+ 			if(port->length - port->rx_wp > header->len){
+ 				memcpy(&port->read_buffer[port->rx_wp], addr, header->len);
+ 				port->rx_wp += header->len;
+@@ -1676,6 +1682,7 @@
+ 	port->rx_data = data;
+ 	init_completion(&port->rx_done);
+ 	init_completion(&port->tx_done);
++	port->done_inited = 1;
+ 	mutex_init(&port->rx_mutex);
+ 	port->state = PORT_STATE_OPEN;
+ 	port->tx_flow_ctrl = 0;
+@@ -1704,7 +1711,16 @@
+ 	if(id == skw_log_port()) {
+ 		skw_sdio_cp_log_disable(1);
+ 	}
+-	complete(&port->rx_done);
++	/*
++	 * C20e: a port can have a non-zero state without ever having been
++	 * opened (the rx/tx paths set IDLE/OPEN/ASST themselves), and then
++	 * rx_done is still zeroed. Completing it dereferenced a NULL wait-list
++	 * head: kernel oops in complete() from kill_BT_rx_transfer() on BT
++	 * power-off (BT data port 5), which turned every shutdown with
++	 * Bluetooth on into an oops + panic reboot (seen 2026-09-22).
++	 */
++	if (port->done_inited)
++		complete(&port->rx_done);
+ 	return 0;
+ }
+ void kill_BT_rx_transfer(void)

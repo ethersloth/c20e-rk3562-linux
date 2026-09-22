@@ -94,7 +94,7 @@ else
 fi
 
 # ------------------------------------------------------------------ services
-for pair in "c20e-bt-bringup:sbin" "c20e-dvfs-policy:sbin" "c20e-camera:sbin" "c20e-usb-debug:sbin" "c20e-audio-init:sbin" "c20e-accel-enable:sbin"; do
+for pair in "c20e-bt-bringup:sbin" "c20e-dvfs-policy:sbin" "c20e-camera:sbin" "c20e-usb-debug:sbin" "c20e-audio-init:sbin" "c20e-accel-enable:sbin" "c20e-usb-role:sbin"; do
     name="${pair%%:*}"
     install -m0755 "$REPO/overlay/$name.sh"      "$ROOT/usr/local/sbin/$name"
     install -m0644 "$REPO/overlay/$name.service" "$ROOT/etc/systemd/system/$name.service"
@@ -110,6 +110,10 @@ install -d "$ROOT/etc/systemd/system/getty.target.wants"
 ln -sf /usr/lib/systemd/system/serial-getty@.service \
     "$ROOT/etc/systemd/system/getty.target.wants/serial-getty@ttyGS0.service"
 say "enabled login getty on ttyGS0 (USB serial console)"
+
+# Power key: short press = suspend, long press = power off (see the file).
+install -D -m0644 "$REPO/overlay/c20e-logind-power-key.conf" "$ROOT/etc/systemd/logind.conf.d/10-c20e-power-key.conf"
+say "installed logind power-key policy (short press suspends)"
 
 # Suspend: release the USB console gadget around sleep (dwc3 cannot suspend
 # with it bound). See overlay/c20e-usb-gadget-sleep.

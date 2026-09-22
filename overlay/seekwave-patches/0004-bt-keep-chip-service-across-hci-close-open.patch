@@ -1,0 +1,142 @@
+--- a/drivers/swtbt4l/skw_btdriver.c	2026-09-22 13:07:45.494741227 -0500
++++ b/drivers/swtbt4l/skw_btdriver.c	2026-09-22 14:05:49.035607475 -0500
+@@ -75,6 +75,31 @@
+ static atomic_t cmd_reject;
+ static atomic_t atomic_close_sync;//make sure running close func before remove func
+ 
++/*
++ * C20e: keep the chip-side BT service running across an HCI close/open.
++ *
++ * Android's HAL (libbt-vendor-seekwave.so, read out of the tablet's own
++ * vendor partition) never stops the chip's BT service when Bluetooth is
++ * switched off: BT_VND_OP_POWER_CTRL only logs "set power off and delay
++ * 200ms" and sleeps. It opens/closes the userspace ports and that is all.
++ *
++ * This driver instead called skw_stop_bt_service() on close and
++ * skw_start_bt_service() (which re-downloads the BT firmware into the
++ * shared chip) on open. Doing that while Wi-Fi is associated leaves the
++ * Wi-Fi data path dead until reboot: the link stays up and passes nothing,
++ * and the next Wi-Fi command times out and asserts the chip (2026-09-22).
++ *
++ * bt_keep_service=0 restores the vendor behaviour. Both the
++ * INCLUDE_NEW_VERSION (pdata->service_start/stop -- what this Makefile
++ * actually builds, via -DINCLUDE_NEW_VERSION=1) and the legacy
++ * skw_{start,stop}_bt_service paths are covered.
++ */
++static int bt_keep_service = 1;
++module_param(bt_keep_service, int, S_IRUGO);
++MODULE_PARM_DESC(bt_keep_service,
++        "keep the chip BT service running across HCI close/open, as Android does (default 1)");
++static int bt_service_running;
++
+ module_param(bd_addr, charp, S_IRUSR);
+ 
+ 
+@@ -95,6 +120,7 @@
+     struct notifier_block plt_notifier;
+     uint8_t plt_notifier_set;
+     uint8_t bt_is_open;
++    uint8_t nv_downloaded;  /* C20e: NV config already in the controller (bt_keep_service) */
+ 
+     struct sk_buff_head cmd_txq;
+     struct sk_buff_head data_txq;
+@@ -493,16 +519,29 @@
+             data->pdata->modem_unregister_notify(&data->plt_notifier);
+         }
+ #if INCLUDE_NEW_VERSION
+-        if(data->pdata->service_stop)
++        if(bt_keep_service)
++        {
++            SKWBT_INFO("%s bt_keep_service: leaving the chip BT service running", __func__);
++        }
++        else if(data->pdata->service_stop)
+         {
+             data->pdata->service_stop();
++            bt_service_running = 0;
+         }
+         else
+         {
+             SKWBT_ERROR("func %s service_stop not exist", __func__);
+         }
+ #else
+-        skw_stop_bt_service();
++        if(bt_keep_service)
++        {
++            SKWBT_INFO("%s bt_keep_service: leaving the chip BT service running", __func__);
++        }
++        else
++        {
++            skw_stop_bt_service();
++            bt_service_running = 0;
++        }
+ #endif
+         if(data->pdata->close_port)
+         {
+@@ -734,7 +773,12 @@
+             }
+         }
+ #if INCLUDE_NEW_VERSION
+-        if(data->pdata->service_start)
++        if(bt_keep_service && bt_service_running)
++        {
++            SKWBT_INFO("%s bt_keep_service: chip BT service already running", __func__);
++            err = 0;
++        }
++        else if(data->pdata->service_start)
+         {
+             err = data->pdata->service_start();
+             if(err != 0)
+@@ -742,6 +786,7 @@
+                 SKWBT_ERROR("func %s service_start err:%d", __func__, err);
+                 return err;
+             }
++            bt_service_running = 1;
+         }
+         else
+         {
+@@ -749,14 +794,40 @@
+             return -1;
+         }
+ #else
+-        err = skw_start_bt_service();
+-        if(err != 0)
++        if(bt_keep_service && bt_service_running)
+         {
+-            SKWBT_ERROR("%s service_start err:%d", __func__, err);
+-            return err;
++            SKWBT_INFO("%s bt_keep_service: chip BT service already running", __func__);
++            err = 0;
++        }
++        else
++        {
++            err = skw_start_bt_service();
++            if(err != 0)
++            {
++                SKWBT_ERROR("%s service_start err:%d", __func__, err);
++                return err;
++            }
++            bt_service_running = 1;
+         }
+ #endif
+-        err = btseekwave_download_nv(hdev);
++        /*
++         * C20e: with the chip BT service kept running (bt_keep_service), the
++         * controller still holds the NV config from the first open. Sending it
++         * again times out and the SDIO layer then asserts the chip, which took
++         * BT down on every re-enable (2026-09-22). BlueZ does its own HCI reset
++         * and init on top of this, so skipping the re-download is enough.
++         */
++        if(bt_keep_service && bt_service_running && data->nv_downloaded)
++        {
++            SKWBT_INFO("%s bt_keep_service: NV already downloaded, skipping", __func__);
++            err = 0;
++        }
++        else
++        {
++            err = btseekwave_download_nv(hdev);
++            if(err == 0)
++                data->nv_downloaded = 1;
++        }
+         if(err == 0)
+         {
+             data->bt_is_open = 1;

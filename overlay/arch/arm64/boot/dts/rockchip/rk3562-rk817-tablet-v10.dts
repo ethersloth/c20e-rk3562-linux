@@ -971,7 +971,14 @@
 
 &u2phy_otg {
 	status = "okay";
-	vbus-supply = <&otg_switch>;
+	/*
+	 * NO vbus-supply here. VBUS (otg_switch -> RK817 5V boost) belongs to the
+	 * HUSB320 Type-C controller, which turns it on only in the Type-C SOURCE
+	 * state (the tablet powering an OTG adapter / unpowered hub). With the PHY
+	 * as a second consumer, every switch to USB host mode also drove 5V out --
+	 * even into a charging hub or a laptop that was itself supplying VBUS.
+	 * Pulling the cable in that state reset the board (2026-09-22).
+	 */
 };
 
 &uart1 {

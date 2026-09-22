@@ -15,7 +15,7 @@ set -euo pipefail
 D="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 [[ $EUID -eq 0 ]] || { echo "run as root" >&2; exit 1; }
 
-for u in c20e-audio-init c20e-accel-enable; do
+for u in c20e-audio-init c20e-accel-enable c20e-usb-role; do
     [[ -f "$D/$u.sh" ]] || continue
     install -m0755 "$D/$u.sh" "/usr/local/sbin/$u"
     install -m0644 "$D/$u.service" "/etc/systemd/system/$u.service"
@@ -32,7 +32,9 @@ systemctl enable c20e-dvfs-policy.service c20e-usb-debug.service \
     c20e-bt-bringup.service c20e-camera.service serial-getty@ttyGS0.service
 [[ -f /etc/systemd/system/c20e-audio-init.service ]] && systemctl enable c20e-audio-init.service
 [[ -f /etc/systemd/system/c20e-accel-enable.service ]] && systemctl enable c20e-accel-enable.service
+[[ -f /etc/systemd/system/c20e-usb-role.service ]] && systemctl enable c20e-usb-role.service
 [[ -f "$D/c20e-usb-gadget-sleep" ]] && install -D -m0755 "$D/c20e-usb-gadget-sleep" /usr/lib/systemd/system-sleep/c20e-usb-gadget
+[[ -f "$D/c20e-logind-power-key.conf" ]] && install -D -m0644 "$D/c20e-logind-power-key.conf" /etc/systemd/logind.conf.d/10-c20e-power-key.conf
 [[ -f "$D/61-c20e-accel.rules" ]] && install -m0644 "$D/61-c20e-accel.rules" /etc/udev/rules.d/61-c20e-accel.rules
 echo "[fixup] preset installed; c20e units + ttyGS0 getty enabled"
 

@@ -1,0 +1,25 @@
+--- a/drivers/seekwaveplatform_lite/sdio/skw_sdio_rx.c	2026-09-22 14:13:57.793952682 -0500
++++ b/drivers/seekwaveplatform_lite/sdio/skw_sdio_rx.c	2026-09-22 14:13:57.804022751 -0500
+@@ -891,12 +891,17 @@
+ 		data = (u32 *) addr;
+ 		if(((data[2] & 0xffff) != port->next_seqno) &&
+ 			(header->len > 12) && !IS_LOG_PORT(portno)) {
+-			skw_sdio_err("portno:%d, packet lost recv seqno=%d expected %d\n", port->channel,
++			/*
++			 * C20e: RESYNC instead of dropping, as the newer
++			 * skw_sdio2_handle_packet() in this same file already does.
++			 * Reopening a port resets the host counter to 1 while the chip
++			 * keeps counting (BT re-enable with the chip BT service left
++			 * running: "recv seqno=71 expected 1"), so every reply was
++			 * dropped and BlueZ's first HCI command timed out (2026-09-22).
++			 */
++			skw_sdio_warn("portno:%d, resync seqno: recv %d, expected %d\n", port->channel,
+ 					data[2] & 0xffff, port->next_seqno);
+-			if(skw_sdio->adma_rx_enable)
+-				skw_page_frag_free(header);
+-			mutex_unlock(&port->rx_mutex);
+-			return 0;
++			port->next_seqno = (data[2] & 0xffff);
+ 		}
+ 		if(header->len > 12) {
+ 			port->next_seqno++;

@@ -1,0 +1,12 @@
+[Unit]
+Description=C20e USB-C data role (console gadget vs. host for hubs)
+After=c20e-usb-debug.service
+Wants=c20e-usb-debug.service
+
+[Service]
+ExecStart=/usr/local/sbin/c20e-usb-role
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
