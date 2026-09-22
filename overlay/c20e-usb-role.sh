@@ -33,9 +33,22 @@ mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 set_device(){
     echo peripheral > "$PHY" 2>/dev/null
     echo device > "$DBG" 2>/dev/null
-    for _ in $(seq 1 30); do [ -e /sys/class/udc/$UDC ] && break; sleep 0.2; done
-    [ -d "$G" ] && [ -z "$(cat "$G/UDC" 2>/dev/null)" ] && echo "$UDC" > "$G/UDC" 2>/dev/null
-    log "device mode (console gadget: $(cat "$G/UDC" 2>/dev/null || echo none))"
+    # The UDC disappears in host mode and takes a moment to come back; the
+    # first bind after it reappears can still fail, so retry. Without this the
+    # gadget silently stayed unbound and the USB console was missing.
+    for i in $(seq 1 25); do
+        [ -e /sys/class/udc/$UDC ] || { sleep 0.2; continue; }
+        [ -d "$G" ] || break
+        [ -n "$(cat "$G/UDC" 2>/dev/null)" ] && break
+        if ! echo "$UDC" > "$G/UDC" 2>/dev/null; then sleep 0.2; continue; fi
+        sleep 0.2
+    done
+    bound="$(cat "$G/UDC" 2>/dev/null)"
+    if [ -n "$bound" ]; then
+        log "device mode (console + usb0 gadget bound to $bound)"
+    else
+        log "device mode, but BINDING THE GADGET FAILED (no USB console/usb0)"
+    fi
 }
 set_host(){
     [ -d "$G" ] && echo "" > "$G/UDC" 2>/dev/null

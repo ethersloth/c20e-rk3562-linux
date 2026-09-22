@@ -111,6 +111,16 @@ ln -sf /usr/lib/systemd/system/serial-getty@.service \
     "$ROOT/etc/systemd/system/getty.target.wants/serial-getty@ttyGS0.service"
 say "enabled login getty on ttyGS0 (USB serial console)"
 
+# USB Ethernet gadget profile (RNDIS): tablet 192.168.241.241/24, DHCP to the
+# host via NetworkManager shared mode. Needs dnsmasq installed.
+if [[ -d "$ROOT/etc/NetworkManager" ]]; then
+    install -D -m0600 "$REPO/overlay/c20e-usb0.nmconnection" \
+        "$ROOT/etc/NetworkManager/system-connections/c20e-usb0.nmconnection"
+    say "installed usb0 (RNDIS) network profile: 192.168.241.241/24, DHCP for the host"
+fi
+install -D -m0644 "$REPO/overlay/99-c20e-usb0-nm-managed.rules" "$ROOT/etc/udev/rules.d/99-c20e-usb0-nm-managed.rules"
+say "installed udev rule so NetworkManager manages usb0"
+
 # Power key: short press = suspend, long press = power off (see the file).
 install -D -m0644 "$REPO/overlay/c20e-logind-power-key.conf" "$ROOT/etc/systemd/logind.conf.d/10-c20e-power-key.conf"
 say "installed logind power-key policy (short press suspends)"

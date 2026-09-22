@@ -1,0 +1,8 @@
+# Let NetworkManager manage the C20e USB Ethernet gadget interface.
+#
+# Numbered 99 so it runs AFTER Fedora's /usr/lib/udev/rules.d/85-nm-unmanaged.rules,
+# which otherwise re-marks it unmanaged. That rule unmanages USB gadget
+# interfaces ("whatever created it probably configures it"), so the c20e-usb0
+# profile never applied and usb0 stayed down. Here the profile IS the
+# configuration: tablet 192.168.241.241/24 + DHCP for the attached host.
+SUBSYSTEM=="net", ACTION=="add|change|move", ENV{INTERFACE}=="usb0", ENV{NM_UNMANAGED}="0"

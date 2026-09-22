@@ -129,7 +129,7 @@ mcopy -i "$OUT" "$REPO/tools/c20e-fedora-live-fixup.sh" "$REPO/overlay/c20e.pres
     "$REPO/overlay/c20e-accel-enable.sh" "$REPO/overlay/c20e-accel-enable.service" \
     "$REPO/overlay/61-c20e-accel.rules" "$REPO/overlay/c20e-usb-gadget-sleep" \
     "$REPO/overlay/c20e-usb-role.sh" "$REPO/overlay/c20e-usb-role.service" \
-    "$REPO/overlay/c20e-logind-power-key.conf" ::/c20e/
+    "$REPO/overlay/c20e-logind-power-key.conf" "$REPO/overlay/c20e-usb0.nmconnection" "$REPO/overlay/99-c20e-usb0-nm-managed.rules" ::/c20e/
 mcopy -i "$OUT" "$REPO"/overlay/firmware/*.bin ::/c20e/firmware/
 [[ $OVERRIDE -eq 1 ]] || cp "$T/extlinux.conf" "$SRC/boot/extlinux/extlinux.conf"   # keep boot/ in step with the image
 L=$(grep 'append' "$T/extlinux.conf" | sed 's/^ *append //' | awk '{ if (length($0) > m) m = length($0) } END { print m }')

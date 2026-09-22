@@ -1,0 +1,20 @@
+# USB Ethernet gadget link (RNDIS) -- the tablet side of the USB cable.
+# 'shared' makes NetworkManager run its dnsmasq on this interface: the host
+# plugged into the USB-C port gets a DHCP address in 192.168.241.0/24 and can
+# reach the tablet at 192.168.241.241, mirroring the FlexEdge behaviour.
+[connection]
+id=c20e-usb0
+type=ethernet
+interface-name=usb0
+autoconnect=true
+autoconnect-priority=10
+
+[ethernet]
+cloned-mac-address=permanent
+
+[ipv4]
+method=shared
+address1=192.168.241.241/24
+
+[ipv6]
+method=ignore

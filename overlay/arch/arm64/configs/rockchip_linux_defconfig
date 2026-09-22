@@ -878,3 +878,14 @@ CONFIG_NFT_CONNLIMIT=m
 CONFIG_NFT_OBJREF=m
 CONFIG_NF_CT_NETLINK=m
 CONFIG_IP_SET=m
+
+# USB gadget networking: the tablet also appears as a USB Ethernet device
+# (RNDIS + ECM) alongside the /dev/ttyGS0 console, so a laptop gets a wired
+# path to it that does not depend on Wi-Fi. See overlay/c20e-usb-debug.sh.
+CONFIG_USB_U_ETHER=y
+CONFIG_USB_F_ECM=y
+CONFIG_USB_F_RNDIS=y
+CONFIG_USB_F_NCM=y
+CONFIG_USB_CONFIGFS_ECM=y
+CONFIG_USB_CONFIGFS_RNDIS=y
+CONFIG_USB_CONFIGFS_NCM=y
