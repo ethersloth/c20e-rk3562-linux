@@ -100,6 +100,30 @@ make -s -C "$KSRC" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
      INSTALL_MOD_PATH="$R" INSTALL_MOD_STRIP=1 modules_install >/dev/null
 rm -f "$R/lib/modules/$KREL/build" "$R/lib/modules/$KREL/source"
 
+# ---- Fedora kernel packages: remove and exclude ---------------------------
+# This board boots OUR kernel from the eMMC boot partition; Fedora's kernel
+# packages only fill /boot on the root fs (nothing reads it) and /lib/modules
+# -- ~400 MB each, and every update adds another (seen 2026-09-22: 6.19.10 from
+# the image plus 7.2.6 from the first update). --noscripts: their scriptlets
+# (kernel-install, dracut) are aarch64 and pointless here; the host rpm only
+# edits the database and deletes files. linux-firmware stays.
+FEDKERNELS=$(rpm --root "$R" -qa 'kernel' 'kernel-core' 'kernel-modules' 'kernel-modules-core' 'kernel-modules-extra' 2>/dev/null || true)
+if [[ -n "$FEDKERNELS" ]]; then
+    # shellcheck disable=SC2086
+    rpm --root "$R" -e --nodeps --noscripts $FEDKERNELS
+    say "removed Fedora kernel packages: $(echo $FEDKERNELS | tr '\n' ' ')"
+fi
+if ! grep -q '^excludepkgs' "$R/etc/dnf/dnf.conf"; then
+    cat >> "$R/etc/dnf/dnf.conf" <<'EOF'
+
+# C20e: this board boots its own vendor kernel (6.1.x, Panfrost) from the eMMC
+# boot partition via U-Boot + extlinux. Fedora kernel packages install into
+# /boot on the root filesystem, which nothing reads -- ~400 MB per kernel.
+excludepkgs=kernel kernel-core kernel-modules kernel-modules-core kernel-modules-extra kernel-uki-virt
+EOF
+    say "dnf: Fedora kernel packages excluded"
+fi
+
 # ---- board support (Wi-Fi, BT, DVFS pin, cameras, USB console) ---------
 "$REPO/install-c20e-board-support.sh" "$R"
 
