@@ -156,18 +156,6 @@ sync; umount "$MNT"; losetup -d "$LOOP"; LOOP=""
 # ---- boot partition contents -------------------------------------------
 cp "$KSRC/arch/arm64/boot/Image" "$OUT/boot/Image"
 cp "$KDTB" "$OUT/boot/rk3562.dtb"
-# C20e Fedora KDE Plasma Mobile -- boots the C20e kernel ($KREL, Panfrost)
-# against Fedora's btrfs root. No initramfs: root is resolved by PARTUUID,
-# and btrfs is built into the kernel.
-default fedora
-timeout 30
-menu title C20e Fedora
-
-label fedora
-  kernel /Image
-  fdt /rk3562.dtb
-  append earlycon=uart8250,mmio32,0xff210000 console=ttyS0,1500000n8 console=tty1 root=PARTUUID=$FEDORA_ROOT_PARTUUID rootfstype=btrfs rootflags=subvol=root,compress=zstd:1 rw rootwait panic=10 enforcing=0 video=DSI-1:800x1280@60,rotate=90
-EOF
 
 say "compressing root image (for transfer to the tablet)..."
 zstd -T0 -3 -q --rm -f "$ROOTIMG" -o "$ROOTIMG.zst"
