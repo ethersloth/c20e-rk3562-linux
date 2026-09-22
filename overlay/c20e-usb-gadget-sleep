@@ -1,0 +1,25 @@
+#!/bin/sh
+# systemd system-sleep hook: release the USB console gadget around suspend.
+#
+# With the configfs gadget bound, dwc3's suspend path tries to soft-disconnect
+# and halt the controller, which times out, so every suspend aborted with
+# "dwc3 fe500000.usb: PM: failed to suspend: error -11" -- cable plugged in or
+# not (verified 2026-09-22). Unbinding the gadget first lets dwc3 suspend;
+# it is rebound on resume, so the /dev/ttyGS0 console comes back.
+G=/sys/kernel/config/usb_gadget/c20e
+STATE=/run/c20e-usb-gadget.udc
+[ -d "$G" ] || exit 0
+case "$1" in
+pre)
+    udc="$(cat "$G/UDC" 2>/dev/null)"
+    [ -n "$udc" ] || exit 0
+    echo "$udc" > "$STATE"
+    echo "" > "$G/UDC"
+    ;;
+post)
+    [ -s "$STATE" ] || exit 0
+    cat "$STATE" > "$G/UDC" 2>/dev/null || true
+    rm -f "$STATE"
+    ;;
+esac
+exit 0

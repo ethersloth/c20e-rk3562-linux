@@ -32,6 +32,7 @@ systemctl enable c20e-dvfs-policy.service c20e-usb-debug.service \
     c20e-bt-bringup.service c20e-camera.service serial-getty@ttyGS0.service
 [[ -f /etc/systemd/system/c20e-audio-init.service ]] && systemctl enable c20e-audio-init.service
 [[ -f /etc/systemd/system/c20e-accel-enable.service ]] && systemctl enable c20e-accel-enable.service
+[[ -f "$D/c20e-usb-gadget-sleep" ]] && install -D -m0755 "$D/c20e-usb-gadget-sleep" /usr/lib/systemd/system-sleep/c20e-usb-gadget
 [[ -f "$D/61-c20e-accel.rules" ]] && install -m0644 "$D/61-c20e-accel.rules" /etc/udev/rules.d/61-c20e-accel.rules
 echo "[fixup] preset installed; c20e units + ttyGS0 getty enabled"
 

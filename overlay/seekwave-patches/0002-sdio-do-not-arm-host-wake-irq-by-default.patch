@@ -1,0 +1,40 @@
+--- a/drivers/seekwaveplatform_lite/sdio/skw_sdio_main.c	2026-09-22 09:40:08.583697548 -0500
++++ b/drivers/seekwaveplatform_lite/sdio/skw_sdio_main.c	2026-09-22 09:40:08.594005363 -0500
+@@ -49,6 +49,17 @@
+ module_param(bind_device, int, S_IRUGO);
+ module_param(test_debug, uint, S_IRUGO);
+ module_param(skw_use_sdma, int, S_IRUGO);
++/*
++ * C20e: do NOT arm the WL_WAKE_HOST GPIO interrupt as a system wakeup by
++ * default. The chip toggles it for all traffic (~360k times per boot) and
++ * answers the host-suspend indication on it too, so with it armed every
++ * suspend aborted ("Wakeup pending. Abort CPU freeze", pm_wakeup_irq = the
++ * skw-gpio-irq). irq_wake=1 restores the vendor behaviour (Wi-Fi can wake
++ * the system).
++ */
++static int irq_wake;
++module_param(irq_wake, int, S_IRUGO);
++MODULE_PARM_DESC(irq_wake, "arm the Wi-Fi host-wake GPIO IRQ as a system wakeup (default 0)");
+ 
+ #ifndef MMC_CAP2_SDIO_IRQ_NOTHREAD
+ #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
+@@ -275,7 +286,8 @@
+ 					skw_sdio->irq_num, skw_sdio->device_active);
+ 		}
+ 	}
+-	enable_irq_wake(skw_sdio->irq_num);
++	if (irq_wake)
++		enable_irq_wake(skw_sdio->irq_num);
+ 	return ret;
+ }
+ 
+@@ -716,7 +728,8 @@
+ 					skw_sdio->irq_num, skw_sdio->device_active);
+ 		}
+ 	}
+-	enable_irq_wake(skw_sdio->irq_num);
++	if (irq_wake)
++		enable_irq_wake(skw_sdio->irq_num);
+ 	skw_sdio_rx_up(skw_sdio);
+ 	return ret;
+ }

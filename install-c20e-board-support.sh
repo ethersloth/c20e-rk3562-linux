@@ -111,6 +111,11 @@ ln -sf /usr/lib/systemd/system/serial-getty@.service \
     "$ROOT/etc/systemd/system/getty.target.wants/serial-getty@ttyGS0.service"
 say "enabled login getty on ttyGS0 (USB serial console)"
 
+# Suspend: release the USB console gadget around sleep (dwc3 cannot suspend
+# with it bound). See overlay/c20e-usb-gadget-sleep.
+install -D -m0755 "$REPO/overlay/c20e-usb-gadget-sleep" "$ROOT/usr/lib/systemd/system-sleep/c20e-usb-gadget"
+say "installed system-sleep hook for the USB console gadget"
+
 # Accelerometer -> iio-sensor-proxy (auto-rotation). See overlay/61-c20e-accel.rules.
 install -d "$ROOT/etc/udev/rules.d"
 install -m0644 "$REPO/overlay/61-c20e-accel.rules" "$ROOT/etc/udev/rules.d/61-c20e-accel.rules"
