@@ -53,6 +53,11 @@ OVERRIDE=0
 # U-Boot's 1023-byte append limit needs the room.
 WANTS_MIN="systemd.wants=c20e-dvfs-policy.service systemd.wants=c20e-usb-debug.service systemd.wants=serial-getty@ttyGS0.service"
 WANTS_ALL="$WANTS_MIN systemd.wants=c20e-bt-bringup.service systemd.wants=c20e-camera.service"
+# Boot logo: our own (overlay/drivers/video/logo/logo_linux_clut224.ppm)
+# instead of the four Tux penguins -- the kernel draws one per CPU, so
+# logo-count:1 shows it once. Not on the fedora-log entry: that one is a
+# diagnostic boot and its command line is already near U-Boot's 1023-byte limit.
+SPLASH="fbcon=logo-count:1"
 BASE="console=tty1 root=PARTUUID=$FEDORA_ROOT_PARTUUID rootfstype=btrfs rootflags=subvol=root,compress=zstd:1 rw rootwait panic=10 enforcing=0 video=DSI-1:800x1280@60,rotate=90"
 # Boot logger for the text entry, no rootfs change needed: PID 1 starts as bash,
 # forks a logger, then execs systemd (still PID 1, so the boot is otherwise
@@ -87,13 +92,13 @@ label fedora-text
   menu label Fedora (text mode)
   kernel /Image
   fdt /rk3562.dtb
-  append $BASE $WANTS_MIN systemd.unit=multi-user.target systemd.show_status=1 plymouth.enable=0
+  append $BASE $SPLASH $WANTS_MIN systemd.unit=multi-user.target systemd.show_status=1 plymouth.enable=0
 
 label fedora-text-nogpu
   menu label Fedora (text mode, Panfrost not loaded)
   kernel /Image
   fdt /rk3562.dtb
-  append $BASE $WANTS_MIN systemd.unit=multi-user.target systemd.show_status=1 plymouth.enable=0 initcall_blacklist=panfrost_driver_init
+  append $BASE $SPLASH $WANTS_MIN systemd.unit=multi-user.target systemd.show_status=1 plymouth.enable=0 initcall_blacklist=panfrost_driver_init
 
 label fedora-log
   menu label Fedora (text mode, boot log to this partition)
@@ -105,7 +110,7 @@ label fedora
   menu label Fedora (desktop)
   kernel /Image
   fdt /rk3562.dtb
-  append $BASE $WANTS_ALL
+  append $BASE $SPLASH $WANTS_ALL
 EOF
 
 rm -f "$OUT"

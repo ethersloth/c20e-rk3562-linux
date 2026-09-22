@@ -1,44 +1,85 @@
 # c20e-rk3562-linux
 
-Linux enablement for the C20e RK3562 tablet. Debian 13 is the current development target; Fedora support is planned.
+Linux enablement for the C20e RK3562 tablet: **Fedora 44 KDE Plasma Mobile** on the internal eMMC, and **Debian 13** from an SD card.
 
 > [!WARNING]
 > C20e support is under active hardware qualification. The upstream Doogee U10 images and release links below are not C20e images and must not be flashed to C20e hardware.
 
 ## Current C20e Status
 
-| Feature | Status |
-|---------|--------|
-| Boot and Debian 13 userspace | Working |
-| Display and GSL3673 touch enumeration | Working; manual touch coverage pending |
-| Seekwave EA6621Q/SV6160 Wi-Fi | Working with V5.9r2 hybrid driver |
-| GPU (Mali vendor stack) | Working; `Mali-G52` hardware rendering, stable. Use `--gpu-stack=mali` |
-| GPU (Panfrost) | **Broken — do not use.** Corrupts kernel memory whenever the GPU is used; reproducible in seconds with `eglinfo`. This was the cause of the long-standing intermittent DRM/Phosh hard lock |
-| RK817 audio | ALSA playback/capture enumerated; functional tests pending |
-| Battery and charging | Reporting present; kernel/UPower state discrepancy under investigation |
-| Bluetooth | Blocked; modern `skwbt` corrupts kernel memory with the V5.9r2 hybrid stack and is disabled |
-| USB-C | HUSB320 Type-C state present; host/device tests pending |
-| Cameras | Sensors/media graph enumerate; end-to-end capture pending |
-| Suspend/resume | Deep sleep advertised; manual qualification pending |
-| Hang detection / hardware watchdog | Working; DW watchdog armed by systemd (22s hardware timeout), hung-task/softlockup panic + `panic=10` auto-reboot verified on-device |
+Two systems run on this tablet:
 
-The passive collector is [scripts/qualify-hardware.sh](scripts/qualify-hardware.sh). Potentially destabilizing GPU probes remain disabled unless explicitly requested.
+* **Fedora 44 KDE Plasma Mobile** on the internal eMMC (Android erased). This is where the current work happens.
+* **Debian 13** from an SD card, the original target. Still buildable; see the rkdebian sections below.
 
-### The intermittent hard lock (resolved 2026-09-19)
+| Feature | Fedora (eMMC) | Notes |
+|---------|---------------|-------|
+| Boot, desktop, touch | Working | KWin on Wayland; auto-rotation works |
+| GPU | Working (**Panfrost**) | `Mali-G52 r1 MC1`, OpenGL ES 3.1. Chrome is hardware accelerated |
+| Wi-Fi | Working | Seekwave SV6160, fixed MAC |
+| Bluetooth | Working | Including switching it off and on, which used to kill Wi-Fi |
+| Audio | Working (speaker) | Headphone switching untested |
+| Cameras | Working | Rear OV5648 through the ISP, front GC02M1 raw. Not an app-ready webcam: no 3A |
+| Suspend/resume | Working | RTC and power key wake |
+| USB-C | Working | Automatic host/device switching, USB serial console, USB Ethernet |
+| Firewall | Working | nftables + conntrack in the kernel, firewalld runs |
+| Battery, charging, backlight | Working | |
+| Hardware video decode | **Not working** | The decoder exists (`/dev/mpp_service`); no player or browser can use it |
+| SELinux | Permissive | Enforcing needs a relabel first |
 
-The long-standing intermittent hard lock in the DSI + Phosh path (see `c20e-analysis/20260918-graphical-lock/`) was **Panfrost corrupting kernel memory**. It reproduces in seconds with a single `eglinfo` — no GUI, no network. Ruled out by controlled testing: the NPU DRM node, Wi-Fi/network load, GPU undervolt, the GPU interrupt mapping (verified correct against the factory Android DTB), and DVFS. Blocking Panfrost's DRM nodes made the reproducer survive; nothing else did.
+### Reaching the tablet
 
-The signature is memory corruption, not a GPU fault: no GPU error is ever logged, and instead an unrelated process dies, e.g. `pipewire` taking a NULL dereference in `link_path_walk` during an ordinary `openat()`. The fix is to use the Mali vendor stack (`--gpu-stack=mali`), which is what upstream ships by default and what the factory Android uses. That yields `Mali-G52` hardware rendering with no crashes.
+Three independent paths, which matters because the first two can fail:
 
-Hang detection was added while chasing this and is worth keeping. Until 2026-09-18 a hard hang left no trace at all: the kernel had no lockup detection compiled in and the SoC watchdog was `status = "disabled"` in the device tree, so there was no panic, no pstore record, and no reboot — every occurrence needed a manual power cycle. Both are now enabled in
-`overlay/arch/arm64/boot/dts/rockchip/rk3562-rk817-tablet-v10-panfrost.dts`,
-`overlay/arch/arm64/configs/rockchip_linux_defconfig`, `extlinux.conf` and `build_rootfs.sh`.
-`CONFIG_HARDLOCKUP_DETECTOR` is deliberately still off and remains untested.
+1. **Wi-Fi**, SSH as usual.
+2. **USB serial console** at `/dev/ttyACM0` on the host, no network needed.
+3. **USB Ethernet**: plug the USB-C cable into a computer and it gets a DHCP address in `192.168.241.0/24`; the tablet answers at **192.168.241.241** (SSH works). Modelled on the Red Lion FlexEdge.
+
+Paths 2 and 3 need the port in device mode, which is automatic when the tablet is plugged into a computer. Plugging in a powered hub switches it to host mode for keyboards, mice and dongles; a USB port can have only one host, so it is one or the other.
+
+If nothing boots at all, hold **Volume Up** while powering on with a USB cable attached: that enters the bootloader's USB loader mode, and `c20e-emmc-bootloader-rockusb.sh` can then inspect, dump, repair or replace what is on the eMMC without opening the tablet.
+
+### Fedora: build and install
+
+Everything is built on a laptop; nothing is downloaded onto the tablet.
+
+```bash
+./build.sh extboot --gpu-stack panfrost     # kernel + DTBs (Panfrost)
+./rebuild-c20e-hybrid-seekwave.sh           # Wi-Fi/BT modules for that kernel
+sudo ./prepare-c20e-fedora.sh path/to/Fedora-KDE-Mobile-Disk-44-*.aarch64.raw
+```
+
+`prepare-c20e-fedora.sh` produces `out/fedora-emmc/`: Fedora's own root filesystem with our kernel, modules, firmware and board support added, plus the boot partition image. It refuses to run against a kernel without the Panfrost fix below.
+
+Install it in either of two ways:
+
+* **From a running system on the tablet** (the Debian SD card, or Fedora itself), copy `out/fedora-emmc/` plus `bootloader/upstream-*` to the tablet and run `install-c20e-fedora-emmc.sh --dry-run` first. It refuses unless it is booted from the SD card, the target is the ~58 GB eMMC, and nothing on it is mounted, then asks you to type `ERASE-ANDROID`.
+* **From an installer SD card**: `sudo ./make-c20e-fedora-sd.sh` builds `out/fedora-sd/c20e-fedora-sd.img.xz`, a bootable Fedora card carrying the same bundle plus an **"Install Fedora to internal storage"** launcher that runs the installer above.
+
+**Back up Android first** with `backup-c20e-emmc.sh`. The backup is a sector-exact image of everything before `userdata`; restoring it puts Android back.
 
 > [!IMPORTANT]
-> **`overlay/` is the source of truth and it can go stale.** `build.sh` copies `overlay/` over `src/kernel` on every kernel build, and the `prepare-c20e-v5.x-*.sh` scripts patch `src/kernel` directly. Any device-tree work not copied back into `overlay/` is silently reverted by the next build, and `deploy-c20e-sd.sh` will then flash that regressed DTB.
+> **An SD card does not take priority over the eMMC.** Once the eMMC holds a bootable system, the tablet boots it even with a card inserted. An installer card therefore works on a tablet still running Android, but not on one already running Fedora from the eMMC. Loader mode (Volume Up) is the way back in either case.
+
+### Fixes that this hardware needs
+
+Each of these was a hard failure, and the reasoning is in the commit messages and in comments next to the code:
+
+* **Panfrost froze the whole SoC** on the first GPU use. RK3562 gives the GPU four clocks; Panfrost claims two, and `clk_disable_unused()` switched off the rest. `overlay/drivers/gpu/drm/panfrost/panfrost_device.c` enables every clock the device tree lists.
+* **Xwayland crashed and every X client hung**, including the Plasma setup wizard. Rockchip's `DRM_IGNORE_IOTCL_PERMIT` makes libdrm believe every file descriptor is DRM master; `build.sh` disables it for the Panfrost stack.
+* **Bluetooth off/on left Wi-Fi dead** until reboot, and crashed the kernel on shutdown. Android's own `libbt-vendor-seekwave.so` never stops the chip's Bluetooth service, so neither do we now: `overlay/seekwave-patches/0003..0005`.
+* **USB host mode drove 5 V into chargers and laptops**, resetting the board when the cable was pulled. Both the PHY and the charger driver drove VBUS; only the Type-C controller should.
+* **DDR frequency scaling corrupts memory** under display load. `c20e-dvfs-policy` pins the governor; the mechanism is still not understood.
+* **Fedora disables unknown services on first boot** (`preset-all`), which silently removed all board services, including the memory pin. `overlay/c20e.preset` prevents it.
+
+### Working on this repo
+
+> [!IMPORTANT]
+> **`overlay/` is the source of truth.** `build.sh` copies `overlay/` over `src/kernel` on every kernel build, so anything edited only in `src/kernel` — device tree, defconfig, drivers — is silently reverted by the next build. Edit `overlay/`.
 >
-> On 2026-09-18 this cost four failed boot cycles: the committed DTS was missing the `vcc_sd` regulator fix (`gpios=` not `enable-gpio=`, plus a corrected `states` table), so the SD card holding the rootfs never powered up and the kernel hung at `Waiting for root device`. **Before deploying, decompile the freshly built DTB and diff it against a known-good one** — differences you did not intend mean `overlay/` is stale.
+> Out-of-tree Wi-Fi/Bluetooth changes live in `overlay/seekwave-patches/*.patch` and are applied by `rebuild-c20e-hybrid-seekwave.sh`. Those modules are tied to the kernel build: rebuild them whenever the kernel changes, or Wi-Fi and Bluetooth stop working.
+>
+> When patching the Seekwave Bluetooth driver, note that its Makefile sets `-DINCLUDE_NEW_VERSION=1`: the file carries two versions of several functions and only that branch is compiled.
 
 This work builds on [tech4bot/rk3562deb](https://github.com/tech4bot/rk3562deb). Its original Doogee U10 documentation follows for build-system background.
 
