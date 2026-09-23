@@ -204,6 +204,15 @@ if [[ -f "$REPO/tools/rkisp32_gain.c" ]]; then
     if aarch64-linux-gnu-gcc -O2 -I"$REPO/src/kernel/include/uapi" \
          -o "$ROOT/usr/local/bin/c20e-isp-gain" "$REPO/tools/rkisp32_gain.c" 2>/dev/null; then
         say "compiled c20e-isp-gain"
+    elif [[ -f "$REPO/prebuilt/isp/sha256sums" ]]; then
+        # The repo's aarch64 toolchain is a bare kernel cross-compiler with no
+        # libc, so the build above fails on any normal laptop. Use the binary
+        # built on the tablet instead -- without it the rear camera's ISP output
+        # is nearly black, and a distro image has no gcc to fix that later.
+        ( cd "$REPO/prebuilt/isp" && sha256sum -c sha256sums >/dev/null ) \
+            || die "prebuilt/isp checksum does not match"
+        install -D -m0755 "$REPO/prebuilt/isp/c20e-isp-gain" "$ROOT/usr/local/bin/c20e-isp-gain"
+        say "installed prebuilt c20e-isp-gain (see prebuilt/isp/provenance)"
     else
         # Ship the source AND the Rockchip vendor ISP uapi headers it needs:
         # distro kernel-headers are mainline and lack rk-isp32-config.h and its

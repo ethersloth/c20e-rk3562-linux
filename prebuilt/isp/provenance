@@ -1,0 +1,10 @@
+# c20e-isp-gain, built on the tablet itself from tools/rkisp32_gain.c with the
+# vendor ISP uapi headers in src/kernel/include/uapi (Fedora 44, aarch64):
+#     gcc -O2 -I/usr/local/include -o c20e-isp-gain /usr/local/src/rkisp32_gain.c
+#
+# It lives here because install-c20e-board-support.sh runs on an x86 laptop and
+# the repo's aarch64 cross-compiler is a bare kernel toolchain with no libc, so
+# it cannot build a userspace binary. Without this the rear camera's ISP output
+# is nearly black -- there is no 3A on this board, so the gain is set by hand.
+#
+# built: kernel 6.1.172; gcc 16; 2026-09-23T02:26Z
