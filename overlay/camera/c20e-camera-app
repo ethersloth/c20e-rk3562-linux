@@ -1,0 +1,33 @@
+#!/bin/sh
+# Run a camera application with the bridge up for as long as it is open.
+#
+# The bridge is not left running because it keeps the sensor and ISP powered.
+# This wrapper starts it, waits for the loopback device to carry a format, runs
+# the application, and stops the bridge afterwards. Used by the Plasma Camera
+# launcher entry in /usr/local/share/applications.
+#
+#   c20e-camera-app [application] [args…]   (default: plasma-camera)
+set -u
+
+# Plasma Camera is deliberately NOT in this list: Fedora builds it against
+# libcamera and it enumerates cameras only through libcamera, which has no
+# pipeline handler for this board's vendor ISP driver (rkisp_v8) and therefore
+# finds nothing, loopback device or not. Cheese and Snapshot go through
+# GStreamer/PipeWire and work.
+if [ $# -gt 0 ]; then
+    APP="$1"; shift
+else
+    APP=""
+    for candidate in cheese snapshot kamoso; do
+        if command -v "$candidate" >/dev/null 2>&1; then APP="$candidate"; break; fi
+    done
+    if [ -z "$APP" ]; then
+        echo "c20e-camera-app: no camera application installed." >&2
+        echo "  sudo dnf install cheese      # or: snapshot" >&2
+        exit 1
+    fi
+fi
+
+/usr/local/sbin/c20e-camera-bridge start || echo "c20e-camera-app: bridge did not start" >&2
+trap '/usr/local/sbin/c20e-camera-bridge stop' EXIT INT TERM
+"$APP" "$@"

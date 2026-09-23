@@ -1,0 +1,14 @@
+[Desktop Entry]
+# Starts the camera bridge for as long as the application is open (see
+# c20e-camera-app). Plasma Camera's own entry cannot work on this board: it
+# enumerates cameras through libcamera, which does not support this vendor ISP.
+Type=Application
+Name=Camera
+GenericName=Camera
+Comment=Take photos and videos with the tablet camera
+Exec=/usr/local/bin/c20e-camera-app
+TryExec=/usr/local/sbin/c20e-camera-bridge
+Icon=camera-photo
+Terminal=false
+Categories=AudioVideo;Video;Recorder;
+Keywords=camera;photo;webcam;

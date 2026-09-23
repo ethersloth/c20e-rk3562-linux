@@ -19,13 +19,33 @@ Two systems run on this tablet:
 | Wi-Fi | Working | Seekwave SV6160, fixed MAC |
 | Bluetooth | Working | Including switching it off and on, which used to kill Wi-Fi |
 | Audio | Working (speaker) | Headphone switching untested |
-| Cameras | Working | Rear OV5648 through the ISP, front GC02M1 raw. Not an app-ready webcam: no 3A |
+| Cameras | Working (rear) | OV5648 through the ISP, 1280x720 at 15 fps, as a normal webcam for applications. No 3A, so gain is fixed |
 | Suspend/resume | Working | RTC and power key wake |
 | USB-C | Working | Automatic host/device switching, USB serial console, USB Ethernet |
 | Firewall | Working | nftables + conntrack in the kernel, firewalld runs |
 | Battery, charging, backlight | Working | |
 | Hardware video decode | Working (Chrome) | rkvdec2 through MPP and a VA-API driver; 1080p30 smooth, 1080p60 about 50 fps |
 | SELinux | Permissive | Enforcing needs a relabel first |
+
+### Camera in applications
+
+The sensor and ISP work, but for a long time no application could see them: the ISP's capture node (`/dev/video22`, driver `rkisp_v8`) is a **multiplanar** V4L2 device, and the userspace that matters refuses those.
+
+* Qt Multimedia's ffmpeg backend wants single-planar `V4L2_CAP_VIDEO_CAPTURE`.
+* PipeWire's V4L2 monitor lists the node as a device but publishes no camera from it.
+* libcamera has a pipeline handler for the mainline `rkisp1` driver, not for this vendor one.
+
+So `v4l2loopback` provides one ordinary single-planar device, `/dev/video40` ("C20e Camera"), and `c20e-camera-bridge` feeds it from the ISP. Applications then see a normal 1280x720 webcam: verified in Chrome (`label: C20e Camera, 1280x720 @15`) and in Cheese, streaming through PipeWire.
+
+The **Camera** entry in the app grid runs `c20e-camera-app`, which starts the bridge, runs a camera application, and stops the bridge when it closes — the sensor and ISP are powered only while something is using them. For browser use, start it by hand and leave it running:
+
+```bash
+c20e-camera-bridge start     # …and: stop, status
+```
+
+**The image ships no camera application that works**, so install one — `sudo dnf install cheese` (or `snapshot`). Plasma Camera comes with Fedora but cannot work here: it enumerates cameras only through libcamera, so it reports "Camera not available" whatever V4L2 devices exist. Its launcher entry is hidden for that reason.
+
+Two limits worth knowing: **15 fps** is the ceiling (the rear OV5648 runs 2592x1944 at 15 fps and the ISP main path inherits it, so pinning 30 fps fails negotiation outright), and the bridge follows whichever sensor `c20e-camera` linked to the ISP **at boot** — there is one ISP for both sensors and it sizes itself at first init, so changing cameras reliably means changing it at boot, not at runtime.
 
 ### Known gaps
 
@@ -34,6 +54,8 @@ Everything in the table above was checked on hardware. These were not, or do not
 * **The NPU does not work.** Its driver fails at probe: `RKNPU ff300000.npu: can't request region for resource [mem 0xff300000-0xff30ffff]`. The NPU LLM sections further down this README come from the upstream Doogee U10 project and **do not apply to this build**.
 * **`xwaylandvideobridge` crashes at every login**, inside Mesa: `panfrost_resource_set_damage_region()`. It is KDE's bridge for sharing Wayland windows with X11 applications, so screen sharing into X11 apps is unavailable; nothing else is affected. Disable its autostart if the crash notification is a nuisance.
 * **Untested, not known to be broken:** headphone and headset-microphone switching (the mixer controls are present), Bluetooth audio, and hardware video *encode* — MPP has the encoders, but nothing on the system asks for them. Firefox has no VA-API configuration here; only Chrome is set up for hardware decode.
+* **The front camera is raw Bayer only** (`/dev/video11`, SRGGB10); only the rear sensor goes through the ISP, so only the rear one appears as a webcam.
+* **Plasma Camera cannot work** — see above; use Cheese or GNOME Snapshot.
 * **1080p60 video plays at about 50 fps.** 1080p30 is solid. The limit is measured, not guessed: 20.2 ms per frame, 15.7 ms of it the decoder itself.
 * **SELinux is permissive.** Enforcing needs a relabel first.
 * **One hard freeze, once**, during bring-up, with nothing in the logs; not seen since, and not reproduced.

@@ -1,0 +1,18 @@
+[Desktop Entry]
+# Hides Plasma Camera from the app grid on this board, because it cannot work
+# here: Fedora builds it against libcamera and it enumerates cameras only through
+# libcamera, which has a pipeline handler for the mainline rkisp1 driver but not
+# for this tablet's vendor rkisp_v8 ISP. It therefore shows "Camera not
+# available" no matter what V4L2 devices exist. The "Camera" entry installed
+# beside this one (c20e-camera.desktop) starts a camera application that works.
+#
+# This file wins over Plasma Camera's own entry because
+# XDG_DATA_DIRS lists /usr/local/share before /usr/share. Delete it to get the
+# original entry back, e.g. to retest after a libcamera update.
+Type=Application
+Name=Plasma Camera (not supported on this board)
+Exec=plasma-camera
+Icon=camera-photo
+Terminal=false
+NoDisplay=true
+Categories=AudioVideo;Video;Recorder;

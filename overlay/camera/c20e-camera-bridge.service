@@ -1,0 +1,22 @@
+[Unit]
+# USER service: it runs as the logged-in user, who holds the udev ACL on both the
+# ISP node and the loopback device, and so it can be started without root by
+# c20e-camera-app (the launcher wrapper) or by hand for browser use:
+#     systemctl --user start c20e-camera-bridge
+# Not enabled by default: while it runs, the sensor and ISP are powered and
+# streaming, which costs battery on a tablet.
+Description=C20e camera bridge (ISP capture node -> loopback camera device)
+Documentation=file:/usr/local/sbin/c20e-camera-bridge
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/c20e-camera-bridge run
+Restart=on-failure
+RestartSec=2
+# Give up rather than restart for ever if the ISP never produces frames.
+StartLimitBurst=3
+StartLimitIntervalSec=60
+
+[Install]
+WantedBy=graphical-session.target

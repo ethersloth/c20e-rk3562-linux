@@ -152,6 +152,42 @@ install -d "$ROOT/etc/systemd/system-preset"
 install -m0644 "$REPO/overlay/c20e.preset" "$ROOT/etc/systemd/system-preset/10-c20e.preset"
 say "installed systemd preset (keeps c20e units enabled across first-boot preset-all)"
 
+# ------------------------------------------------------------- camera for apps
+# The ISP capture node is multiplanar V4L2, which Qt Multimedia, PipeWire and
+# libcamera all refuse, so applications report no camera even though the sensor
+# and ISP work (verified 2026-09-22: frames captured fine with GStreamer, while
+# Plasma Camera said "Camera not available"). v4l2loopback provides one ordinary
+# single-planar device and c20e-camera-bridge feeds it from the ISP. Chrome,
+# Cheese and GNOME Snapshot then see a normal 1280x720 webcam.
+#
+# Rebuild the module when the kernel version changes:
+#   ./tools/c20e-build-v4l2loopback.sh --capture prebuilt/camera
+PC="$REPO/prebuilt/camera"
+if [[ -f "$PC/sha256sums" ]]; then
+    ( cd "$PC" && sha256sum -c sha256sums >/dev/null ) || die "prebuilt/camera checksum does not match"
+    VM="$(modinfo "$PC/v4l2loopback.ko" 2>/dev/null | awk -F': +' '/^vermagic/{print $2}')"
+    if [[ "$VM" == "$KREL"* ]]; then
+        install -D -m0644 "$PC/v4l2loopback.ko" "$ROOT/lib/modules/$KREL/updates/v4l2loopback.ko"
+        install -D -m0644 "$REPO/overlay/camera/c20e-v4l2loopback-modprobe.conf" "$ROOT/etc/modprobe.d/c20e-v4l2loopback.conf"
+        install -D -m0644 "$REPO/overlay/camera/c20e-v4l2loopback-load.conf" "$ROOT/etc/modules-load.d/c20e-v4l2loopback.conf"
+        install -D -m0644 "$REPO/overlay/camera/62-c20e-camera-loopback.rules" "$ROOT/etc/udev/rules.d/62-c20e-camera-loopback.rules"
+        install -D -m0755 "$REPO/overlay/camera/c20e-camera-bridge.sh" "$ROOT/usr/local/sbin/c20e-camera-bridge"
+        install -D -m0755 "$REPO/overlay/camera/c20e-camera-app" "$ROOT/usr/local/bin/c20e-camera-app"
+        install -D -m0644 "$REPO/overlay/camera/c20e-camera-bridge.service" "$ROOT/usr/lib/systemd/user/c20e-camera-bridge.service"
+        install -D -m0644 "$REPO/overlay/camera/c20e-camera.desktop" "$ROOT/usr/local/share/applications/c20e-camera.desktop"
+        # and hide Plasma Camera's own entry, which cannot work here (libcamera)
+        install -D -m0644 "$REPO/overlay/camera/org.kde.plasma.camera.desktop" \
+            "$ROOT/usr/local/share/applications/org.kde.plasma.camera.desktop"
+        say "installed loopback camera (v4l2loopback + bridge + launcher)"
+    else
+        say "WARNING: prebuilt/camera/v4l2loopback.ko is for '$VM', not $KREL -- skipped."
+        say "         rebuild: ./tools/c20e-build-v4l2loopback.sh --capture prebuilt/camera"
+    fi
+else
+    say "WARNING: no prebuilt/camera -- applications will not see a camera."
+    say "         build it: ./tools/c20e-build-v4l2loopback.sh --capture prebuilt/camera"
+fi
+
 # ------------------------------------------------------------- disk and power
 # Grow the root filesystem ourselves, and stop Fedora's two units that cannot
 # work on this layout from showing up red in `systemctl --failed` on a tablet
@@ -262,6 +298,7 @@ say "verification:"
 printf '    seekwave modules : %s\n' "$(ls "$ROOT/lib/modules/$KREL/updates/c20e-seekwave" 2>/dev/null | tr '\n' ' ')"
 printf '    wifi firmware    : %s\n' "$([[ -f "$ROOT/lib/firmware/SWT6621_DRAM_SDIO.bin" && -f "$ROOT/lib/firmware/SWT6621_IRAM_SDIO.bin" ]] && echo yes || echo MISSING)"
 printf '    bt nv firmware   : %s\n' "$([[ -f "$ROOT/lib/firmware/seekwave/sv6160.nvbin" ]] && echo yes || echo MISSING)"
+printf '    loopback camera  : %s\n' "$([[ -f "$ROOT/lib/modules/$KREL/updates/v4l2loopback.ko" ]] && echo yes || echo 'MISSING (apps see no camera)')"
 printf '    vaapi decode     : %s\n' "$([[ -f "$ROOT/usr/lib64/dri/rockchip_drv_video.so" || -f "$ROOT/usr/lib/aarch64-linux-gnu/dri/rockchip_drv_video.so" ]] && echo yes || echo 'MISSING (software decode)')"
 printf '    isp gain binary  : %s\n' "$([[ -x "$ROOT/usr/local/bin/c20e-isp-gain" ]] && echo yes || echo 'not built (source shipped)')"
 printf '    enabled units    : %s\n' "$(ls "$ROOT/etc/systemd/system/multi-user.target.wants" 2>/dev/null | grep -c c20e) c20e units"

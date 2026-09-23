@@ -1,0 +1,14 @@
+# v4l2loopback, cross-compiled on the laptop against this repo's kernel with
+# tools/c20e-build-v4l2loopback.sh. It exists because the C20e's ISP capture node
+# is multiplanar V4L2, which Qt, PipeWire and libcamera all refuse; the loopback
+# gives one ordinary single-planar camera device that applications accept.
+#
+# source    https://github.com/umlaeute/v4l2loopback.git @ v0.15.4
+#           (0f9ee86760b7f2bea174b7e3e7a1d38845da0ab4)
+# kernel    6.1.172
+# vermagic  6.1.172 SMP mod_unload aarch64
+# built     2026-09-23T03:36Z
+#
+# The module has no kernel ABI checks beyond vermagic (CONFIG_MODVERSIONS is off
+# in this kernel), so it keeps loading across kernel rebuilds as long as
+# UTS_RELEASE stays the same. Rebuild it if the kernel version changes.
