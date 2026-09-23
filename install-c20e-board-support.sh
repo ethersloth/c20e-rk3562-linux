@@ -169,16 +169,13 @@ for u in systemd-growfs-root.service systemd-repart.service; do
 done
 say "masked systemd-growfs-root and systemd-repart (neither can work here; see the comment)"
 
-# tuned picks throughput-performance on this board, which pins all four cores at
-# 2016 MHz for ever: 72-75 C at idle and battery spent on nothing. balanced uses
-# schedutil instead. It does NOT touch devfreq, so the DDR pin that keeps memory
-# from being corrupted under scanout load (c20e-dvfs-policy) is unaffected.
-if [[ -d "$ROOT/etc/tuned" || -e "$ROOT/usr/sbin/tuned" ]]; then
-    install -d "$ROOT/etc/tuned"
-    echo balanced > "$ROOT/etc/tuned/active_profile"
-    echo manual   > "$ROOT/etc/tuned/profile_mode"
-    say "set tuned profile to balanced (CPU governor schedutil; DDR stays pinned)"
-fi
+# NOTE on CPU frequency: nothing here sets it, deliberately. tuned's profile is
+# chosen by the desktop -- KDE's power widget asks tuned-ppd for a profile, and
+# tuned-ppd maps it (performance -> throughput-performance, which pins all four
+# cores at 2016 MHz and sits the SoC at 72-75 C; on battery it maps to
+# balanced-battery). Writing /etc/tuned/active_profile here has no lasting
+# effect: the desktop overrides it at every login. The DDR pin that memory
+# stability depends on is separate and is ours -- see c20e-dvfs-policy.
 
 # ------------------------------------------------------- hardware video decode
 # Rockchip MPP + the VA-API driver on top of it, so browsers decode video on the
