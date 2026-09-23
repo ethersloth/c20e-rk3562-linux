@@ -1,0 +1,26 @@
+#!/bin/sh
+# Google Chrome with the Rockchip hardware video decoder enabled.
+#
+# Chrome will not use a VA-API driver on Linux unless it is asked to: the
+# VaapiVideoDecodeLinuxGL feature turns the accelerated decoder on, and
+# VaapiIgnoreDriverChecks stops Chrome rejecting a driver whose vendor string
+# is not one it knows (ours is the MPP driver, which no Chrome release lists).
+# There is no policy or config file for command-line switches in Google Chrome,
+# hence this wrapper; /usr/local/bin comes before /usr/bin in PATH, and
+# /usr/local/share/applications/google-chrome.desktop points the launcher here.
+#
+# Without it Chrome decodes in software: 1080p30 costs about 208% of one CPU
+# core instead of 128%, and the tablet has four.
+#
+# Extra switches can be added per user in ~/.config/c20e-chrome-flags (one
+# switch per line, # for comments).
+exec_flags="--enable-features=VaapiVideoDecodeLinuxGL,VaapiIgnoreDriverChecks"
+
+user_flags=""
+if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/c20e-chrome-flags" ]; then
+    user_flags=$(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' \
+                     "${XDG_CONFIG_HOME:-$HOME/.config}/c20e-chrome-flags" | tr '\n' ' ')
+fi
+
+# shellcheck disable=SC2086
+exec /opt/google/chrome/google-chrome $exec_flags $user_flags "$@"

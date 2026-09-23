@@ -152,6 +152,52 @@ install -d "$ROOT/etc/systemd/system-preset"
 install -m0644 "$REPO/overlay/c20e.preset" "$ROOT/etc/systemd/system-preset/10-c20e.preset"
 say "installed systemd preset (keeps c20e units enabled across first-boot preset-all)"
 
+# ------------------------------------------------------- hardware video decode
+# Rockchip MPP + the VA-API driver on top of it, so browsers decode video on the
+# rkvdec2 block instead of the CPU: 1080p30 in Chrome costs about 128% of one
+# core with it and 208% without, and 1080p60 is unwatchable in software.
+#
+# These are prebuilt aarch64 binaries (see prebuilt/vaapi/provenance for the
+# upstream commits and the patches in overlay/vaapi-patches/), because this
+# script runs on an x86 laptop against an aarch64 image. Rebuild them on the
+# tablet with tools/c20e-build-vaapi.sh --capture prebuilt/vaapi.
+PV="$REPO/prebuilt/vaapi"
+if [[ -f "$PV/sha256sums" ]]; then
+    ( cd "$PV" && sha256sum -c sha256sums >/dev/null ) || die "prebuilt/vaapi checksums do not match"
+    MPP_LIB="$(awk '{print $2}' "$PV/sha256sums" | grep '^librockchip_mpp')"
+    install -D -m0755 "$PV/$MPP_LIB" "$ROOT/usr/local/lib64/$MPP_LIB"
+    # MPP's soname is librockchip_mpp.so.1; upstream names the file .so.0 and
+    # links the rest to it, so recreate both links rather than shipping them.
+    ln -sf "$MPP_LIB" "$ROOT/usr/local/lib64/librockchip_mpp.so.1"
+    ln -sf librockchip_mpp.so.1 "$ROOT/usr/local/lib64/librockchip_mpp.so"
+    install -D -m0644 "$REPO/overlay/c20e-local-lib64.conf" "$ROOT/etc/ld.so.conf.d/c20e-local-lib64.conf"
+
+    # libva looks the driver up by the DRM device's name ("panfrost", which has
+    # no VA-API driver) unless LIBVA_DRIVER_NAME says otherwise -- the decoder is
+    # a separate block from the GPU on this SoC.
+    DRI="$ROOT/usr/lib64/dri"
+    [[ -d "$DRI" ]] || DRI="$ROOT/usr/lib/aarch64-linux-gnu/dri"
+    [[ -e "$ROOT/usr/lib64/libva.so.2" || -e "$ROOT/usr/lib/aarch64-linux-gnu/libva.so.2" ]] \
+        || say "WARNING: no libva in this rootfs -- install libva, or nothing can load the driver"
+    install -D -m0755 "$PV/rockchip_drv_video.so" "$DRI/rockchip_drv_video.so"
+    install -D -m0644 "$REPO/overlay/c20e-vaapi.conf" "$ROOT/etc/environment.d/90-c20e-vaapi.conf"
+    install -D -m0644 "$REPO/overlay/70-c20e-mpp.rules" "$ROOT/etc/udev/rules.d/70-c20e-mpp.rules"
+
+    # Google Chrome needs the switches in this wrapper before it will use any
+    # VA-API driver on Linux, and it has no config file for switches. The
+    # .desktop file beats Chrome's own because XDG_DATA_DIRS lists /usr/local
+    # first; both are harmless if Chrome is never installed (TryExec hides the
+    # launcher entry).
+    install -D -m0755 "$REPO/overlay/vaapi/google-chrome-c20e" "$ROOT/usr/local/bin/google-chrome-stable"
+    ln -sf google-chrome-stable "$ROOT/usr/local/bin/google-chrome"
+    install -D -m0644 "$REPO/overlay/vaapi/google-chrome.desktop" \
+        "$ROOT/usr/local/share/applications/google-chrome.desktop"
+    say "installed hardware video decode (MPP + VA-API driver + Chrome wrapper)"
+else
+    say "WARNING: no prebuilt/vaapi -- video will decode in software."
+    say "         build it on the tablet: sudo tools/c20e-build-vaapi.sh"
+fi
+
 # --------------------------------------------------------------- ISP gain
 # Without this the ISP output is nearly black; there is no 3A on this board.
 if [[ -f "$REPO/tools/rkisp32_gain.c" ]]; then
@@ -182,6 +228,7 @@ say "verification:"
 printf '    seekwave modules : %s\n' "$(ls "$ROOT/lib/modules/$KREL/updates/c20e-seekwave" 2>/dev/null | tr '\n' ' ')"
 printf '    wifi firmware    : %s\n' "$([[ -f "$ROOT/lib/firmware/SWT6621_DRAM_SDIO.bin" && -f "$ROOT/lib/firmware/SWT6621_IRAM_SDIO.bin" ]] && echo yes || echo MISSING)"
 printf '    bt nv firmware   : %s\n' "$([[ -f "$ROOT/lib/firmware/seekwave/sv6160.nvbin" ]] && echo yes || echo MISSING)"
+printf '    vaapi decode     : %s\n' "$([[ -f "$ROOT/usr/lib64/dri/rockchip_drv_video.so" || -f "$ROOT/usr/lib/aarch64-linux-gnu/dri/rockchip_drv_video.so" ]] && echo yes || echo 'MISSING (software decode)')"
 printf '    isp gain binary  : %s\n' "$([[ -x "$ROOT/usr/local/bin/c20e-isp-gain" ]] && echo yes || echo 'not built (source shipped)')"
 printf '    enabled units    : %s\n' "$(ls "$ROOT/etc/systemd/system/multi-user.target.wants" 2>/dev/null | grep -c c20e) c20e units"
 printf '    skwbt auto-load  : %s\n' "$(grep -qx skwbt "$ROOT/etc/modules-load.d/c20e-seekwave.conf" && echo 'PRESENT (bad)' || echo 'absent (good)')"

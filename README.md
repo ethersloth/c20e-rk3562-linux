@@ -24,7 +24,7 @@ Two systems run on this tablet:
 | USB-C | Working | Automatic host/device switching, USB serial console, USB Ethernet |
 | Firewall | Working | nftables + conntrack in the kernel, firewalld runs |
 | Battery, charging, backlight | Working | |
-| Hardware video decode | **Not working** | The decoder exists (`/dev/mpp_service`); no player or browser can use it |
+| Hardware video decode | Working (Chrome) | rkvdec2 through MPP and a VA-API driver; 1080p30 smooth, 1080p60 about 50 fps |
 | SELinux | Permissive | Enforcing needs a relabel first |
 
 ### Reaching the tablet
@@ -61,6 +61,27 @@ Install it in either of two ways:
 > [!IMPORTANT]
 > **An SD card does not take priority over the eMMC.** Once the eMMC holds a bootable system, the tablet boots it even with a card inserted. An installer card therefore works on a tablet still running Android, but not on one already running Fedora from the eMMC. Loader mode (Volume Up) is the way back in either case.
 
+### Hardware video decode
+
+The RK3562 decodes H.264, HEVC, VP8, VP9 and AV1 on its rkvdec2 block, reached through Rockchip's MPP library and a VA-API driver built on top of it ([woodyst/rockchip-vaapi](https://github.com/woodyst/rockchip-vaapi), plus the two patches in `overlay/vaapi-patches/`). In Chrome, 1080p30 plays at a steady 30 fps for about 128% of one CPU core, against 208% and visible judder in software.
+
+A fresh install has it: `install-c20e-board-support.sh` installs the prebuilt aarch64 binaries from `prebuilt/vaapi/` (provenance and checksums are in that directory), the `LIBVA_DRIVER_NAME` setting, the decoder's udev permissions, and a Chrome wrapper. To rebuild the binaries from source, on the tablet:
+
+```bash
+sudo tools/c20e-build-vaapi.sh                          # build + install
+sudo tools/c20e-build-vaapi.sh --capture prebuilt/vaapi # …and refresh the repo copies
+```
+
+Three things are easy to get wrong here, and each one silently falls back to software decode:
+
+* **libva picks the driver by GPU name.** It asks the DRM device, gets `panfrost`, looks for a Panfrost VA-API driver and gives up — the decoder is a separate block from the GPU. `LIBVA_DRIVER_NAME=rockchip` in `/etc/environment.d` is what points it at the right one.
+* **Chrome needs switches, and has no file to put them in.** `/usr/local/bin/google-chrome-stable` is a wrapper that adds them, and a `.desktop` file in `/usr/local/share/applications` makes the launcher use it. Both beat Chrome's own copies (PATH and `XDG_DATA_DIRS` order), so a Chrome update cannot undo them. Extra switches per user go in `~/.config/c20e-chrome-flags`.
+* **The decoder device is root-only.** `overlay/70-c20e-mpp.rules` grants the logged-in user `/dev/mpp_service` and the DMA heaps MPP allocates from.
+
+`lsof /dev/mpp_service` during playback is the proof it is really being used. `tools/video-bench/` measures playback the way a viewer sees it — frame rate, dropped frames, and whether the video clock keeps up — and is how the numbers above were taken.
+
+1080p60 reaches about 50 fps: 20.2 ms per frame from packet to decoded frame, of which 15.7 ms is the decoder itself and 4.5 ms the driver's copy into the surface buffer. Removing that copy needs the decoder to write straight into the VA surface, which is not done yet.
+
 ### Fixes that this hardware needs
 
 Each of these was a hard failure, and the reasoning is in the commit messages and in comments next to the code:
@@ -71,6 +92,7 @@ Each of these was a hard failure, and the reasoning is in the commit messages an
 * **USB host mode drove 5 V into chargers and laptops**, resetting the board when the cable was pulled. Both the PHY and the charger driver drove VBUS; only the Type-C controller should.
 * **DDR frequency scaling corrupts memory** under display load. `c20e-dvfs-policy` pins the governor; the mechanism is still not understood.
 * **Fedora disables unknown services on first boot** (`preset-all`), which silently removed all board services, including the memory pin. `overlay/c20e.preset` prevents it.
+* **Hardware video decode ran slower than software.** The VA-API driver blocks until the frame it just submitted comes back, but MPP emitted frames in display order, so with B-frames that frame could not appear until more packets had been submitted — which the blocked caller could not do. Every frame waited out the timeout: 15-20 fps, in slow motion. `overlay/vaapi-patches/0002-*` switches MPP to decode order, which is what VA-API expects anyway.
 
 ### Working on this repo
 
