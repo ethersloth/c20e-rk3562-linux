@@ -152,6 +152,34 @@ install -d "$ROOT/etc/systemd/system-preset"
 install -m0644 "$REPO/overlay/c20e.preset" "$ROOT/etc/systemd/system-preset/10-c20e.preset"
 say "installed systemd preset (keeps c20e units enabled across first-boot preset-all)"
 
+# ------------------------------------------------------------- disk and power
+# Grow the root filesystem ourselves, and stop Fedora's two units that cannot
+# work on this layout from showing up red in `systemctl --failed` on a tablet
+# somebody else just flashed:
+#   systemd-growfs-root  needs to name the root's block device; with no initramfs
+#                        btrfs reports /dev/root and it gives up
+#   systemd-repart       "minimal disk image size 58.2G, current 58.2G" -- there
+#                        is nothing to repartition; our layout is fixed by
+#                        install-c20e-fedora-emmc.sh
+install -m0644 "$REPO/overlay/c20e-growfs.service" "$ROOT/etc/systemd/system/c20e-growfs.service"
+enable_unit "c20e-growfs.service"
+say "installed + enabled c20e-growfs.service (grows the root filesystem to its partition)"
+for u in systemd-growfs-root.service systemd-repart.service; do
+    ln -sf /dev/null "$ROOT/etc/systemd/system/$u"
+done
+say "masked systemd-growfs-root and systemd-repart (neither can work here; see the comment)"
+
+# tuned picks throughput-performance on this board, which pins all four cores at
+# 2016 MHz for ever: 72-75 C at idle and battery spent on nothing. balanced uses
+# schedutil instead. It does NOT touch devfreq, so the DDR pin that keeps memory
+# from being corrupted under scanout load (c20e-dvfs-policy) is unaffected.
+if [[ -d "$ROOT/etc/tuned" || -e "$ROOT/usr/sbin/tuned" ]]; then
+    install -d "$ROOT/etc/tuned"
+    echo balanced > "$ROOT/etc/tuned/active_profile"
+    echo manual   > "$ROOT/etc/tuned/profile_mode"
+    say "set tuned profile to balanced (CPU governor schedutil; DDR stays pinned)"
+fi
+
 # ------------------------------------------------------- hardware video decode
 # Rockchip MPP + the VA-API driver on top of it, so browsers decode video on the
 # rkvdec2 block instead of the CPU: 1080p30 in Chrome costs about 128% of one

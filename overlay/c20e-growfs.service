@@ -1,0 +1,27 @@
+[Unit]
+# Grow the root filesystem to fill its partition, on every boot, idempotently.
+#
+# Fedora's own systemd-growfs-root.service cannot do it here: with no initramfs
+# the kernel mounts the root itself, so btrfs reports the device as /dev/root
+# and growfs gives up with "not a valid userspace accessible device node". It
+# then shows as a failed unit on every boot, which looks alarming and is not.
+# (The /home and /var growfs units did happen to grow the same filesystem,
+# because those mounts name a UUID -- too incidental to rely on.)
+#
+# `btrfs filesystem resize max` takes a mount point, not a device, so it works
+# regardless of what the root device is called, and is a no-op once the
+# filesystem already fills the partition. That matters for both images: the
+# bundle's filesystem is about 9.5 GB, the eMMC partition is 58 GB and the SD
+# card's is 14 GB.
+Description=C20e: grow the root filesystem to its partition
+Documentation=man:btrfs-filesystem(8)
+After=local-fs.target
+ConditionPathIsMountPoint=/
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/btrfs filesystem resize max /
+
+[Install]
+WantedBy=multi-user.target

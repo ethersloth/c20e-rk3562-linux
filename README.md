@@ -27,6 +27,17 @@ Two systems run on this tablet:
 | Hardware video decode | Working (Chrome) | rkvdec2 through MPP and a VA-API driver; 1080p30 smooth, 1080p60 about 50 fps |
 | SELinux | Permissive | Enforcing needs a relabel first |
 
+### Known gaps
+
+Everything in the table above was checked on hardware. These were not, or do not work:
+
+* **The NPU does not work.** Its driver fails at probe: `RKNPU ff300000.npu: can't request region for resource [mem 0xff300000-0xff30ffff]`. The NPU LLM sections further down this README come from the upstream Doogee U10 project and **do not apply to this build**.
+* **`xwaylandvideobridge` crashes at every login**, inside Mesa: `panfrost_resource_set_damage_region()`. It is KDE's bridge for sharing Wayland windows with X11 applications, so screen sharing into X11 apps is unavailable; nothing else is affected. Disable its autostart if the crash notification is a nuisance.
+* **Untested, not known to be broken:** headphone and headset-microphone switching (the mixer controls are present), Bluetooth audio, and hardware video *encode* — MPP has the encoders, but nothing on the system asks for them. Firefox has no VA-API configuration here; only Chrome is set up for hardware decode.
+* **1080p60 video plays at about 50 fps.** 1080p30 is solid. The limit is measured, not guessed: 20.2 ms per frame, 15.7 ms of it the decoder itself.
+* **SELinux is permissive.** Enforcing needs a relabel first.
+* **One hard freeze, once**, during bring-up, with nothing in the logs; not seen since, and not reproduced.
+
 ### Reaching the tablet
 
 Three independent paths, which matters because the first two can fail:
@@ -99,6 +110,7 @@ Each of these was a hard failure, and the reasoning is in the commit messages an
 * **Bluetooth off/on left Wi-Fi dead** until reboot, and crashed the kernel on shutdown. Android's own `libbt-vendor-seekwave.so` never stops the chip's Bluetooth service, so neither do we now: `overlay/seekwave-patches/0003..0005`.
 * **USB host mode drove 5 V into chargers and laptops**, resetting the board when the cable was pulled. Both the PHY and the charger driver drove VBUS; only the Type-C controller should.
 * **DDR frequency scaling corrupts memory** under display load. `c20e-dvfs-policy` pins the governor; the mechanism is still not understood.
+* **tuned pinned all four cores at 2016 MHz.** Fedora's `tuned` picks `throughput-performance` on this board, which sat the SoC at 72-75 °C doing nothing and spent battery for it. The image now ships the `balanced` profile (CPU governor `schedutil`); `tuned` does not touch devfreq, so the DDR pin above is unaffected.
 * **Fedora disables unknown services on first boot** (`preset-all`), which silently removed all board services, including the memory pin. `overlay/c20e.preset` prevents it.
 * **Hardware video decode ran slower than software.** The VA-API driver blocks until the frame it just submitted comes back, but MPP emitted frames in display order, so with B-frames that frame could not appear until more packets had been submitted — which the blocked caller could not do. Every frame waited out the timeout: 15-20 fps, in slow motion. `overlay/vaapi-patches/0002-*` switches MPP to decode order, which is what VA-API expects anyway.
 
