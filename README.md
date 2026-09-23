@@ -37,6 +37,14 @@ Three independent paths, which matters because the first two can fail:
 
 Paths 2 and 3 need the port in device mode, which is automatic when the tablet is plugged into a computer. Plugging in a powered hub switches it to host mode for keyboards, mice and dongles; a USB port can have only one host, so it is one or the other.
 
+> [!WARNING]
+> **The USB serial console logs in as root, without a password.** Plug the tablet into a computer and `/dev/ttyACM0` is a root shell; the screen lock does not apply. It is deliberate — it is the only way back in when the GPU, the display or `plasma-setup` fail, and this tablet has no reachable UART without taking the case apart. Physical USB access is required. To turn it off once your system is set up:
+>
+> ```bash
+> sudo rm -r /etc/systemd/system/serial-getty@ttyGS0.service.d
+> sudo systemctl daemon-reload
+> ```
+
 If nothing boots at all, hold **Volume Up** while powering on with a USB cable attached: that enters the bootloader's USB loader mode, and `c20e-emmc-bootloader-rockusb.sh` can then inspect, dump, repair or replace what is on the eMMC without opening the tablet.
 
 ### Fedora: build and install
