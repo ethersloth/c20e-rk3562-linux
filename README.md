@@ -77,6 +77,19 @@ Everything in the table above was checked on hardware. These were not, or do not
 * **SELinux is permissive.** Enforcing needs a relabel first.
 * **One hard freeze, once**, during bring-up, with nothing in the logs; not seen since, and not reproduced.
 
+### Download a ready-made card image
+
+Prebuilt installer images are on the [releases page](https://github.com/ethersloth/c20e-rk3562-linux/releases). Each is split into parts of under 2 GiB, because that is GitHub's limit for a release asset:
+
+```bash
+sha256sum -c SHA256SUMS                              # the parts, as downloaded
+cat c20e-fedora-sd.img.xz.part* > c20e-fedora-sd.img.xz
+sha256sum -c SHA256SUMS.whole                        # the reassembled image
+xz -dc c20e-fedora-sd.img.xz | sudo dd of=/dev/sdX bs=4M conv=fsync status=progress
+```
+
+`tools/c20e-package-release.sh` builds that set from `out/`, and verifies the parts reassemble to the original before writing the checksums.
+
 ### Reaching the tablet
 
 Three independent paths, which matters because the first two can fail:
