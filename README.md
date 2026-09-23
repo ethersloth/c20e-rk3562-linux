@@ -24,6 +24,7 @@ Two systems run on this tablet:
 | USB-C | Working | Automatic host/device switching, USB serial console, USB Ethernet |
 | Firewall | Working | nftables + conntrack in the kernel, firewalld runs |
 | Battery, charging, backlight | Working | |
+| Shutdown | Working | Needs `c20e-poweroff`; without it the board reboots instead of powering off |
 | Hardware video decode | Working (Chrome) | rkvdec2 through MPP and a VA-API driver; 1080p30 smooth, 1080p60 about 50 fps |
 | SELinux | Permissive | Enforcing needs a relabel first |
 
@@ -46,6 +47,22 @@ c20e-camera-bridge start     # …and: stop, status
 **The image ships no camera application that works**, so install one — `sudo dnf install cheese` (or `snapshot`). Plasma Camera comes with Fedora but cannot work here: it enumerates cameras only through libcamera, so it reports "Camera not available" whatever V4L2 devices exist. Its launcher entry is hidden for that reason.
 
 Two limits worth knowing: **15 fps** is the ceiling (the rear OV5648 runs 2592x1944 at 15 fps and the ISP main path inherits it, so pinning 30 fps fails negotiation outright), and the bridge follows whichever sensor `c20e-camera` linked to the ISP **at boot** — there is one ISP for both sensors and it sizes itself at first init, so changing cameras reliably means changing it at boot, not at runtime.
+
+### Shutdown, and a puzzle in the PMIC driver
+
+"Shut down" used to reboot the tablet. The RK817 needs `DEV_OFF` (bit 0 of `SYS_CFG3`, register `0xf4`) written over I2C; with nothing cutting the rails the kernel falls through to PSCI `SYSTEM_OFF`, which this board's firmware performs as a **reset**, so the board comes straight back up. It is not the charger — it reboots with nothing plugged in.
+
+`overlay/power/c20e-poweroff` does that write from a systemd shutdown hook, which systemd runs last, after every filesystem is unmounted and read-only. It uses python3 and `/dev/i2c-0` directly, so it needs no `i2c-tools`. Verified: the board powers off and stays off; `reboot` is untouched, because the hook only acts on `poweroff`.
+
+**This belongs in the PMIC driver and does not work there.** Everything below was measured on 2026-09-23, and it is recorded because the contradiction is unresolved and someone will try again:
+
+* From userspace at the end of shutdown, the write always works — value masked to `DEV_OFF` alone, or `raw | DEV_OFF` with the other bits preserved, either way the board powers off and stays off.
+* From the driver it never takes effect: not from the `SYS_OFF_MODE_POWER_OFF_PREPARE` handler, not from an i2c `.shutdown` callback during `device_shutdown()`, not from a reboot notifier (the earliest hook in the syscall), with SMBus or with regmap transfers, and with the PMIC settle wait raised from 3 s to 12 s.
+* Markers written into `RTC_COMP_LSB` — a register the PMIC keeps across a SoC reset, verified writable and verified to survive a reboot — showed that **none of those driver paths ran at all**, on a power-off or on a plain reboot. Yet the code was in the running kernel (checked by string in the `Image` on the boot partition), its registration site demonstrably executes (`/sys/pmic`, created after it, exists), the chip reports `0x8170` = `RK817_ID`, `rockchip,system-power-controller` is present in the live device tree, and the same regmap write works from `/sys/pmic/rk8xx_dbg` while the system is up.
+
+Two things about instrumenting this board, learned the hard way: **ramoops never captures the final kernel phase here** — no archived `console-ramoops` contains "Power down" or "Restarting system", even with `initcall_debug=1` over a plain reboot — and pstore cannot be asked to dump at `KMSG_DUMP_SHUTDOWN`, because this kernel's ramoops takes `max_reason` only as a module parameter that the DT configuration overrides. A PMIC register is the only reliable witness.
+
+Also note `build.sh` **discards** `overlay/drivers/mfd/rk808.c` and restores the vendor driver, then applies `overlay/kernel-patches/rk817-dev-off-poweroff.patch`. Editing that overlay driver looks right and changes nothing unless `RKDEBIAN_KEEP_OVERLAY_PMIC_PATCHES=1`.
 
 ### Known gaps
 

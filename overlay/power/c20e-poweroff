@@ -1,0 +1,82 @@
+#!/usr/bin/python3
+"""Cut power on shutdown, because the kernel's own power-off does not.
+
+"Shut down" on this tablet ends in a reboot. The RK817 needs DEV_OFF (bit 0 of
+SYS_CFG3, register 0xf4) written over I2C; when nothing cuts the rails, the
+kernel falls through to PSCI SYSTEM_OFF, which this board's firmware performs as
+a reset -- so the board comes straight back up.
+
+Why this runs from userspace rather than in the PMIC driver, which is where it
+belongs: measured over many cycles on 2026-09-23, this exact write powers the
+board off and keeps it off from here, while the same write from the driver never
+takes effect -- not from the power-off-prepare handler, not from the i2c
+.shutdown callback during device_shutdown(), not from a reboot notifier, with
+either SMBus or regmap transfers, and with the value both preserved
+(raw | DEV_OFF) and masked to DEV_OFF alone. Markers written into a PMIC
+register that survives a reset showed that none of those driver paths ran at all,
+on a power-off or on a plain reboot, even though the code was in the running
+kernel, its registration site demonstrably executed, and the same regmap write
+worked from /sys/pmic/rk8xx_dbg while the system was up. That contradiction is
+unresolved; this hook is the part that is known to work.
+
+systemd runs scripts in /usr/lib/systemd/system-shutdown/ as its very last step,
+after every filesystem is unmounted and remounted read-only, so cutting power
+here loses nothing. Only "poweroff" is handled: a reboot must be left alone.
+
+No i2c-tools dependency on purpose -- the image ships python3 but not i2c-tools,
+so this talks to /dev/i2c-0 directly.
+"""
+import fcntl, os, sys, time
+
+I2C_SLAVE_FORCE = 0x0706
+BUS = "/dev/i2c-0"
+PMIC_ADDR = 0x20
+SYS_CFG3 = 0xF4
+DEV_OFF = 0x01
+# bits 4:3 select the sleep-pin function (NULL/SLP/DN/RST) and bits 7:6 the reset
+# function; both are cleared so the PMIC performs a power-off and not a reset.
+SLPPIN_FUNC_MSK = 0x3 << 3
+RST_FUNC_MSK = 0x3 << 6
+
+
+def log(msg):
+    """Log to the kernel ring buffer: nothing writable is left at this point."""
+    try:
+        with open("/dev/kmsg", "w") as k:
+            k.write("c20e-poweroff: %s\n" % msg)
+    except OSError:
+        pass
+
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] != "poweroff":
+        return 0
+
+    try:
+        fd = os.open(BUS, os.O_RDWR)
+    except OSError as e:
+        log("cannot open %s: %s" % (BUS, e))
+        return 0
+
+    try:
+        fcntl.ioctl(fd, I2C_SLAVE_FORCE, PMIC_ADDR)
+        os.write(fd, bytes([SYS_CFG3]))
+        raw = os.read(fd, 1)[0]
+        val = (raw & ~(SLPPIN_FUNC_MSK | RST_FUNC_MSK)) | DEV_OFF
+        log("SYS_CFG3=0x%02x, writing 0x%02x (DEV_OFF)" % (raw, val))
+        os.write(fd, bytes([SYS_CFG3, val]))
+    except OSError as e:
+        log("PMIC write failed: %s" % e)
+        return 0
+    finally:
+        os.close(fd)
+
+    # The rails collapse during this wait. If we return, systemd proceeds to
+    # reboot() and the board resets instead of staying off, so wait generously.
+    time.sleep(10)
+    log("still running after 10s: the PMIC did not cut power")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -188,6 +188,16 @@ else
     say "         build it: ./tools/c20e-build-v4l2loopback.sh --capture prebuilt/camera"
 fi
 
+# Power off for real. "Shut down" otherwise reboots this tablet: the RK817 needs
+# DEV_OFF written over I2C, and with nothing cutting the rails the kernel falls
+# through to PSCI SYSTEM_OFF, which this board's firmware performs as a reset.
+# The hook belongs in the PMIC driver and does not work there -- see the header of
+# overlay/power/c20e-poweroff for what was measured. It needs no i2c-tools:
+# python3 (which the image has) talks to /dev/i2c-0 directly.
+install -D -m0755 "$REPO/overlay/power/c20e-poweroff" \
+    "$ROOT/usr/lib/systemd/system-shutdown/c20e-poweroff"
+say "installed power-off hook (without it, shutdown reboots the board)"
+
 # ------------------------------------------------------------- disk and power
 # Grow the root filesystem ourselves, and stop Fedora's two units that cannot
 # work on this layout from showing up red in `systemctl --failed` on a tablet
@@ -298,6 +308,7 @@ say "verification:"
 printf '    seekwave modules : %s\n' "$(ls "$ROOT/lib/modules/$KREL/updates/c20e-seekwave" 2>/dev/null | tr '\n' ' ')"
 printf '    wifi firmware    : %s\n' "$([[ -f "$ROOT/lib/firmware/SWT6621_DRAM_SDIO.bin" && -f "$ROOT/lib/firmware/SWT6621_IRAM_SDIO.bin" ]] && echo yes || echo MISSING)"
 printf '    bt nv firmware   : %s\n' "$([[ -f "$ROOT/lib/firmware/seekwave/sv6160.nvbin" ]] && echo yes || echo MISSING)"
+printf '    poweroff hook    : %s\n' "$([[ -x "$ROOT/usr/lib/systemd/system-shutdown/c20e-poweroff" ]] && echo yes || echo 'MISSING (shutdown will reboot)')"
 printf '    loopback camera  : %s\n' "$([[ -f "$ROOT/lib/modules/$KREL/updates/v4l2loopback.ko" ]] && echo yes || echo 'MISSING (apps see no camera)')"
 printf '    vaapi decode     : %s\n' "$([[ -f "$ROOT/usr/lib64/dri/rockchip_drv_video.so" || -f "$ROOT/usr/lib/aarch64-linux-gnu/dri/rockchip_drv_video.so" ]] && echo yes || echo 'MISSING (software decode)')"
 printf '    isp gain binary  : %s\n' "$([[ -x "$ROOT/usr/local/bin/c20e-isp-gain" ]] && echo yes || echo 'not built (source shipped)')"
